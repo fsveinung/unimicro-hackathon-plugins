@@ -4,8 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev2": "concurrently \"vite build --watch \" \"http-server ./dist -p 3001 --cors\"",
+    "dev": "concurrently \"vite build --watch \" \"http-server ./dist -p 3001 --cors\"",
     "build": "vite build",
     "build.watch": "vite build --watch",
     "preview": "vite preview",
