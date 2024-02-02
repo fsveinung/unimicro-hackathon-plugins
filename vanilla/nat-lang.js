@@ -29,15 +29,34 @@ class MicroPlugin extends HTMLElement {
   createContent() {
     this.appendChild(this.html("h1", "..", "id", "plugin-title"));
     const content = this.html("article", undefined, "class", "mb-4", "style", "min-height: 26em");
-    content.appendChild(this.html("button", "Chat", "class", "c2a", "click", async () => {
-      var result = await this._api.http.post('/api/comments?action=generate',
+    content.appendChild(this.html("button", "Humor?", "class", "c2a", "click", async () => {
+
+      var el = document.getElementById("chat-outlet");
+
+      //add spinner
+      el.appendChild(this.html("div", undefined, "class", "spinner", "id", "spinner"));
+
+      var result = await this._api.http.post('/api/biz/comments?action=generate',
       {
-        "Temperature": 100,
-        "Prompt": "Fortell en morsom historie på 3 setninger der du er selvironisk på vegne av kunstig inteligens",
-        "TopPercentage": 100
+        "Temperature": 50,
+        "Prompt": "Fortell en morsom historie på maks 3 setninger der du er selvironisk på vegne av kunstig inteligens",
+        "TopPercentage": 10
       });
+
+      // Remove spinner
+      var spinnerEl = document.getElementById("spinner");
+      if (spinnerEl) spinnerEl.remove();
+
       console.log(result);
-    }))
+      var el = document.getElementById("chat-outlet");
+      if (el) {
+        el.appendChild(this.html("p", result.Text));
+      }
+
+    }));
+
+    content.appendChild(this.html("section", undefined, "id", "chat-outlet"));
+
     this.appendChild(content);
     //this.appendChild(this.createFooter());
   }
@@ -76,4 +95,29 @@ class MicroPlugin extends HTMLElement {
 
 }
 
-customElements.define("nat-lang", MicroPlugin);
+try {
+  customElements.define("nat-lang", MicroPlugin);
+  const css = `
+  .spinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    -webkit-animation: spin 1s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    to { -webkit-transform: rotate(360deg); }
+  }
+  @-webkit-keyframes spin {
+    to { -webkit-transform: rotate(360deg); }
+  }`;
+  var style = document.createElement("style");
+  style.innerHTML = "<style>" +  css + "</style>";
+  document.appendChild(style);
+} catch {
+
+}
