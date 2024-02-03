@@ -27,10 +27,10 @@ class MicroPlugin extends HTMLElement {
   }
 
   createContent() {
-    this.appendChild(this.html("h1", "..", "id", "plugin-title"));
-    const content = this.html("div", undefined, "style", "min-height: 26em");
-    content.appendChild(this.html("button", "Humor?", "class", "c2a", "click", async () => this.onBtnClick()));
-    content.appendChild(this.html("div", undefined, "id", "chat-outlet"));
+    this.appendChild(Utils.create("h1", "..", "id", "plugin-title"));
+    const content = Utils.create("div", undefined, "style", "min-height: 26em");
+    content.appendChild(Utils.create("button", "Humor?", "class", "c2a", "click", async () => this.onBtnClick()));
+    content.appendChild(Utils.create("div", undefined, "id", "chat-outlet"));
     this.appendChild(content);
   }
 
@@ -39,7 +39,7 @@ class MicroPlugin extends HTMLElement {
     var outlet = document.getElementById("chat-outlet");
 
     //add spinner
-    outlet.appendChild(this.html("div", undefined, "class", "spinner", "id", "spinner", "style", "width: 30px; height: 30px"));
+    outlet.appendChild(Utils.create("div", undefined, "class", "spinner", "id", "spinner", "style", "width: 30px; height: 30px"));
 
     var result = await this._api.http.post('/api/biz/comments?action=generate',
     {
@@ -54,7 +54,7 @@ class MicroPlugin extends HTMLElement {
     console.log(result);
     var outlet = document.getElementById("chat-outlet");
     if (outlet) {
-      outlet.appendChild(this.html("p", Utils.trimLeadingLineBreaks(result.Text)));
+      outlet.appendChild(Utils.create("p", Utils.trimLeadingLineBreaks(result.Text)));
     }
     
   }
@@ -73,8 +73,13 @@ class MicroPlugin extends HTMLElement {
     }
   }
 
-  // Helper to create html-elements
-  html(type, text, ...attribs) {
+
+}
+
+
+class Utils {
+
+  create(type, text, ...attribs) {
     const el = document.createElement(type);
     if (text) {
       el.innerText = text;
@@ -90,11 +95,6 @@ class MicroPlugin extends HTMLElement {
     }
     return el;
   }
-
-}
-
-
-class Utils {
 
   static trimLeadingLineBreaks(value) {
     if (value && value.startsWith("\n")) 
