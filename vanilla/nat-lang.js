@@ -28,9 +28,9 @@ class MicroPlugin extends HTMLElement {
 
   createContent() {
     this.appendChild(this.html("h1", "..", "id", "plugin-title"));
-    const content = this.html("article", undefined, "class", "mb-4", "style", "min-height: 26em");
+    const content = this.html("div", undefined, "style", "min-height: 26em");
     content.appendChild(this.html("button", "Humor?", "class", "c2a", "click", async () => this.onBtnClick()));
-    content.appendChild(this.html("section", undefined, "id", "chat-outlet"));
+    content.appendChild(this.html("div", undefined, "id", "chat-outlet"));
     this.appendChild(content);
   }
 
@@ -39,11 +39,11 @@ class MicroPlugin extends HTMLElement {
     var outlet = document.getElementById("chat-outlet");
 
     //add spinner
-    outlet.appendChild(this.html("div", undefined, "class", "spinner", "id", "spinner"));
+    outlet.appendChild(this.html("div", undefined, "class", "spinner", "id", "spinner", "style", "width: 30px; height: 30px"));
 
     var result = await this._api.http.post('/api/biz/comments?action=generate',
     {
-      "Temperature": 50,
+      "Temperature": 10,
       "Prompt": "Fortell en morsom historie på maks 3 setninger der du er selvironisk på vegne av kunstig inteligens",
       "TopPercentage": 10
     });
@@ -54,7 +54,7 @@ class MicroPlugin extends HTMLElement {
     console.log(result);
     var outlet = document.getElementById("chat-outlet");
     if (outlet) {
-      outlet.appendChild(this.html("p", result.Text));
+      outlet.appendChild(this.html("p", Utils.trimLeadingLineBreaks(result.Text)));
     }
     
   }
@@ -93,14 +93,31 @@ class MicroPlugin extends HTMLElement {
 
 }
 
+
+class Utils {
+
+  static trimLeadingLineBreaks(value) {
+    if (value && value.startsWith("\n")) 
+      return this.trimLeadingLineBreaks(value.substring(1));
+    return value;
+  }
+
+  static addStyleSheet(css) {
+    var style = document.createElement("style");
+    style.innerText = css;
+    document.getElementsByTagName("body")[0].appendChild(style);    
+  }
+
+}
+
+
 try {
+
   customElements.define("nat-lang", MicroPlugin);
-  const css = `
+  Utils.addStyleSheet(`
   .spinner {
     margin: 0.5rem;
     display: inline-block;
-    width: 25px;
-    height: 25px;
     border: 5px solid rgba(192,192,225,.3);
     border-radius: 50%;
     border-top-color: #ccc;
@@ -113,10 +130,8 @@ try {
   }
   @-webkit-keyframes spin {
     to { -webkit-transform: rotate(360deg); }
-  }`;
-  var style = document.createElement("style");
-  style.innerText = css;
-  document.getElementsByTagName("body")[0].appendChild(style);
+  }`);
+
 } catch {
 
 }
