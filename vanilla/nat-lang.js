@@ -79,7 +79,7 @@ class MicroPlugin extends HTMLElement {
 
 class Utils {
 
-  create(type, text, ...attribs) {
+  static create(type, text, ...attribs) {
     const el = document.createElement(type);
     if (text) {
       el.innerText = text;
