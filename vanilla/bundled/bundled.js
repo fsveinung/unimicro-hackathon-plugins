@@ -1,5 +1,6 @@
 import { Utils } from "../libs/utils.js";
 import { myCss } from "./style.css";
+import { template } from "./bundled.html";
 
 class MicroPlugin extends HTMLElement {
   constructor() {
@@ -22,7 +23,7 @@ class MicroPlugin extends HTMLElement {
     if (this.ownerDocument.defaultView) {
       if (this.childNodes.length == 0) {
         this.createContent();
-        setTimeout(() => { this.setupComponents(); }, 0);
+        setTimeout(() => { this.addComponents(); }, 0);
       } else {
         this.updateContent();
       }
@@ -30,11 +31,10 @@ class MicroPlugin extends HTMLElement {
   }
 
   createContent() {
-    this.appendChild(Utils.create("h1", "..", "id", "plugin-title"));
-    const content = Utils.create("div", undefined, "style", "min-height: 26em");
-    content.appendChild(Utils.create("button", "Humor?", "class", "c2a", "click", async () => this.onBtnClick()));
-    content.appendChild(Utils.create("div", undefined, "id", "chat-outlet"));
-    this.appendChild(content);
+    this.appendChild(
+      Utils.createFromTemplate(template, "theButton", async () => this.onBtnClick())
+    );
+
   }
 
   async onBtnClick() {
@@ -62,7 +62,7 @@ class MicroPlugin extends HTMLElement {
     
   }
 
-  setupComponents() {
+  addComponents() {
     if (!this._api?.factory) { console.log("No factory"); return; }
   }
 
@@ -79,7 +79,6 @@ class MicroPlugin extends HTMLElement {
 
 }
 
-// Register component:
 if (Utils.defineComponent("bundled-plugin", MicroPlugin)) {
   Utils.addStyleSheet("bundled-spinnerstylesheet", myCss);
 }

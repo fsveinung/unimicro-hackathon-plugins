@@ -6,15 +6,40 @@ export class Utils {
         el.innerText = text;
         }
         if (attribs.length > 0) {
-        for (var i = 0; i < attribs.length; i+=2) {
-            if (typeof attribs[i+1] === "function") {
-                el.addEventListener(attribs[i], attribs[i+1]);
-            } else {
-                el.setAttribute(attribs[i], attribs[i+1]);
+            for (var i = 0; i < attribs.length; i+=2) {
+                if (typeof attribs[i+1] === "function") {
+                    el.addEventListener(attribs[i], attribs[i+1]);
+                } else {
+                    el.setAttribute(attribs[i], attribs[i+1]);
+                }
             }
         }
-        }
         return el;
+    }
+    
+    /**
+     * Creates html from a template and adds eventhandlers
+     * for each "ID" found inside the template.
+     * example:
+     * createFromTemplate("<button id='a'>clickme</button>", "a", () => alert("hi"))
+     * @param {string} html 
+     * @param  {...any} handlers 
+     * @returns 
+     */
+    static createFromTemplate(html, ...handlers) {
+        const template = document.createElement("template");
+        template.innerHTML = html;
+        const element = template.content.cloneNode(true);
+        if (handlers.length > 0) {
+            for (var i = 0; i < handlers.length; i+=2) {
+                if (typeof handlers[i+1] === "function") {
+                    const target = element.getElementById(handlers[i]);
+                    if (target)
+                        target.addEventListener("click", handlers[i+1]);
+                }
+            }
+        }
+        return element;      
     }
 
     static trimLeadingLineBreaks(value) {
