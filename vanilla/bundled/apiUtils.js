@@ -124,10 +124,10 @@ export class ApiUtils {
     }
 
     static minutesToHours(value, format) {
-        const parsed = Utils.parseMinutes(value);
+        const parsed = ApiUtils.parseMinutes(value);
         switch (format) {
             case 'short':
-                return Utils.shortFmt(parsed);
+                return ApiUtils.shortFmt(parsed);
             case 'decimal00':
                 return !!value ? parsed.decimal.toFixed(2) : '';
             case 'int':
@@ -137,7 +137,7 @@ export class ApiUtils {
             case 'money':
                 return !!value ? parsed.decimal.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}) : '';
             default:
-                return Utils.longFmt(parsed);
+                return ApiUtils.longFmt(parsed);
         }
     }
 

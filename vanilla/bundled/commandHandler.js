@@ -332,8 +332,9 @@ export class CommandHandler {
         switch (ApiUtils.getFuzzy(chatData.input, "subaction")) {
             case "product":
                 await tryCreateProduct(chatData);
-                break;
+                return true;
         }
+        return false;
     }
 
     async handleFetch(chatData) {
@@ -342,7 +343,7 @@ export class CommandHandler {
             case "products":
             case "product":
                 await this.tryGetProducts(chatData);
-                break;
+                return true;
             case "orders":
             case "order":
             case "orderlist":
@@ -373,6 +374,7 @@ export class CommandHandler {
             this.addMsg(`Produkt ${product.ID} - ${product.Name} med pris ${ApiUtils.formatMoney(product.PriceExVat)}`);
         }
     }
+    
 
     addError(msg) {
         console.error(msg);

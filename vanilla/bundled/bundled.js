@@ -5,12 +5,12 @@ import { ChatApi } from "./chatapi.js";
 import { CommandHandler } from "./commandHandler.js";
 
 class MicroPlugin extends HTMLElement {
-
   
   _api;
   _user;
   _userid;
   _company;
+  
   
   constructor() {
     super();
@@ -112,7 +112,6 @@ class MicroPlugin extends HTMLElement {
       this.outputMessage(`Hei ${this._user.DisplayName ?? "der"}, skriv en kommando så skal jeg prøve å utføre den ?`, true);
     }
   }
-
 
 }
 
