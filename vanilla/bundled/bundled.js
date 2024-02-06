@@ -1,12 +1,21 @@
 import { Utils } from "../libs/utils.js";
 import { myCss } from "./style.css";
 import { template } from "./bundled.html";
-import { ChatApi } from "../libs/chatapi.js";
+import { ChatApi } from "./chatapi.js";
+import { CommandHandler } from "./commandHandler.js";
 
 class MicroPlugin extends HTMLElement {
+
+  
+  _api;
+  _user;
+  _userid;
+  _company;
+  
   constructor() {
     super();
     this._api = null;
+    this._userid = undefined;
     this._company = null;
   }
 
@@ -51,22 +60,32 @@ class MicroPlugin extends HTMLElement {
     // Clear the inputfield
     txtInput.value = "";
 
-    var outlet = document.getElementById("chat-outlet");
-
-    //add spinner:
-    const spinnerContainer = Utils.create("div", undefined, "id", "spinner");
-    spinnerContainer.appendChild(Utils.create("div", undefined, "class", "spinner", "style", "width: 30px; height: 30px"));
-    outlet.appendChild(spinnerContainer);
+    this.toggleSpinner(true);
 
     const chatApi = new ChatApi(this._api);
     var result = await chatApi.chat(commandText);
 
-    // Remove spinner:
-    document.getElementById("spinner")?.remove();
+    var handler = new CommandHandler(this._api.http, this._userid, (type, msg) => {
+      this.outputMessage(msg, true);
+      this.toggleSpinner(false);
+    });
 
     var msg = Utils.trimLeadingLineBreaks(result.Text);
-    this.outputMessage(msg, true);
+    handler.handleCommand(msg);
+    console.log(msg);
+    //this.outputMessage(msg, true);
     
+  }
+
+  toggleSpinner(on) {
+    var outlet = document.getElementById("chat-outlet");
+    if (on) {
+      const spinnerContainer = Utils.create("div", undefined, "id", "spinner");
+      spinnerContainer.appendChild(Utils.create("div", undefined, "class", "spinner", "style", "width: 30px; height: 30px"));
+      outlet.appendChild(spinnerContainer);
+      return;      
+    }
+    document.getElementById("spinner")?.remove();
   }
 
   outputMessage(text, isBot) {
@@ -87,8 +106,11 @@ class MicroPlugin extends HTMLElement {
 
   async updateContent() {
     if (this._api) {
-      // todo: .. need to fetch anything?
-      this.outputMessage("Hei, skriv en kommando så skal jeg prøve å utføre den ? ", true);
+      debugger;
+      const user = await this._api.http.get("/api/biz/users?action=current-session");
+      this._user = user;
+      this._userid = user?.ID ?? 0;
+      this.outputMessage(`Hei ${this._user.DisplayName ?? "der"}, skriv en kommando så skal jeg prøve å utføre den ?`, true);
     }
   }
 
