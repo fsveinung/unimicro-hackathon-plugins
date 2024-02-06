@@ -5,7 +5,6 @@ import { ChatApi } from "./chatapi.js";
 import { CommandHandler } from "./commandHandler.js";
 
 class MicroPlugin extends HTMLElement {
-  
   _api;
   _user;
   _userid;
@@ -73,7 +72,12 @@ class MicroPlugin extends HTMLElement {
 
     // Process command
     var msg = Utils.trimLeadingLineBreaks(result.Text);
-    handler.handleCommand(msg);
+    try {
+      handler.handleCommand(msg);
+    } catch (err) {
+      this.outputMessage(err, true, true);
+      this.toggleSpinner(false);
+    }
     console.log(msg);
     
   }
@@ -90,10 +94,10 @@ class MicroPlugin extends HTMLElement {
     document.getElementById("spinner")?.remove();
   }
 
-  outputMessage(text, isBot) {
+  outputMessage(text, isBot, isError) {
     var outlet = document.getElementById("chat-outlet");
     if (outlet) {
-      const cls = "chat-message " + (isBot ? "msg-left" : "msg-right");
+      const cls = "chat-message " + (isBot ? "msg-left" : "msg-right") + (isError ? " msg-err" : "");
       const msg = Utils.create("p", text, "class", cls);
       const row = Utils.create("div", undefined, "class", "chat-row");
       row.appendChild(msg);

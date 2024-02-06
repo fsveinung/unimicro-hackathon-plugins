@@ -41,7 +41,7 @@
 
   .chat-row {
     padding: 0;
-    margin: -11px 0;
+    margin-top: 0.5rem;
   }
 
   .chat-message {
@@ -52,7 +52,9 @@
   }
 
   .msg-left {
-    background-color: var(--color-good);
+    border: 1px solid var(--color-c2a);
+    background-color: white;
+    color: var(--color-c2a)
     float: left;
   }
 
