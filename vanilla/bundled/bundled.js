@@ -44,27 +44,41 @@ class MicroPlugin extends HTMLElement {
     // Fetch input-value
     const txtInput = document.getElementById("chat-input");
     if (!txtInput) return;
-    const commandText = txtInput.value;
+    let commandText = txtInput.value;
+    if (!commandText) commandText = txtInput.getAttribute("placeholder");
+
+    this.outputMessage(commandText, false);
     // Clear the inputfield
     txtInput.value = "";
 
     var outlet = document.getElementById("chat-outlet");
 
-    //add spinner
-    outlet.appendChild(Utils.create("div", undefined, "class", "spinner", "id", "spinner", "style", "width: 30px; height: 30px"));
+    //add spinner:
+    const spinnerContainer = Utils.create("div", undefined, "id", "spinner");
+    spinnerContainer.appendChild(Utils.create("div", undefined, "class", "spinner", "style", "width: 30px; height: 30px"));
+    outlet.appendChild(spinnerContainer);
 
     const chatApi = new ChatApi(this._api);
-    var result = await chatApi.chat(commandText ?? "Hva er banksaldo?");
+    var result = await chatApi.chat(commandText);
 
-    // Remove spinner
+    // Remove spinner:
     document.getElementById("spinner")?.remove();
 
-    console.log(result);
+    var msg = Utils.trimLeadingLineBreaks(result.Text);
+    this.outputMessage(msg, true);
+    
+  }
+
+  outputMessage(text, isBot) {
     var outlet = document.getElementById("chat-outlet");
     if (outlet) {
-      outlet.appendChild(Utils.create("p", Utils.trimLeadingLineBreaks(result.Text)));
+      const cls = "chat-message " + (isBot ? "msg-left" : "msg-right");
+      const msg = Utils.create("p", text, "class", cls);
+      const row = Utils.create("div", undefined, "class", "chat-row");
+      row.appendChild(msg);
+      outlet.appendChild(row);
+      row.scrollIntoView();
     }
-    
   }
 
   addComponents() {
@@ -73,7 +87,8 @@ class MicroPlugin extends HTMLElement {
 
   async updateContent() {
     if (this._api) {
-      // todo: .. ned to fetch anything?
+      // todo: .. need to fetch anything?
+      this.outputMessage("Hei, skriv en kommando så skal jeg prøve å utføre den ? ", true);
     }
   }
 

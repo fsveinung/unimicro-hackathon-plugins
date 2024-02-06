@@ -33,6 +33,31 @@
 
   #chat-outlet {
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     height: calc(100vh - 15rem);
+    overflow-y: auto;
+    padding-right: 1.5rem;
+  }
+
+  .chat-row {
+    padding: 0;
+    margin: -11px 0;
+  }
+
+  .chat-message {
+    border-radius: 2rem;
+    padding: 0.6rem 1rem;
+    color: white;
+    display: inline;
+  }
+
+  .msg-left {
+    background-color: var(--color-good);
+    float: left;
+  }
+
+  .msg-right {
+    background-color: var(--color-c2a);
+    float: right;
+    margin-right: 2rem;
   }
