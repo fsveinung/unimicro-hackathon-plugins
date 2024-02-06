@@ -14,3 +14,25 @@
   @-webkit-keyframes spin {
     to { -webkit-transform: rotate(360deg); }
   }
+
+  #chat-form-container {
+    position: absolute;
+    width: calc(100% - 3rem);
+    bottom: 2rem;
+    background: var(--body-background);
+  }
+
+  #chat-form {
+    display: flex;
+    gap: 1rem;
+  }
+
+  #chat-input {
+    flex: 1;
+  }
+
+  #chat-outlet {
+    display: flex;
+    flex-direction: column-reverse;
+    height: calc(100vh - 15rem);
+  }

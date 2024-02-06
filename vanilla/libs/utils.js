@@ -33,9 +33,11 @@ export class Utils {
         if (handlers.length > 0) {
             for (var i = 0; i < handlers.length; i+=2) {
                 if (typeof handlers[i+1] === "function") {
-                    const target = element.getElementById(handlers[i]);
+                    var parts = handlers[i].split(":");
+                    let event = parts.length > 1 ? parts[1] : "click";
+                    const target = element.getElementById(parts[0]);
                     if (target)
-                        target.addEventListener("click", handlers[i+1]);
+                        target.addEventListener(event, handlers[i+1]);
                 }
             }
         }

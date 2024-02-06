@@ -1,13 +1,13 @@
 import { Utils } from "../libs/utils.js";
 import { myCss } from "./style.css";
 import { template } from "./bundled.html";
+import { ChatApi } from "../libs/chatapi.js";
 
 class MicroPlugin extends HTMLElement {
   constructor() {
     super();
     this._api = null;
     this._company = null;
-    this._title = "Kommandoline";
   }
 
   connectedCallback() {
@@ -32,24 +32,29 @@ class MicroPlugin extends HTMLElement {
 
   createContent() {
     this.appendChild(
-      Utils.createFromTemplate(template, "theButton", async () => this.onBtnClick())
+      Utils.createFromTemplate(template, "chat-form:submit", async (evt) => this.onSubmit(evt))
     );
 
   }
 
-  async onBtnClick() {
+  async onSubmit(event) {
+
+    event?.preventDefault();
+
+    // Fetch input-value
+    const txtInput = document.getElementById("chat-input");
+    if (!txtInput) return;
+    const commandText = txtInput.value;
+    // Clear the inputfield
+    txtInput.value = "";
 
     var outlet = document.getElementById("chat-outlet");
 
     //add spinner
     outlet.appendChild(Utils.create("div", undefined, "class", "spinner", "id", "spinner", "style", "width: 30px; height: 30px"));
 
-    var result = await this._api.http.post('/api/biz/comments?action=generate',
-    {
-      "Temperature": 10,
-      "Prompt": "Fortell en morsom historie på maks 3 setninger der du er selvironisk på vegne av kunstig inteligens",
-      "TopPercentage": 10
-    });
+    const chatApi = new ChatApi(this._api);
+    var result = await chatApi.chat(commandText ?? "Hva er banksaldo?");
 
     // Remove spinner
     document.getElementById("spinner")?.remove();
@@ -68,11 +73,7 @@ class MicroPlugin extends HTMLElement {
 
   async updateContent() {
     if (this._api) {
-        this._company = await this._api.http.get('/api/biz/companysettings/1?select=CompanyName');
-        const title = document.getElementById("plugin-title");
-        if (title) {
-            title.innerText = `${this._title} for ${this._company.CompanyName}`;
-        }
+      // todo: .. ned to fetch anything?
     }
   }
 
