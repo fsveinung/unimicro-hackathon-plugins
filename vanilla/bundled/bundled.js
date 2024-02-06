@@ -11,7 +11,6 @@ class MicroPlugin extends HTMLElement {
   _userid;
   _company;
   
-  
   constructor() {
     super();
     this._api = null;
@@ -50,12 +49,14 @@ class MicroPlugin extends HTMLElement {
 
     event?.preventDefault();
 
+    this.toggleSpinner(false); // hide any active ones
+
     // Fetch input-value
     const txtInput = document.getElementById("chat-input");
     if (!txtInput) return;
     let commandText = txtInput.value;
     if (!commandText) commandText = txtInput.getAttribute("placeholder");
-
+    // Show the users-message
     this.outputMessage(commandText, false);
     // Clear the inputfield
     txtInput.value = "";
@@ -70,10 +71,10 @@ class MicroPlugin extends HTMLElement {
       this.toggleSpinner(false);
     });
 
+    // Process command
     var msg = Utils.trimLeadingLineBreaks(result.Text);
     handler.handleCommand(msg);
     console.log(msg);
-    //this.outputMessage(msg, true);
     
   }
 
@@ -83,6 +84,7 @@ class MicroPlugin extends HTMLElement {
       const spinnerContainer = Utils.create("div", undefined, "id", "spinner");
       spinnerContainer.appendChild(Utils.create("div", undefined, "class", "spinner", "style", "width: 30px; height: 30px"));
       outlet.appendChild(spinnerContainer);
+      spinnerContainer.scrollIntoView();
       return;      
     }
     document.getElementById("spinner")?.remove();

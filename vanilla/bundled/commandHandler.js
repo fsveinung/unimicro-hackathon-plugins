@@ -85,7 +85,7 @@ export class CommandHandler {
                 default:
                     break;
             }
-            this.addError("Unknown action: " + entity.action);
+            this.addError("Unknown action: " + json);
         }
     }
 
@@ -191,7 +191,7 @@ export class CommandHandler {
             const orders = await this.api.get('/api/biz/orders?top=1&select=ID,OrderNumber,CustomerName,TaxInclusiveAmount&filter=ordernumber eq ' + nr);
             if (orders && orders.length === 1) {
                 const item = orders[0];
-                const ok = await this.api.action(`api/biz/orders/${item.ID}?action=complete`, "POST");
+                const ok = await this.api.post(`api/biz/orders/${item.ID}?action=complete`);
                 if (ok) {
                     this.addMsg(`Slettet ordre: ${item.OrderNumber} - ${item.CustomerName} med totalsum ${ApiUtils.formatMoney(item.TaxInclusiveAmount)}`)
                 }
@@ -374,7 +374,7 @@ export class CommandHandler {
             this.addMsg(`Produkt ${product.ID} - ${product.Name} med pris ${ApiUtils.formatMoney(product.PriceExVat)}`);
         }
     }
-    
+
 
     addError(msg) {
         console.error(msg);
