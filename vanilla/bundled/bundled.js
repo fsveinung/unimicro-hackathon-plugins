@@ -106,7 +106,6 @@ class MicroPlugin extends HTMLElement {
 
   async updateContent() {
     if (this._api) {
-      debugger;
       const user = await this._api.http.get("/api/biz/users?action=current-session");
       this._user = user;
       this._userid = user?.ID ?? 0;
