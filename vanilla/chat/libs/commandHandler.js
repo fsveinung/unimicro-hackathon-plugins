@@ -1,4 +1,4 @@
-import { ApiUtils } from "./apiUtils.js";
+import { ChatUtils } from "./chatUtils.js";
 
 export class CommandHandler {
 
@@ -6,10 +6,10 @@ export class CommandHandler {
     callBack;
 
     /**
-     * 
-     * @param {Api} api 
+     *
+     * @param {Api} api
      * @param {number} userid
-     * @param {Function} callBack 
+     * @param {Function} callBack
      */
     constructor(api, userid, callBack) {
         this.api = api;
@@ -94,7 +94,7 @@ export class CommandHandler {
         if (rel) {
             const types = await this.api.get('api/biz/worktypes?top=10');
             const workitems = [ this.parseWork(chatData.input, rel, types) ];
-            const more = ApiUtils.getFuzzy(chatData.input, "meeting");
+            const more = ChatUtils.getFuzzy(chatData.input, "meeting");
             if (more) {
                 const item2 = this.parseWork(more, rel, types);
                 if (item2) {
@@ -104,7 +104,7 @@ export class CommandHandler {
             const items = await this.api.post("api/biz/workitems", workitems);
             if (items && items.length > 0) {
                 items.forEach(item => {
-                    this.addMsg(`Timeføring på ${ApiUtils.minutesToHours(item.Minutes)} opprettet`);
+                    this.addMsg(`Timeføring på ${ChatUtils.minutesToHours(item.Minutes)} opprettet`);
                 });
             }
 
@@ -133,13 +133,13 @@ export class CommandHandler {
         const list = await this.api.get('/api/biz/products?top=10&select=ID,Name,PartName,PriceExVat&orderby=id desc');
         if (list && list.length > 0) {
             list.reverse().forEach( p =>
-                this.addMsg(`${p.PartName} - ${p.Name} med pris ${ApiUtils.formatMoney(p.PriceExVat)}`)
+                this.addMsg(`${p.PartName} - ${p.Name} med pris ${ChatUtils.formatMoney(p.PriceExVat)}`)
             );
         }
     }
 
     async tryGetOrders(chatData) {
-        const nr = ApiUtils.getFuzzy(chatData.input, "ordernumber", "orderid", "nr");
+        const nr = ChatUtils.getFuzzy(chatData.input, "ordernumber", "orderid", "nr");
         if (nr && Number(nr)) {
             this.tryGetSingleOrder(nr);
             return;
@@ -150,9 +150,11 @@ export class CommandHandler {
         if (list && list.length > 0) {
             list.reverse().forEach( item => {
                     item.Status = statusList[item.StatusCode] ?? item.StatusCode;
-                    this.addMsg(`${item.OrderNumber} ${item.CustomerName} (${item.Status}) totalsum ${ApiUtils.formatMoney(item.TaxInclusiveAmount)}`);
+                    this.addMsg(`${item.OrderNumber} ${item.CustomerName} (${item.Status}) totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`);
                 }
             );
+        } else {
+            this.addMsg("Fant ingen ordrer, kanskje du kan lage en?");
         }
     }
 
@@ -166,7 +168,7 @@ export class CommandHandler {
             const item = list[0];
             var output = [];
             item.Status = statusList[item.StatusCode] ?? item.StatusCode;
-            output.push(`Ordre: ${item.OrderNumber} (${item.Status}): totalsum ${ApiUtils.formatMoney(item.TaxInclusiveAmount)}`);
+            output.push(`Ordre: ${item.OrderNumber} (${item.Status}): totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`);
             output.push(`Kunde: ${item.CustomerName}`);
             if (item.Items && item.Items.length) {
                 let n = 0;
@@ -174,7 +176,7 @@ export class CommandHandler {
                     n++; if (n == 10) { this.addMsg("..."); } if (n >= 10) return;
                     output.push(`${line.Product?.PartName ?? "***"} ${line.ItemText}`
                         + (line.NumberOfItems
-                            ? `(${line.NumberOfItems} * ${ApiUtils.formatMoney(line.PriceExVat)}) = ${ApiUtils.formatMoney(line.SumTotalExVat)}`
+                            ? `(${line.NumberOfItems} * ${ChatUtils.formatMoney(line.PriceExVat)}) = ${ChatUtils.formatMoney(line.SumTotalExVat)}`
                             : ""
                         ));
                 });
@@ -186,14 +188,17 @@ export class CommandHandler {
     }
 
     async tryDeleteOrder(chatData) {
-        const nr = ApiUtils.getFuzzy(chatData.input, "ordernumber", "orderid", "ordrenr", "nr", "id");
+        const nr = ChatUtils.getFuzzy(chatData.input, "ordernumber", "orderid", "ordrenr", "nr", "id");
         if (nr && Number(nr) > 0) {
             const orders = await this.api.get('/api/biz/orders?top=1&select=ID,OrderNumber,CustomerName,TaxInclusiveAmount&filter=ordernumber eq ' + nr);
             if (orders && orders.length === 1) {
                 const item = orders[0];
                 const ok = await this.api.post(`api/biz/orders/${item.ID}?action=complete`);
+                console.log("ok?", ok);
                 if (ok) {
-                    this.addMsg(`Slettet ordre: ${item.OrderNumber} - ${item.CustomerName} med totalsum ${ApiUtils.formatMoney(item.TaxInclusiveAmount)}`)
+                    this.addMsg(`Avsluttet ordre: ${item.OrderNumber} - ${item.CustomerName} med totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`)
+                } else {
+                    this.addError("Kunne ikke å slette ordre " + nr);
                 }
             } else {
                 this.addError("Fant ikke ordre nr. " + nr);
@@ -202,8 +207,8 @@ export class CommandHandler {
     }
 
     async tryCreateOrder(chatData) {
-        const customerName = ApiUtils.getFuzzy(chatData.input, "customer");
-        const orderNumber = ApiUtils.getFuzzy(chatData.input, "order", "ordernumber", "orderid", "nr", "id");
+        const customerName = ChatUtils.getFuzzy(chatData.input, "customer");
+        const orderNumber = ChatUtils.getFuzzy(chatData.input, "order", "ordernumber", "orderid", "nr", "id");
         let order;
         if (customerName) {
             const customer = await this.getCustomer(customerName);
@@ -222,7 +227,7 @@ export class CommandHandler {
             //const link = "https://test.unimicro.no/#/sales/orders/" + updated.ID;
             const updated = await this.tryAddItems(order, chatData);
             if (updated) {
-                this.addMsg("Ordren har nå en totalsum på " + ApiUtils.formatMoney(order.TaxInclusiveAmount));
+                this.addMsg("Ordren har nå en totalsum på " + ChatUtils.formatMoney(order.TaxInclusiveAmount));
             } else {
                 this.addMsg("Ordre: " + order.OrderNumber);
             }
@@ -230,9 +235,9 @@ export class CommandHandler {
     }
 
     async tryAddItems(order, chatData) {
-        let input = ApiUtils.getFuzzy(chatData.input, "items", "lines");
+        let input = ChatUtils.getFuzzy(chatData.input, "items", "lines");
         if (!input) {
-            const name = ApiUtils.getFuzzy(chatData.input, "product", "item", "additem", "add", "productid" );
+            const name = ChatUtils.getFuzzy(chatData.input, "product", "item", "additem", "add", "productid" );
             if (name) {
                 input = [ { Name: name }];
             }
@@ -240,12 +245,12 @@ export class CommandHandler {
 
         if (input && Array.isArray(input)) {
             const items = input.map( item =>  {
-                const partName = ApiUtils.getFuzzy(item, "name");
+                const partName = ChatUtils.getFuzzy(item, "name");
                 return {
                     PartName: partName,
                     ItemText: partName,
-                    NumberOfItems: Number(ApiUtils.getFuzzy(item, "quantity")) || 1,
-                    _createguid: ApiUtils.createGuid()
+                    NumberOfItems: Number(ChatUtils.getFuzzy(item, "quantity")) || 1,
+                    _createguid: ChatUtils.createGuid()
                 };
             });
             if (items.find( x => x.PartName)) {
@@ -271,7 +276,7 @@ export class CommandHandler {
                     items.forEach( i => {
 
                         const match = input.length > 1
-                            ? apiProducts.find( pi => ApiUtils.textEquals(pi.PartName, i.PartName) || ApiUtils.textEquals(pi.Name, i.PartName))
+                            ? apiProducts.find( pi => ChatUtils.textEquals(pi.PartName, i.PartName) || ChatUtils.textEquals(pi.Name, i.PartName))
                             : apiProducts[0];
 
                         if (match && match.ID) {
@@ -316,7 +321,7 @@ export class CommandHandler {
             const order = {
                 CustomerID: customer.ID,
                 InvoiceReceiverName:name,
-                OrderDate: ApiUtils.formatDate(new Date())
+                OrderDate: ChatUtils.formatDate(new Date())
             };
             return await this.api.post(`api/biz/orders`, order);
         }
@@ -329,7 +334,7 @@ export class CommandHandler {
     }
 
     async handleCreates(chatData) {
-        switch (ApiUtils.getFuzzy(chatData.input, "subaction")) {
+        switch (ChatUtils.getFuzzy(chatData.input, "subaction")) {
             case "product":
                 await tryCreateProduct(chatData);
                 return true;
@@ -338,7 +343,7 @@ export class CommandHandler {
     }
 
     async handleFetch(chatData) {
-        switch (ApiUtils.getFuzzy(chatData.input, "subaction")) {
+        switch (ChatUtils.getFuzzy(chatData.input, "subaction")) {
             case "productlist":
             case "products":
             case "product":
@@ -353,10 +358,10 @@ export class CommandHandler {
     }
 
     async tryCreateProduct(chatData) {
-        const productName = ApiUtils.getFuzzy(chatData.input, "type", "product", "name");
-        const price = parseInt(ApiUtils.getFuzzy(chatData.input, "price", "pris"));
+        const productName = ChatUtils.getFuzzy(chatData.input, "type", "product", "name");
+        const price = parseInt(ChatUtils.getFuzzy(chatData.input, "price", "pris"));
         const dto = { Name: productName, PriceExVat: price };
-        const id = ApiUtils.getFuzzy(chatData.input, "partname", "id", "productnumber");
+        const id = ChatUtils.getFuzzy(chatData.input, "partname", "id", "productnumber");
         let exist;
         if (id) {
             dto.PartName = id;
@@ -366,12 +371,12 @@ export class CommandHandler {
         }
         if (exist && exist.length > 0) {
             const prod = exist[0];
-            this.addMsg(`Produktet "${prod.Name}" finnes allerede som nr. ${prod.PartName} (id:${prod.ID}) og  pris ${ApiUtils.formatMoney(prod.PriceExVat)}`);
+            this.addMsg(`Produktet "${prod.Name}" finnes allerede som nr. ${prod.PartName} (id:${prod.ID}) og  pris ${ChatUtils.formatMoney(prod.PriceExVat)}`);
             return;
         }
         const product = await this.api.post("api/biz/products", dto);
         if (product) {
-            this.addMsg(`Produkt ${product.ID} - ${product.Name} med pris ${ApiUtils.formatMoney(product.PriceExVat)}`);
+            this.addMsg(`Produkt ${product.ID} - ${product.Name} med pris ${ChatUtils.formatMoney(product.PriceExVat)}`);
         }
     }
 
@@ -388,20 +393,20 @@ export class CommandHandler {
 
     parseWork(input, rel, types) {
         if (typeof input === 'number') return undefined;
-        const tFrom = ApiUtils.getFuzzy(input, "from", "start");
-        let tTo = ApiUtils.getFuzzy(input, "to", "end");
+        const tFrom = ChatUtils.getFuzzy(input, "from", "start");
+        let tTo = ChatUtils.getFuzzy(input, "to", "end");
         tTo = tTo < tFrom ? tTo + 12 : tTo;
         if (tTo == tFrom) tTo = tFrom + 1;
         const workitem = {
             WorkTypeID: types[0].ID,
             WorkRelationID: rel.ID,
-            Description: ApiUtils.getFuzzy(input, "person") || "Timeføring fra Chat",
+            Description: ChatUtils.getFuzzy(input, "person") || "Timeføring fra Chat",
             Minutes: (tTo - tFrom) * 60,
-            Date: ApiUtils.formatDate(new Date()),
-            StartTime: ApiUtils.formatTime(new Date(), tFrom),
-            EndTime: ApiUtils.formatTime(new Date(), tTo),
+            Date: ChatUtils.formatDate(new Date()),
+            StartTime: ChatUtils.formatTime(new Date(), tFrom),
+            EndTime: ChatUtils.formatTime(new Date(), tTo),
         };
-        const lunch = ApiUtils.getFuzzy(input, "lunchbreak", "lunch", "pause");
+        const lunch = ChatUtils.getFuzzy(input, "lunchbreak", "lunch", "pause");
         if (lunch) {
             // Hours or minutes?
             if (lunch <= 1) {

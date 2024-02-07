@@ -1,15 +1,29 @@
 import { Utils } from "../libs/utils.js";
 import { myCss } from "./style.css";
-import { template } from "./bundled.html";
-import { ChatApi } from "./chatapi.js";
-import { CommandHandler } from "./commandHandler.js";
+import { template } from "./chat.html";
+import { ChatApi } from "./libs/chatApi.js";
+import { CommandHandler } from "./libs/commandHandler.js";
+import { ChatLog } from "./libs/chatLogg.js";
 
 class MicroPlugin extends HTMLElement {
+
   _api;
   _user;
   _userid;
   _company;
-  
+
+  _sampleCommands = [
+    "Hva er banksaldo?", "Hva er resultatet mitt?",
+    "Hent ordrene mine!", "Vis produktlisten",
+    "Opprett nytt produkt 'USB-Lader' med pris 99",
+    "Lag en ordre til 'Jon Terje Aksland'",
+    "Legg til produktet 'USB-Lader' på ordren til 'Jon Terje Aksland'",
+    "Jeg kom på jobb kl. 07:30 og gikk kl. 15:45 og hadde lunch i 20 minutter"
+  ];
+
+  _logg = new ChatLog();
+  _chatInput;
+
   constructor() {
     super();
     this._api = null;
@@ -39,8 +53,29 @@ class MicroPlugin extends HTMLElement {
 
   createContent() {
     this.appendChild(
-      Utils.createFromTemplate(template, "chat-form:submit", async (evt) => this.onSubmit(evt))
+      Utils.createFromTemplate(template,
+        "chat-form:submit", async (evt) => this.onSubmit(evt),
+        "chat-input:keydown", (evt) => this.onInputKey(evt))
     );
+
+  }
+
+  onInputKey(event) {
+    if (event.key === "ArrowUp") {
+      this.navHistory(true);
+    } else if (event.key === "ArrowDown") {
+      this.navHistory(false);
+    }
+  }
+
+  navHistory(moveBack) {
+
+    const msg = moveBack
+      ? this._logg.moveBack()
+      : this._logg.moveNext();
+    if (msg) {
+      this._chatInput.placeholder = msg;
+    }
 
   }
 
@@ -51,14 +86,27 @@ class MicroPlugin extends HTMLElement {
     this.toggleSpinner(false); // hide any active ones
 
     // Fetch input-value
-    const txtInput = document.getElementById("chat-input");
-    if (!txtInput) return;
-    let commandText = txtInput.value;
-    if (!commandText) commandText = txtInput.getAttribute("placeholder");
+    const chatInput = this._chatInput;
+    if (!chatInput) return;
+    let commandText = chatInput.value;
+
+    // Use placeholder (suggestion) ?
+    if (!commandText) {
+      commandText = chatInput.getAttribute("placeholder");
+      let index = this._sampleCommands.indexOf(commandText) + 1;
+      // Reset?
+      if (index + 1 > this._sampleCommands.length) index = 0;
+      chatInput.placeholder = this._sampleCommands[index];
+    }
+
     // Show the users-message
     this.outputMessage(commandText, false);
+
+    // Add to history
+    this._logg.add(commandText);
+
     // Clear the inputfield
-    txtInput.value = "";
+    chatInput.value = "";
 
     this.toggleSpinner(true);
 
@@ -78,8 +126,9 @@ class MicroPlugin extends HTMLElement {
       this.outputMessage(err, true, true);
       this.toggleSpinner(false);
     }
+
     console.log(msg);
-    
+
   }
 
   toggleSpinner(on) {
@@ -89,7 +138,7 @@ class MicroPlugin extends HTMLElement {
       spinnerContainer.appendChild(Utils.create("div", undefined, "class", "spinner", "style", "width: 30px; height: 30px"));
       outlet.appendChild(spinnerContainer);
       spinnerContainer.scrollIntoView();
-      return;      
+      return;
     }
     document.getElementById("spinner")?.remove();
   }
@@ -111,6 +160,7 @@ class MicroPlugin extends HTMLElement {
   }
 
   async updateContent() {
+    this._chatInput = document.getElementById("chat-input");
     if (this._api) {
       const user = await this._api.http.get("/api/biz/users?action=current-session");
       this._user = user;

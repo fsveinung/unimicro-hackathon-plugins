@@ -1,26 +1,4 @@
-export class ApiUtils {
-
-    static setValue(obj, prop, value) {
-        const subIx = prop.indexOf(".");
-        if (subIx > 0) {
-            const p1 = prop.substring(0, subIx);
-            obj[p1] = obj[p1] || { _createguid: this.createGuid() };
-            this.setValue(obj[p1], prop.substring(subIx + 1), value);
-            return;
-        }
-        obj[prop] = value;
-    }
-
-    static getValue(object, name) {
-        const ixDot = name.indexOf(".");
-        if (ixDot > 0) {
-            const child = name.substring(0, ixDot);
-            if (object[child]) {
-                return this.getValue(object[child], name.substring(ixDot + 1));
-            }
-        }
-        return object[name];
-    }
+export class ChatUtils {
 
     static createGuid() {
         return(""+1e7+-1e3+-4e3+-8e3+-1e11).replace(/1|0/g,function(){return(0|Math.random()*16).toString(16)});
@@ -28,48 +6,6 @@ export class ApiUtils {
 
     static formatMoney(value) {
         return Intl.NumberFormat("nb-NO", { style: 'currency', currency: "NOK"}).format((value));
-    }
-
-    static newEntity(...props) {
-        const ent = { _createguid: this.createGuid() };
-        props.forEach( p => ent[p] = "");
-        return ent;
-    }
-
-    static toast(msg) {
-        var x = document.getElementById("toast");
-        x.innerText = msg;
-        x.className = "show";
-        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
-    }
-
-    static positionRelativeTo(popup, relativeTo) {
-        const rect = relativeTo.getBoundingClientRect();
-        const popupRect = popup.getBoundingClientRect();
-        if (popupRect.width > window.innerWidth) {
-            popup.style.width = window.innerWidth + "px";
-            popupRect.width = window.innerWidth;
-        }
-        let yPosition = relativeTo.offsetTop + relativeTo.offsetParent.offsetTop;
-        let xPosition = relativeTo.offsetLeft + relativeTo.offsetParent.offsetLeft;
-        yPosition += rect.height;
-        // Outside window ?
-        if (yPosition + popupRect.height > window.innerHeight) {
-            yPosition = relativeTo.offsetTop + relativeTo.offsetParent.offsetTop - popupRect.height;
-            if (yPosition < 0) yPosition = 0;
-        }
-        if (xPosition + popupRect.width > window.innerWidth) {
-            xPosition = relativeTo.offsetLeft + relativeTo.offsetParent.offsetLeft - popupRect.width;
-            if (xPosition < 0) xPosition = 0;
-        }
-        popup.style.position = "absolute";
-        popup.style.left = xPosition + "px";
-        popup.style.top = yPosition + "px";
-    }
-
-    static async loadHtml(htmlRelativeUrl, baseUrl) {
-        const htmlUrl = new URL(htmlRelativeUrl, baseUrl).href;
-        return await fetch(htmlUrl).then(response => response.text());
     }
 
     static getFuzzy(object, property) {
@@ -124,10 +60,10 @@ export class ApiUtils {
     }
 
     static minutesToHours(value, format) {
-        const parsed = ApiUtils.parseMinutes(value);
+        const parsed = ChatUtils.parseMinutes(value);
         switch (format) {
             case 'short':
-                return ApiUtils.shortFmt(parsed);
+                return ChatUtils.shortFmt(parsed);
             case 'decimal00':
                 return !!value ? parsed.decimal.toFixed(2) : '';
             case 'int':
@@ -137,7 +73,7 @@ export class ApiUtils {
             case 'money':
                 return !!value ? parsed.decimal.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}) : '';
             default:
-                return ApiUtils.longFmt(parsed);
+                return ChatUtils.longFmt(parsed);
         }
     }
 

@@ -37,14 +37,16 @@
     height: calc(100vh - 15rem);
     overflow-y: auto;
     padding-right: 1.5rem;
+    gap: 1px;
   }
 
   .chat-row {
     padding: 0;
-    margin-top: 0.5rem;
+    margin-top: 0;
   }
 
   .chat-message {
+    margin: 0;
     border-radius: 2rem;
     padding: 0.6rem 2rem;
     color: white;
@@ -54,7 +56,7 @@
   .msg-left {
     border: 1px solid var(--color-c2a);
     background-color: white;
-    color: var(--color-c2a)
+    color: var(--color-c2a);
     float: left;
   }
 

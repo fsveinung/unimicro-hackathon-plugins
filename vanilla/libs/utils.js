@@ -16,15 +16,15 @@ export class Utils {
         }
         return el;
     }
-    
+
     /**
      * Creates html from a template and adds eventhandlers
      * for each "ID" found inside the template.
      * example:
-     * createFromTemplate("<button id='a'>clickme</button>", "a", () => alert("hi"))
-     * @param {string} html 
-     * @param  {...any} handlers 
-     * @returns 
+     * createFromTemplate("<button id='mybtn'>clickme</button>", "mybtn:click", () => alert("hi"))
+     * @param {string} html
+     * @param  {...any} handlers
+     * @returns
      */
     static createFromTemplate(html, ...handlers) {
         const template = document.createElement("template");
@@ -36,16 +36,17 @@ export class Utils {
                     var parts = handlers[i].split(":");
                     let event = parts.length > 1 ? parts[1] : "click";
                     const target = element.getElementById(parts[0]);
-                    if (target)
+                    if (target) {
                         target.addEventListener(event, handlers[i+1]);
+                    }
                 }
             }
         }
-        return element;      
+        return element;
     }
 
     static trimLeadingLineBreaks(value) {
-        if (value && value.startsWith("\n")) 
+        if (value && value.startsWith("\n"))
         return this.trimLeadingLineBreaks(value.substring(1));
         return value;
     }
@@ -57,14 +58,14 @@ export class Utils {
         var style = document.createElement("style");
         if (name) style.setAttribute("ID", name);
         style.innerText = css;
-        document.getElementsByTagName("body")[0].appendChild(style);    
+        document.getElementsByTagName("body")[0].appendChild(style);
     }
 
     /**
      * Calls the customeElements.define function with try/catch block
      * Returns true if successfull
-     * @param {string} name 
-     * @param {class} implementation 
+     * @param {string} name
+     * @param {class} implementation
      */
     static defineComponent(name, implementation) {
         try {
