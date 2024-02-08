@@ -51,6 +51,7 @@
     padding: 0.6rem 2rem;
     color: white;
     display: inline;
+    max-width: 30rem;
   }
 
   .msg-left {
