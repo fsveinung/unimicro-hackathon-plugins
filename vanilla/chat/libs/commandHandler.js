@@ -39,6 +39,11 @@ export class CommandHandler {
                     this.tryGetOrders(entity);
                     return;
 
+                case "invoice":
+                    //{ "action": "invoice", "input": { "subaction": "create", "order": 12 } }
+                    this.addError("Har ikke lært meg faktura biten, men noterer meg at det er noe jeg må lære meg...");
+                    return;
+
                 case "timetracking":
                     if (subAction == "create") {
                         this.tryCreateWorkitem(entity);
@@ -74,6 +79,20 @@ export class CommandHandler {
                     this.tryCreateProduct(entity);
                     return;
 
+                case "employees":
+                    // { "action": "employees", "input": { "subaction": "fetch" }, "message": "Kan ikke svare på dette spørsmålet, da det ikke er klart hva som skal gjøres." }
+                    this.addError("Har ikke helt kontroll på ansatt-api'et enda. Men det kommer :)");
+                    return;
+
+                case "customer":
+                    // { "action": "customer", "input": { "subaction": "fetch", "best": true } }
+                    this.addError("Har ikke helt kontroll på kunde-api'et enda. Men det kommer :)");
+                    return;
+
+                case "accountspayable":
+                case "accountsreceivable":
+                    this.addError("Holder på å lære meg kunde/leverandør-reskontro biten, så jeg håper snart å kunne svare bedre på dette :)");
+                    return;
                 case "productlist":
                 case "products":
                     this.tryGetProducts(entity);
@@ -85,7 +104,7 @@ export class CommandHandler {
                 default:
                     break;
             }
-            this.addError("Unknown action: " + json);
+            this.addError("Ukjent handling: " + json);
         }
     }
 
@@ -109,7 +128,7 @@ export class CommandHandler {
             }
 
         } else {
-            this.addError('You must first set up Timetracking on your user');
+            this.addError('Du må først aktivere timeregistrering. Jeg tror du finner det under innstillinger / brukere');
         }
     }
 
@@ -198,7 +217,7 @@ export class CommandHandler {
                 if (ok) {
                     this.addMsg(`Avsluttet ordre: ${item.OrderNumber} - ${item.CustomerName} med totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`)
                 } else {
-                    this.addError("Kunne ikke å slette ordre " + nr);
+                    this.addError("Forsøkte å arkivere ordre " + nr);
                 }
             } else {
                 this.addError("Fant ikke ordre nr. " + nr);
@@ -207,6 +226,10 @@ export class CommandHandler {
     }
 
     async tryCreateOrder(chatData) {
+
+        // todo: handle this; { "action": "order", "input": { "subaction": "add", "number": 1, "to": 2 } }
+        // could add product with id=1 to order.id = 2
+
         const customerName = ChatUtils.getFuzzy(chatData.input, "customer");
         const orderNumber = ChatUtils.getFuzzy(chatData.input, "order", "ordernumber", "orderid", "nr", "id");
         let order;
@@ -334,16 +357,20 @@ export class CommandHandler {
     }
 
     async handleCreates(chatData) {
-        switch (ChatUtils.getFuzzy(chatData.input, "subaction")) {
+        const value = ChatUtils.getFuzzy(chatData.input, "subaction");
+        switch (ChatUtils.value) {
             case "product":
                 await tryCreateProduct(chatData);
                 return true;
+            default:
+                this.addError(`Jeg vet ikke helt hvordan jeg kan opprette '${value}', men skal prøve å lære meg det så snart som mulig :)`);
         }
         return false;
     }
 
     async handleFetch(chatData) {
-        switch (ChatUtils.getFuzzy(chatData.input, "subaction")) {
+        const value = ChatUtils.getFuzzy(chatData.input, "subaction");
+        switch (value) {
             case "productlist":
             case "products":
             case "product":
@@ -354,6 +381,8 @@ export class CommandHandler {
             case "orderlist":
                 await this.tryGetOrders(chatData);
                 break;
+            default:
+                this.addError(`Har ikke helt kontroll på å finne '${value}', men skal prøve å lære meg det så snart som mulig :)`);
         }
     }
 

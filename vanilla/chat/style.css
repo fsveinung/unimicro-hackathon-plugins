@@ -65,3 +65,7 @@
     float: right;
     margin-right: 2rem;
   }
+
+  .msg-err {
+    color: var(--color-warn) !important;
+  }

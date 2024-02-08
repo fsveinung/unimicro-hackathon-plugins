@@ -114,7 +114,7 @@ class MicroPlugin extends HTMLElement {
     var result = await chatApi.chat(commandText);
 
     var handler = new CommandHandler(this._api.http, this._userid, (type, msg) => {
-      this.outputMessage(msg, true);
+      this.outputMessage(msg, true, type == "error");
       this.toggleSpinner(false);
     });
 
@@ -147,12 +147,18 @@ class MicroPlugin extends HTMLElement {
     var outlet = document.getElementById("chat-outlet");
     if (outlet) {
       const cls = "chat-message " + (isBot ? "msg-left" : "msg-right") + (isError ? " msg-err" : "");
-      const msg = Utils.create("p", text, "class", cls);
+      const msg = Utils.create("p", (isError ? this.randomSmiley() + " " : "") + text, "class", cls);
       const row = Utils.create("div", undefined, "class", "chat-row");
       row.appendChild(msg);
       outlet.appendChild(row);
       row.scrollIntoView();
     }
+  }
+
+  randomSmiley() {
+    const smileys = ["🤫","😐","😶","🤔","😳", "🤪","🥲","🙃"];
+    const index = Math.floor(Math.random() * smileys.length);
+    return smileys[index];
   }
 
   addComponents() {
