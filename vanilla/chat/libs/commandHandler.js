@@ -101,6 +101,14 @@ export class CommandHandler {
                 case "create":
                     this.handleCreates(entity);
                     return;
+
+                case "thankyou":
+                case "praise":
+                case "acknowledge":
+                case "cool":
+                    this.addError("Bare hyggelig!", "praise")
+                    return;
+
                 default:
                     break;
             }
@@ -410,9 +418,9 @@ export class CommandHandler {
     }
 
 
-    addError(msg) {
+    addError(msg, category) {
         console.error(msg);
-        if (this.callBack) this.callBack("error", msg);
+        if (this.callBack) this.callBack(category ?? "error", msg);
     }
 
     addMsg(msg, link) {
