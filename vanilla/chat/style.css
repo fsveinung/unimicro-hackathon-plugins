@@ -68,5 +68,6 @@
   }
 
   .msg-err {
-    color: var(--color-warn) !important;
+    background-color: var(--alert-warn);
+    color: var(--text-color);
   }

@@ -24,4 +24,10 @@ export class ChatLog {
         return this._logg[this._cursor];
     }
 
+    getLastElement() {
+        if (this._logg.length > 0) {
+            return this._logg[this._logg.length - 1];
+        }
+    }
+
 }

@@ -21,6 +21,7 @@ class MicroPlugin extends HTMLElement {
     "Jeg kom på jobb kl. 07:30 og gikk kl. 15:45 og hadde lunch i 20 minutter"
   ];
 
+  _commandLogg = new ChatLog();
   _logg = new ChatLog();
   _chatInput;
 
@@ -71,8 +72,8 @@ class MicroPlugin extends HTMLElement {
   navHistory(moveBack) {
 
     const msg = moveBack
-      ? this._logg.moveBack()
-      : this._logg.moveNext();
+      ? this._commandLogg.moveBack()
+      : this._commandLogg.moveNext();
     if (msg) {
       this._chatInput.placeholder = msg;
     }
@@ -103,7 +104,7 @@ class MicroPlugin extends HTMLElement {
     this.outputMessage(commandText, false);
 
     // Add to history
-    this._logg.add(commandText);
+    this._commandLogg.add(commandText);
 
     // Clear the inputfield
     chatInput.value = "";
@@ -144,15 +145,37 @@ class MicroPlugin extends HTMLElement {
   }
 
   outputMessage(text, isBot, isError, isPraise) {
-    var outlet = document.getElementById("chat-outlet");
+    
+    const prevItem = this._logg.getLastElement();
+    this._logg.add({ text: text, isBot: isBot, isError: isError, isPrais: isPraise });
+    const intoSameBubble = !!prevItem && prevItem.isBot === isBot;
+
+    const outlet = document.getElementById("chat-outlet");
     if (outlet) {
       const pfx = isError ? this.randomSmiley(isError) : isPraise ? this.randomSmiley(false) : "";
-      const cls = "chat-message " + (isBot ? "msg-left" : "msg-right") + (isError ? " msg-err" : "");
-      const msg = Utils.create("p", pfx + text, "class", cls);
-      const row = Utils.create("div", undefined, "class", "chat-row");
-      row.appendChild(msg);
-      outlet.appendChild(row);
-      row.scrollIntoView();
+      if (intoSameBubble) {
+        const bubble = this.getLastChatBubble();
+        if (bubble) {
+          bubble.appendChild(Utils.create("br", undefined));
+          bubble.appendChild(document.createTextNode(pfx + text));
+          bubble.scrollIntoView();
+        }
+      } else {
+        const cls = "chat-message " + (isBot ? "msg-left" : "msg-right") + (isError ? " msg-err" : "");
+        const msg = Utils.create("p", pfx + text, "class", cls);
+        const row = Utils.create("div", undefined, "class", "chat-row");
+        row.appendChild(msg);
+        outlet.appendChild(row);
+        row.scrollIntoView();
+      }
+    }
+  }
+
+  getLastChatBubble() {
+    const outlet = document.getElementById("chat-outlet");
+    const rows = outlet.querySelectorAll(".chat-row:last-child");
+    if (rows?.length === 1) {
+      return rows[0].firstChild;
     }
   }
 
