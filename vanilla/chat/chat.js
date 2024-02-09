@@ -161,14 +161,12 @@ class MicroPlugin extends HTMLElement {
     document.getElementById("spinner")?.remove();
   }
 
-  outputMessage(text, isBot, isError, isPraise, noLogg) {
+  outputMessage(text, isBot, isError, isPraise, noSave) {
 
     const prevItem = this._logg.getLastElement();
 
-    if (!noLogg) {
-      this._logg.add({ text: text, isBot: isBot, isError: isError, isPraise: isPraise });
-      this._logg.save("chatlog");
-    }
+    this._logg.add({ text: text, isBot: isBot, isError: isError, isPraise: isPraise });
+    if (!noSave) this._logg.save("chatlog");
 
     const intoSameBubble = !!prevItem && prevItem.isBot === isBot;
 
@@ -219,21 +217,32 @@ class MicroPlugin extends HTMLElement {
       const user = await this._api.http.get("/api/biz/users?action=current-session");
       this._user = user;
       this._userid = user?.ID ?? 0;
-
-      // Load previous logg?
-      this._logg.load("chatlog");
-      if (this._logg.getLength()>0) {
-        const history = this._logg.getLogg();
-        history.forEach( msg => this.outputMessage(msg.text, msg.isBot, msg.isError, msg.isPraise, false));
-      } else {
-        this.outputMessage(`Hei ${this._user.DisplayName ?? "der"}, skriv en kommando så skal jeg prøve å utføre den ?`, true);
-      }
-
+      this.loadHistory();
+      this._chatInput?.focus();
     }
 
   }
 
+  loadHistory() {
+      const history = new ChatLog();
+      history.load("chatlog");
+      if (history.getLength() > 0) {
+        const items = history.getLogg();
+        items.forEach( msg => {
+          if (!msg.isBot) {
+            this._commandLogg.add(msg.text);
+          }
+          this.outputMessage(msg.text, msg.isBot, msg.isError, msg.isPraise, true)
+        });
+
+      } else {
+        this.outputMessage(`Hei ${this._user.DisplayName ?? "der"}, skriv en kommando så skal jeg prøve å utføre den ?`, true);
+      }
+  }
+
 }
+
+
 
 if (Utils.defineComponent("bundled-plugin", MicroPlugin)) {
   Utils.addStyleSheet("bundled-spinnerstylesheet", myCss);
