@@ -4,7 +4,7 @@ export class ChatApi {
     categories = {
         accounting: [
             "incomestatement", "accountstatement","balancesheet", "accountspayable", "accountsreceivable"
-        ], 
+        ],
         sales: [
             "order", "invoice", "quote", "product",
         ],
@@ -35,18 +35,28 @@ export class ChatApi {
             + ` basert på følgende kategorier ` + JSON.stringify(jsonSpec) + ' ?'
             + ` Legg også alltid med en subaction fra følgende liste` + JSON.stringify(this.subactions) + '.'
             + ` Merk at tilbud, ordre og faktura trenger en kunde, og timeføring trenger tidspunkt (fra/til).`
-            + ` Responder kun i gyldig json format.` //, men inkluder en veldig kort og hyggelig bekreftende kommentar på engelsk i message feltet. 
+            + ` Responder kun i gyldig json format.` //, men inkluder en veldig kort og hyggelig bekreftende kommentar på engelsk i message feltet.
             + ` Dersom du ikke kan svare gir du bare en json hvor du inkluder en kort kommentar med forklaring i feltet message.`;
         return await this.api.http.post("/api/biz/comments?action=generate", {
             "Temperature": 0,
             "Prompt": message,
             "TopPercentage": 50
-        });        
+        });
+    }
+
+    async chatNatural(msg) {
+        const jsonSpec = this.cateGories;
+        const message = `$Du er en regnskapsfører og skal svare på følgende spørsmål: "${msg}"`
+        return await this.api.http.post("/api/biz/comments?action=generate", {
+            "Temperature": 0,
+            "Prompt": message,
+            "TopPercentage": 50
+        });
     }
 
     async chatx(message) {
         return new Promise((resolve, reject)=> {
-            setTimeout(() => {                
+            setTimeout(() => {
                 resolve({
                     Text: ` { "action": "timetracking", "input": { "subaction": "create", "from": 8, "to": 4, "lunchbreak": 0.5, "meeting": { "person": "Knut Olsen", "from": 10, "to": 12 } } }`
                         //{ text: `{ "action": "order", "subaction": "create", "input": { "Customer": "Sjøfartsdirektoratet", "Duration": 2, "Items": [ { "Name": "PCP-11", "Quantity": 3 }, { "Name": "PCP-200", "Quantity": 5 } ] }, "message": "Order successfully created!" }` }

@@ -112,7 +112,7 @@ export class CommandHandler {
                 default:
                     break;
             }
-            this.addError("Ukjent handling: " + json);
+            this.addError(json, "unknown");
         }
     }
 

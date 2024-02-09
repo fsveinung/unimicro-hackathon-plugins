@@ -115,6 +115,12 @@ class MicroPlugin extends HTMLElement {
     var result = await chatApi.chat(commandText);
 
     var handler = new CommandHandler(this._api.http, this._userid, (type, msg) => {
+      if (type === "unknown") {
+        this.outputMessage("...", true);
+        this.toggleSpinner(false);
+        this.retrywithNaturlaLanguage(commandText);
+        return;
+      }
       this.outputMessage(msg, true, type == "error", type == "praise");
       this.toggleSpinner(false);
     });
@@ -132,6 +138,17 @@ class MicroPlugin extends HTMLElement {
 
   }
 
+  async retrywithNaturlaLanguage(commandText) {
+    const chatApi = new ChatApi(this._api);
+    this.toggleSpinner(true);
+    const result = await chatApi.chatNatural(commandText);
+    this.toggleSpinner(false);
+    if (result) {
+      var msg = Utils.trimLeadingLineBreaks(result.Text);
+      this.outputMessage(msg, true);
+    }
+  }
+
   toggleSpinner(on) {
     var outlet = document.getElementById("chat-outlet");
     if (on) {
@@ -144,10 +161,15 @@ class MicroPlugin extends HTMLElement {
     document.getElementById("spinner")?.remove();
   }
 
-  outputMessage(text, isBot, isError, isPraise) {
-    
+  outputMessage(text, isBot, isError, isPraise, noLogg) {
+
     const prevItem = this._logg.getLastElement();
-    this._logg.add({ text: text, isBot: isBot, isError: isError, isPrais: isPraise });
+
+    if (!noLogg) {
+      this._logg.add({ text: text, isBot: isBot, isError: isError, isPraise: isPraise });
+      this._logg.save("chatlog");
+    }
+
     const intoSameBubble = !!prevItem && prevItem.isBot === isBot;
 
     const outlet = document.getElementById("chat-outlet");
@@ -197,8 +219,18 @@ class MicroPlugin extends HTMLElement {
       const user = await this._api.http.get("/api/biz/users?action=current-session");
       this._user = user;
       this._userid = user?.ID ?? 0;
-      this.outputMessage(`Hei ${this._user.DisplayName ?? "der"}, skriv en kommando så skal jeg prøve å utføre den ?`, true);
+
+      // Load previous logg?
+      this._logg.load("chatlog");
+      if (this._logg.getLength()>0) {
+        const history = this._logg.getLogg();
+        history.forEach( msg => this.outputMessage(msg.text, msg.isBot, msg.isError, msg.isPraise, false));
+      } else {
+        this.outputMessage(`Hei ${this._user.DisplayName ?? "der"}, skriv en kommando så skal jeg prøve å utføre den ?`, true);
+      }
+
     }
+
   }
 
 }
