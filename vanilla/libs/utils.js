@@ -31,9 +31,8 @@ export class Utils {
         template.innerHTML = html;
         const element = template.content.cloneNode(true);
         if (handlers.length > 0) {
+            console.log("eventhandlers:" + handlers.length / 2);
             for (var i = 0; i < handlers.length; i += 2) {
-                debugger;
-
                 if (typeof handlers[i+1] === "function") {
                     var parts = handlers[i].split(":");
                     let event = parts.length > 1 ? parts[1] : "click";
@@ -78,6 +77,18 @@ export class Utils {
             console.log(err);
         }
         return false;
+    }
+
+    static removeChildren(htmlNode) {
+        if (htmlNode)
+            while (htmlNode.firstChild) 
+                htmlNode.removeChild(htmlNode.firstChild);
+    }
+
+    static hide(element, hide) {
+        if (element) {
+            element.hidden = !!hide;
+        }
     }
 
 }

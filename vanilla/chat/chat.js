@@ -45,7 +45,6 @@ class MicroPlugin extends HTMLElement {
     if (this.ownerDocument.defaultView) {
       if (this.childNodes.length == 0) {
         this.createContent();
-        setTimeout(() => { this.addComponents(); }, 0);
       } else {
         this.updateContent();
       }
@@ -56,13 +55,9 @@ class MicroPlugin extends HTMLElement {
     this.appendChild(
       Utils.createFromTemplate(template,
         "chat-form:submit", async (evt) => this.onSubmit(evt),
-        "chat-input:keydown", (evt) => this.onInputKey(evt)),
-        "btnClear:click", (evt) => {
-          debugger;
-          evt.preventDefault();
-          this.clear()
-        }
-    );
+        "chat-input:keydown", (evt) => this.onInputKey(evt),
+        "btnClear:click", () => this.clear()
+    ));
 
   }
 
@@ -173,6 +168,10 @@ class MicroPlugin extends HTMLElement {
     this._logg.add({ text: text, isBot: isBot, isError: isError, isPraise: isPraise });
     if (!noSave) this._logg.save("chatlog");
 
+    if (this._logg.getLength() === 2) {
+      Utils.hide(document.getElementById("btnClear"), false);
+    }
+
     const intoSameBubble = !!prevItem && prevItem.isBot === isBot;
 
     const outlet = document.getElementById("chat-outlet");
@@ -212,10 +211,6 @@ class MicroPlugin extends HTMLElement {
     return smileys[index] +  " ";
   }
 
-  addComponents() {
-    if (!this._api?.factory) { console.log("No factory"); return; }
-  }
-
   async updateContent() {
     this._chatInput = document.getElementById("chat-input");
     if (this._api) {
@@ -225,7 +220,6 @@ class MicroPlugin extends HTMLElement {
       this.loadHistory();
       this._chatInput?.focus();
     }
-
   }
 
   loadHistory() {
@@ -241,14 +235,21 @@ class MicroPlugin extends HTMLElement {
         });
 
       } else {
-        this.outputMessage(`Hei ${this._user.DisplayName ?? "der"}, skriv en kommando så skal jeg prøve å utføre den ?`, true);
+        this.addWelcomeMessage();
       }
   }
 
+  addWelcomeMessage() {
+    this.outputMessage(`Hei ${this._user.DisplayName ?? "der"}, skriv en kommando så skal jeg prøve å utføre den ?`, true);
+  }
+
   clear() {
+    Utils.removeChildren(document.getElementById("chat-outlet"));
+    Utils.hide(document.getElementById("btnClear"), true);
     this._logg.clear();
-    var outlet = document.getElementById("chat-outlet");
-    outlet.childNodes.clear();
+    this.addWelcomeMessage();
+    this._logg.save("chatlog");
+    this._chatInput?.focus();
   }
 
 }
