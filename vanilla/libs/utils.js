@@ -31,12 +31,15 @@ export class Utils {
         template.innerHTML = html;
         const element = template.content.cloneNode(true);
         if (handlers.length > 0) {
-            for (var i = 0; i < handlers.length; i+=2) {
+            for (var i = 0; i < handlers.length; i += 2) {
+                debugger;
+
                 if (typeof handlers[i+1] === "function") {
                     var parts = handlers[i].split(":");
                     let event = parts.length > 1 ? parts[1] : "click";
                     const target = element.getElementById(parts[0]);
                     if (target) {
+                        console.log("Adding " + event + " to " + parts[0]);
                         target.addEventListener(event, handlers[i+1]);
                     }
                 }

@@ -56,7 +56,12 @@ class MicroPlugin extends HTMLElement {
     this.appendChild(
       Utils.createFromTemplate(template,
         "chat-form:submit", async (evt) => this.onSubmit(evt),
-        "chat-input:keydown", (evt) => this.onInputKey(evt))
+        "chat-input:keydown", (evt) => this.onInputKey(evt)),
+        "btnClear:click", (evt) => {
+          debugger;
+          evt.preventDefault();
+          this.clear()
+        }
     );
 
   }
@@ -238,6 +243,12 @@ class MicroPlugin extends HTMLElement {
       } else {
         this.outputMessage(`Hei ${this._user.DisplayName ?? "der"}, skriv en kommando så skal jeg prøve å utføre den ?`, true);
       }
+  }
+
+  clear() {
+    this._logg.clear();
+    var outlet = document.getElementById("chat-outlet");
+    outlet.childNodes.clear();
   }
 
 }
