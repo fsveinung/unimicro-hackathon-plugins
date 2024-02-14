@@ -112,15 +112,23 @@ class MicroPlugin extends HTMLElement {
     this.toggleSpinner(true);
 
     const chatApi = new ChatApi(this._api);
-    var result;
-    try {
-      result = await chatApi.chat(commandText);
-    } catch (err) {
-      this.toggleSpinner(false);
-      const errMsg = err.status == 404
-        ? `Endepunkt for tjeneste er ikke tilgjengelig (${err.error})"` : err.error;
-      this.outputMessage("Beklager. " + errMsg, true, true, false, true);
-    }
+
+    // Send prompt to open-ai
+    chatApi.chat(commandText)
+      .then( result => this.handleApiResult(result))
+      .catch( err => this.handleApiError(err));
+  }
+
+  handleApiError(err) {
+    this.toggleSpinner(false);
+    const errMsg = err.status == 404
+      ? `Endepunkt for tjeneste er ikke tilgjengelig (${err.error})"`
+      : err.error;
+    this.outputMessage("Beklager. " + errMsg, true, true, false, true);
+  }
+
+  handleApiResult(result)
+  {
     var handler = new CommandHandler(this._api.http, this._userid, (type, msg) => {
       if (type === "unknown") {
         this.outputMessage("...", true);

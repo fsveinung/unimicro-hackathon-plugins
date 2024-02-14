@@ -38,7 +38,6 @@ export class Utils {
                     let event = parts.length > 1 ? parts[1] : "click";
                     const target = element.getElementById(parts[0]);
                     if (target) {
-                        console.log("Adding " + event + " to " + parts[0]);
                         target.addEventListener(event, handlers[i+1]);
                     }
                 }
@@ -81,7 +80,7 @@ export class Utils {
 
     static removeChildren(htmlNode) {
         if (htmlNode)
-            while (htmlNode.firstChild) 
+            while (htmlNode.firstChild)
                 htmlNode.removeChild(htmlNode.firstChild);
     }
 
