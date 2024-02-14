@@ -122,7 +122,7 @@ class MicroPlugin extends HTMLElement {
   handleApiError(err) {
     this.toggleSpinner(false);
     const errMsg = err.status == 404
-      ? `Endepunkt for tjeneste er ikke tilgjengelig (${err.error})"`
+      ? `Endepunkt for tjeneste er ikke tilgjengelig (${err.status} ${err.error})`
       : err.error;
     this.outputMessage("Beklager. " + errMsg, true, true, false, true);
   }
