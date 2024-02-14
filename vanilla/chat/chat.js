@@ -116,8 +116,10 @@ class MicroPlugin extends HTMLElement {
     try {
       result = await chatApi.chat(commandText);
     } catch (err) {
-      console.log(err);
-      this.outputMessage("Problemer med apikall", true, true, false, true);
+      this.toggleSpinner(false);
+      const errMsg = err.status == 404
+        ? `Endepunkt for tjeneste er ikke tilgjengelig (${err.error})"` : err.error;
+      this.outputMessage("Beklager. " + errMsg, true, true, false, true);
     }
     var handler = new CommandHandler(this._api.http, this._userid, (type, msg) => {
       if (type === "unknown") {
