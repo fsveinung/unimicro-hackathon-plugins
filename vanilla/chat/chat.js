@@ -112,8 +112,13 @@ class MicroPlugin extends HTMLElement {
     this.toggleSpinner(true);
 
     const chatApi = new ChatApi(this._api);
-    var result = await chatApi.chat(commandText);
-
+    var result;
+    try {
+      result = await chatApi.chat(commandText);
+    } catch (err) {
+      console.log(err);
+      this.outputMessage("Problemer med apikall", true, true, false, true);
+    }
     var handler = new CommandHandler(this._api.http, this._userid, (type, msg) => {
       if (type === "unknown") {
         this.outputMessage("...", true);
