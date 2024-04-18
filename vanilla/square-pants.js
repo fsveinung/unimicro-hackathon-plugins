@@ -96,7 +96,7 @@ While Hillenburg was there, his love of the ocean began to influence his artistr
 
   setupWizard() {
     if (!this._api?.factory) { console.log("No factory"); return; }
-    this._wizard = this._api.factory.create("rig-wizard", this);
+    this._wizard = this._api.factory.create("rig-wizard", [undefined, this]);
     if (this._wizard?.instance) {
       const wiz = this._wizard.instance;
       wiz.steps = this._steps;
