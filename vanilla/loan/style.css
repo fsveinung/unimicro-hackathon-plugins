@@ -1,0 +1,15 @@
+.hidden { 
+    display: none; 
+}
+
+.wizard { 
+    min-height: calc(100vh - 15rem) 
+}
+
+footer { 
+    padding-bottom: 3rem
+}
+
+.label { 
+    display: block; 
+}
