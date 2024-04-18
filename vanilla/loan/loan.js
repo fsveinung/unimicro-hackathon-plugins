@@ -8,9 +8,9 @@ class Loan extends HTMLElement {
   _company = null;
   _wizard = undefined;
   _steps = [
-    { label: "Steg 1", value: "page1", ref: undefined },
-    { label: "Steg 2", value: "page2", ref: undefined },
-    { label: "Steg 3", value: "page3", ref: undefined },
+    { label: "Om finansieringen", value: "page1", ref: undefined },
+    { label: "Sikkerhet", value: "page2", ref: undefined },
+    { label: "Fremtidige inntekter", value: "page3", ref: undefined}    
   ];
 
 
