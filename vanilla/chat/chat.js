@@ -115,7 +115,7 @@ class MicroPlugin extends HTMLElement {
 
     // Send prompt to open-ai
     chatApi.chat(commandText)
-      .then( result => this.handleApiResult(result))
+      .then( result => this.handleApiResult(result, commandText))
       .catch( err => this.handleApiError(err));
   }
 
@@ -127,7 +127,7 @@ class MicroPlugin extends HTMLElement {
     this.outputMessage("Beklager. " + errMsg, true, true, false, true);
   }
 
-  handleApiResult(result)
+  handleApiResult(result, commandText)
   {
     var handler = new CommandHandler(this._api.http, this._userid, (type, msg) => {
       if (type === "unknown") {
