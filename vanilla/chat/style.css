@@ -75,3 +75,8 @@
   #chat-form-container button {
     margin: 0;
   }
+
+  .btn-recording {
+    background-color: darkred;
+    color: white;
+  }

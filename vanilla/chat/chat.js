@@ -4,6 +4,7 @@ import { template } from "./chat.html";
 import { ChatApi } from "./libs/chatApi.js";
 import { CommandHandler } from "./libs/commandHandler.js";
 import { ChatLog } from "./libs/chatLogg.js";
+import { speech } from "./libs/speech.js";
 
 class MicroPlugin extends HTMLElement {
 
@@ -56,7 +57,8 @@ class MicroPlugin extends HTMLElement {
       Utils.createFromTemplate(template,
         "chat-form:submit", async (evt) => this.onSubmit(evt),
         "chat-input:keydown", (evt) => this.onInputKey(evt),
-        "btnClear:click", () => this.clear()
+        "btnClear:click", () => this.clear(),
+        "btnRecord:click", (evt) => { evt.preventDefault(); this.onRecord(); }
     ));
 
   }
@@ -66,6 +68,28 @@ class MicroPlugin extends HTMLElement {
       this.navHistory(true);
     } else if (event.key === "ArrowDown") {
       this.navHistory(false);
+    }
+  }
+
+  async onRecord() {
+    
+    if (speech.isRecording) {
+        // this.recordLabel = "...";
+        const result = await speech.stopRecording();
+        if (result && result.text) {
+          if (this.setInputText(txt))
+          this.sendChatRequest(txt, false);
+        }
+        // this.recordLabel = labels[0];
+        // this.recordColor = "success";
+        
+    } else {
+        // this.recordLabel = labels[1];
+        // this.recordColor = "warning";
+        await speech.startRecording(txt => {
+            if (this.setInputText(txt))
+              this.sendChatRequest(txt, false);
+        });
     }
   }
 
@@ -80,25 +104,44 @@ class MicroPlugin extends HTMLElement {
 
   }
 
-  async onSubmit(event) {
+  getInputBox() {
+    return this._chatInput;
+  }  
 
+  setInputText(txt) {
+    const chatInput = this.getInputBox();
+    if (!chatInput) return false;
+    chatInput.value = txt;
+    return true;
+  }
+
+  getInputText() {
+    const chatInput = this.getInputBox();
+    if (!chatInput) return "";
+    return chatInput.value ?? "";    
+  }
+
+  async onSubmit(event) {
     event?.preventDefault();
+    this.sendChatRequest(this.getInputText());
+  }
+
+  async sendChatRequest(commandText, usePlaceHolderIfEmpty = true) {
 
     this.toggleSpinner(false); // hide any active ones
 
-    // Fetch input-value
-    const chatInput = this._chatInput;
-    if (!chatInput) return;
-    let commandText = chatInput.value;
-
     // Use placeholder (suggestion) ?
-    if (!commandText) {
+    if (usePlaceHolderIfEmpty && !commandText) {
+
+      const chatInput = this.getInputBox();
       commandText = chatInput.getAttribute("placeholder");
       let index = this._sampleCommands.indexOf(commandText) + 1;
       // Reset?
       if (index + 1 > this._sampleCommands.length) index = 0;
       chatInput.placeholder = this._sampleCommands[index];
     }
+
+    if (!commandText) return;
 
     // Show the users-message
     this.outputMessage(commandText, false);
@@ -107,7 +150,7 @@ class MicroPlugin extends HTMLElement {
     this._commandLogg.add(commandText);
 
     // Clear the inputfield
-    chatInput.value = "";
+    this.setInputText("");
 
     this.toggleSpinner(true);
 
@@ -117,6 +160,8 @@ class MicroPlugin extends HTMLElement {
     chatApi.chat(commandText)
       .then( result => this.handleApiResult(result, commandText))
       .catch( err => this.handleApiError(err));
+
+
   }
 
   handleApiError(err) {
