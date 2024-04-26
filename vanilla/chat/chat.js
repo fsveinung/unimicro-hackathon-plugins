@@ -134,15 +134,17 @@ class MicroPlugin extends HTMLElement {
 
     this.toggleSpinner(false); // hide any active ones
 
+    const chatInput = this.getInputBox();
+    let nextPlaceHolder = "";
+
     // Use placeholder (suggestion) ?
     if (usePlaceHolderIfEmpty && !commandText) {
-
-      const chatInput = this.getInputBox();
-      commandText = chatInput.getAttribute("placeholder");
+      commandText = chatInput.placeholder;
       let index = this._sampleCommands.indexOf(commandText) + 1;
       // Reset?
       if (index + 1 > this._sampleCommands.length) index = 0;
-      chatInput.placeholder = this._sampleCommands[index];
+      nextPlaceHolder = chatInput.placeholder = this._sampleCommands[index];
+      chatInput.placeholder = "";
     }
 
     if (!commandText) return;
@@ -153,8 +155,6 @@ class MicroPlugin extends HTMLElement {
     // Add to history
     this._commandLogg.add(commandText);
 
-    // Clear the inputfield
-    //this.setInputText("");
 
     this.toggleSpinner(true);
 
@@ -163,11 +163,13 @@ class MicroPlugin extends HTMLElement {
     // Send prompt to open-ai
     chatApi.chat(commandText)
       .then( result => {
-        this.setInputText("");
         this.handleApiResult(result, commandText);
+        // Clear the inputfield
+        this.setInputText("");
+        if (nextPlaceHolder) 
+          chatInput.placeholder = nextPlaceHolder;
       })
       .catch( err => this.handleApiError(err));
-
 
   }
 
