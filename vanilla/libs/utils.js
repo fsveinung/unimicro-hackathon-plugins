@@ -90,4 +90,13 @@ export class Utils {
         }
     }
 
+    static setClass(el, name, add = true) {
+        if (!el) return false;
+        if (add)
+            el.classList.add(name);
+        else
+            el.classList.remove(name);
+        return true;
+    }
+
 }

@@ -74,18 +74,15 @@ class MicroPlugin extends HTMLElement {
   async onRecord() {
     
     if (speech.isRecording) {
-        // this.recordLabel = "...";
+      Utils.setClass(this.ownerDocument.getElementById("btnRecord"), "chat-recording", false);
         const result = await speech.stopRecording();
         if (result && result.text) {
           if (this.setInputText(txt))
           this.sendChatRequest(txt, false);
         }
-        // this.recordLabel = labels[0];
-        // this.recordColor = "success";
         
     } else {
-        // this.recordLabel = labels[1];
-        // this.recordColor = "warning";
+      Utils.setClass(this.ownerDocument.getElementById("btnRecord"), "chat-recording", true);
         await speech.startRecording(txt => {
             if (this.setInputText(txt))
               this.sendChatRequest(txt, false);
@@ -210,7 +207,7 @@ class MicroPlugin extends HTMLElement {
   }
 
   toggleSpinner(on) {
-    var outlet = document.getElementById("chat-outlet");
+    var outlet = this.ownerDocument.getElementById("chat-outlet");
     if (on) {
       const spinnerContainer = Utils.create("div", undefined, "id", "spinner");
       spinnerContainer.appendChild(Utils.create("div", undefined, "class", "spinner", "style", "width: 30px; height: 30px"));
@@ -218,7 +215,7 @@ class MicroPlugin extends HTMLElement {
       spinnerContainer.scrollIntoView();
       return;
     }
-    document.getElementById("spinner")?.remove();
+    this.ownerDocument.getElementById("spinner")?.remove();
   }
 
   outputMessage(text, isBot, isError, isPraise, noSave) {
@@ -229,19 +226,19 @@ class MicroPlugin extends HTMLElement {
     if (!noSave) this._logg.save("chatlog");
 
     if (this._logg.getLength() === 2) {
-      Utils.hide(document.getElementById("btnClear"), false);
+      Utils.hide(this.ownerDocument.getElementById("btnClear"), false);
     }
 
     const intoSameBubble = !!prevItem && prevItem.isBot === isBot;
 
-    const outlet = document.getElementById("chat-outlet");
+    const outlet = this.ownerDocument.getElementById("chat-outlet");
     if (outlet) {
       const pfx = isError ? this.randomSmiley(isError) : isPraise ? this.randomSmiley(false) : "";
       if (intoSameBubble) {
         const bubble = this.getLastChatBubble();
         if (bubble) {
           bubble.appendChild(Utils.create("br", undefined));
-          bubble.appendChild(document.createTextNode(pfx + text));
+          bubble.appendChild(this.ownerDocument.createTextNode(pfx + text));
           bubble.scrollIntoView();
         }
       } else {
@@ -256,7 +253,7 @@ class MicroPlugin extends HTMLElement {
   }
 
   getLastChatBubble() {
-    const outlet = document.getElementById("chat-outlet");
+    const outlet = this.ownerDocument.getElementById("chat-outlet");
     const rows = outlet.querySelectorAll(".chat-row:last-child");
     if (rows?.length === 1) {
       return rows[0].firstChild;
@@ -272,7 +269,7 @@ class MicroPlugin extends HTMLElement {
   }
 
   async updateContent() {
-    this._chatInput = document.getElementById("chat-input");
+    this._chatInput = this.ownerDocument.getElementById("chat-input");
     if (this._api) {
       const user = await this._api.http.get("/api/biz/users?action=current-session");
       this._user = user;
@@ -304,8 +301,8 @@ class MicroPlugin extends HTMLElement {
   }
 
   clear() {
-    Utils.removeChildren(document.getElementById("chat-outlet"));
-    Utils.hide(document.getElementById("btnClear"), true);
+    Utils.removeChildren(this.ownerDocument.getElementById("chat-outlet"));
+    Utils.hide(this.ownerDocument.getElementById("btnClear"), true);
     this._logg.clear();
     this.addWelcomeMessage();
     this._logg.save("chatlog");

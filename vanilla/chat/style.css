@@ -76,7 +76,6 @@
     margin: 0;
   }
 
-  .btn-recording {
-    background-color: darkred;
-    color: white;
+  .chat-recording {
+    background-color: #ffefbb !important;
   }
