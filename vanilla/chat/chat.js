@@ -58,7 +58,7 @@ class MicroPlugin extends HTMLElement {
         "chat-form:submit", async (evt) => this.onSubmit(evt),
         "chat-input:keydown", (evt) => this.onInputKey(evt),
         "btnClear:click", () => this.clear(),
-        "btnRecord:click", (evt) => { evt.preventDefault(); this.onRecord(); }
+        "btnRecord:click", (evt) => { evt.preventDefault(); this.toggleRecord(); }
     ));
 
   }
@@ -71,22 +71,29 @@ class MicroPlugin extends HTMLElement {
     }
   }
 
-  async onRecord() {
+  async toggleRecord() {
     
     if (speech.isRecording) {
-      Utils.setClass(this.ownerDocument.getElementById("btnRecord"), "chat-recording", false);
+        this.cssClass("btnRecord", "chat-recording", false);
         const result = await speech.stopRecording();
         if (result && result.text) {
           if (this.setInputText(txt))
-          this.sendChatRequest(txt, false);
+            this.sendChatRequest(txt, false);
         }
         
     } else {
-      Utils.setClass(this.ownerDocument.getElementById("btnRecord"), "chat-recording", true);
+        this.cssClass("btnRecord", "chat-recording", true);
         await speech.startRecording(txt => {
             if (this.setInputText(txt))
               this.sendChatRequest(txt, false);
         });
+    }
+  }
+
+  cssClass(id, className, addClass = true) {
+    const el = this.ownerDocument.getElementById(id);
+    if (el) {
+      Utils.setClass(el, className, addClass);
     }
   }
 
@@ -147,7 +154,7 @@ class MicroPlugin extends HTMLElement {
     this._commandLogg.add(commandText);
 
     // Clear the inputfield
-    this.setInputText("");
+    //this.setInputText("");
 
     this.toggleSpinner(true);
 
@@ -155,7 +162,10 @@ class MicroPlugin extends HTMLElement {
 
     // Send prompt to open-ai
     chatApi.chat(commandText)
-      .then( result => this.handleApiResult(result, commandText))
+      .then( result => {
+        this.setInputText("");
+        this.handleApiResult(result, commandText);
+      })
       .catch( err => this.handleApiError(err));
 
 
