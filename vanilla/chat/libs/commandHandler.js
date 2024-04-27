@@ -36,8 +36,6 @@ export class CommandHandler {
                     } else if (subAction == "delete") {
                         this.tryDeleteOrder(entity);
                         return;
-                    } else if (subAction == "fetch") {
-                        this.tryCreateOrder(entity);
                     }
                     this.tryGetOrders(entity);
                     return;
@@ -199,10 +197,10 @@ export class CommandHandler {
                 return list[0];
             }
             const item = list[0];
+            const context = { type: "order", id: item.ID };
             var output = [];
             item.Status = statusList[item.StatusCode] ?? item.StatusCode;
-            output.push(`Ordre: ${item.OrderNumber} (${item.Status}): totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`,
-                { type: "order", id: item.ID });
+            output.push(`Ordre: ${item.OrderNumber} (${item.Status}): totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`);
             output.push(`Kunde: ${item.CustomerName}`);
             if (item.Items && item.Items.length) {
                 let n = 0;
@@ -215,7 +213,8 @@ export class CommandHandler {
                         ));
                 });
             }
-            output.reverse().forEach( o => this.addMsg(o));
+            for (let i = output.length - 1; i >= 0 ; i--)
+                this.addMsg(output[i], i == output.length - 1 ? context : undefined);
         } else {
             this.addMsg("Fant ikke ordre nr." + nr);
         }
@@ -435,7 +434,7 @@ export class CommandHandler {
     }
 
     addMsg(msg, context, link) {
-        console.log(msg, context);
+        //console.log(msg, context);
         if (this.callBack) this.callBack("chat", msg, context);
     }
 

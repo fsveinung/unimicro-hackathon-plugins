@@ -196,7 +196,7 @@ class MicroPlugin extends HTMLElement {
           this.retrywithNaturlaLanguage(commandText);
           return;
         }
-        this.outputMessage(msg, true, type == "error", type == "praise");
+        this.outputMessage(msg, true, type == "error", type == "praise", false, context);
         this.toggleSpinner(false);
     });
 
@@ -236,11 +236,11 @@ class MicroPlugin extends HTMLElement {
     this.ownerDocument.getElementById("spinner")?.remove();
   }
 
-  outputMessage(text, isBot, isError, isPraise, noSave) {
+  outputMessage(text, isBot, isError, isPraise, noSave, context) {
 
     const prevItem = this._logg.getLastElement();
 
-    this._logg.add({ text: text, isBot: isBot, isError: isError, isPraise: isPraise });
+    this._logg.add({ text: text, isBot: isBot, isError: isError, isPraise: isPraise, context: context});
     if (!noSave) this._logg.save("chatlog");
 
     if (this._logg.getLength() === 2) {
@@ -261,13 +261,31 @@ class MicroPlugin extends HTMLElement {
         }
       } else {
         const cls = "chat-message " + (isBot ? "msg-left" : "msg-right") + (isError ? " msg-err" : "");
-        const msg = Utils.create("p", pfx + text, "class", cls);
+        const route = this.mapContextToRoute(context);
+        const msg = !!route
+          ? Utils.create("a", pfx + text, "href", route, "class", cls)
+          : Utils.create("p", pfx + text, "class", cls);
         const row = Utils.create("div", undefined, "class", "chat-row");
         row.appendChild(msg);
         outlet.appendChild(row);
         row.scrollIntoView();
       }
     }
+  }
+
+  mapContextToRoute(context) {
+    if (!context) return;
+    const map = { 
+      product: `/#/sales/products/${context.id}`,
+      profit: "/#/accounting/accountingreports/result",
+      order: `/#/sales/orders/${context.id}`,
+      workitem: `/#/timetracking/timeentry`
+    };
+    const match = map[context.type];
+    if (match) {
+      return match;
+    }
+    console.log("Found no routematch for " + context.type);
   }
 
   getLastChatBubble() {
@@ -306,7 +324,7 @@ class MicroPlugin extends HTMLElement {
           if (!msg.isBot) {
             this._commandLogg.add(msg.text);
           }
-          this.outputMessage(msg.text, msg.isBot, msg.isError, msg.isPraise, true)
+          this.outputMessage(msg.text, msg.isBot, msg.isError, msg.isPraise, true, msg.context);
         });
 
       } else {
