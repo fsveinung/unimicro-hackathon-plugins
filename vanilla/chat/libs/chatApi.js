@@ -25,8 +25,8 @@ export class ChatApi {
     }
 
     async chat(msg) {
-        const jsonSpec = this.cateGories;
-        const message = `$Kan du oversette spørsmålet "${msg}" til en kommando i json.`
+        const jsonSpec = this.categories;
+        const message = `Kan du oversette spørsmålet "${msg}" til en kommando i json.`
             + ` Eksempelvis:`
             + `"Hva er resultatet?" gir følgende kommando { "action": "incomestatement", "input": { "sum" } }`
             + `"Hvor mye skylder jeg?" gir { "action": "accountspayable", "input": { "subaction": "profit" } }`

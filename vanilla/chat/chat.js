@@ -25,6 +25,7 @@ class MicroPlugin extends HTMLElement {
   _commandLogg = new ChatLog();
   _logg = new ChatLog();
   _chatInput;
+  _chatHandler;
 
   constructor() {
     super();
@@ -183,21 +184,26 @@ class MicroPlugin extends HTMLElement {
 
   handleApiResult(result, commandText)
   {
-    var handler = new CommandHandler(this._api.http, this._userid, (type, msg) => {
-      if (type === "unknown") {
-        this.outputMessage("...", true);
+    this._chatHandler = this._chatHandler 
+      || new CommandHandler(this._api.http, this._userid, 
+      (type, msg, context) => {
+        if (context) {
+          console.warn("context", context); 
+        }
+        if (type === "unknown") {
+          this.outputMessage("...", true);
+          this.toggleSpinner(false);
+          this.retrywithNaturlaLanguage(commandText);
+          return;
+        }
+        this.outputMessage(msg, true, type == "error", type == "praise");
         this.toggleSpinner(false);
-        this.retrywithNaturlaLanguage(commandText);
-        return;
-      }
-      this.outputMessage(msg, true, type == "error", type == "praise");
-      this.toggleSpinner(false);
     });
 
     // Process command
     var msg = Utils.trimLeadingLineBreaks(result.Text);
     try {
-      handler.handleCommand(msg);
+      this._chatHandler.handleCommand(msg);
     } catch (err) {
       this.outputMessage(err, true, true);
       this.toggleSpinner(false);

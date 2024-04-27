@@ -15,9 +15,7 @@ export class SpeechApi {
             recorder.maxAlternatives = 1;
             recorder.onend = this.reset();            
             recorder.lang = "nb-NO";
-            //recorder.addEventListener('onResult', event => this.onResult(event));
             recorder.addEventListener("result", (event) => this.onResult(event));
-            //recorder.onresult = event => this.onResult(event);
             this.recorder = recorder;
             this.reset();        
         } else {
@@ -67,3 +65,4 @@ export class SpeechApi {
 }
 
 const speech = new SpeechApi();
+export default speech;

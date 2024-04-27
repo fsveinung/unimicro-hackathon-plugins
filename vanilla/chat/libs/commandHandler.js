@@ -4,6 +4,7 @@ export class CommandHandler {
 
     api;
     callBack;
+    objectHistory;
 
     /**
      *
@@ -35,6 +36,8 @@ export class CommandHandler {
                     } else if (subAction == "delete") {
                         this.tryDeleteOrder(entity);
                         return;
+                    } else if (subAction == "fetch") {
+                        this.tryCreateOrder(entity);
                     }
                     this.tryGetOrders(entity);
                     return;
@@ -131,7 +134,8 @@ export class CommandHandler {
             const items = await this.api.post("api/biz/workitems", workitems);
             if (items && items.length > 0) {
                 items.forEach(item => {
-                    this.addMsg(`Timeføring på ${ChatUtils.minutesToHours(item.Minutes)} opprettet`);
+                    this.addMsg(`Timeføring på ${ChatUtils.minutesToHours(item.Minutes)} opprettet`, 
+                        { type: "workitem", id: item.ID }); 
                 });
             }
 
@@ -141,10 +145,12 @@ export class CommandHandler {
     }
 
     async tryGetIncomeStatement() {
-        const statement = await this.api.get('/api/statistics?model=account&select=sum(l.amount) as profit&filter=between(accountnumber,3000,8199) and year(l.financialdate) eq year(now())&join=account.id eq journalentryline.accountid as l&wrap=false');
+        const year = new Date().getFullYear();
+        const statement = await this.api.get(`/api/statistics?model=account&select=sum(l.amount) as profit&filter=between(accountnumber,3000,8199) and year(l.financialdate) eq ${year}&join=account.id eq journalentryline.accountid as l&wrap=false`);
         if (statement && statement.length > 0) {
             const profit = -statement[0].profit;
-            this.addMsg("Resultat før skatt (EBIT) er " + Intl.NumberFormat("nb-NO", { style: 'currency', currency: "NOK"}).format((profit)));
+            this.addMsg("Resultat før skatt (EBIT) er " + Intl.NumberFormat("nb-NO", { style: 'currency', currency: "NOK"}).format((profit)), 
+                { type: "profit", id: year });
         }
     }
 
@@ -166,7 +172,7 @@ export class CommandHandler {
     }
 
     async tryGetOrders(chatData) {
-        const nr = ChatUtils.getFuzzy(chatData.input, "ordernumber", "orderid", "nr");
+        const nr = ChatUtils.getFuzzy(chatData.input, "ordernumber", "number", "id", "orderid", "nr");
         if (nr && Number(nr)) {
             this.tryGetSingleOrder(nr);
             return;
@@ -195,7 +201,8 @@ export class CommandHandler {
             const item = list[0];
             var output = [];
             item.Status = statusList[item.StatusCode] ?? item.StatusCode;
-            output.push(`Ordre: ${item.OrderNumber} (${item.Status}): totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`);
+            output.push(`Ordre: ${item.OrderNumber} (${item.Status}): totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`,
+                { type: "order", id: item.ID });
             output.push(`Kunde: ${item.CustomerName}`);
             if (item.Items && item.Items.length) {
                 let n = 0;
@@ -225,7 +232,7 @@ export class CommandHandler {
                 if (ok) {
                     this.addMsg(`Avsluttet ordre: ${item.OrderNumber} - ${item.CustomerName} med totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`)
                 } else {
-                    this.addError("Forsøkte å arkivere ordre " + nr);
+                    this.addMsg("Arkiverte ordre " + nr);
                 }
             } else {
                 this.addError("Fant ikke ordre nr. " + nr);
@@ -258,9 +265,11 @@ export class CommandHandler {
             //const link = "https://test.unimicro.no/#/sales/orders/" + updated.ID;
             const updated = await this.tryAddItems(order, chatData);
             if (updated) {
-                this.addMsg("Ordren har nå en totalsum på " + ChatUtils.formatMoney(order.TaxInclusiveAmount));
+                this.addMsg("Ordren har nå en totalsum på " + ChatUtils.formatMoney(order.TaxInclusiveAmount),
+                    { type: "order", id: order.ID });
             } else {
-                this.addMsg("Ordre: " + order.OrderNumber);
+                this.addMsg("Ordre: " + order.OrderNumber,
+                    { type: "order", id: order.ID });
             }
         }
     }
@@ -333,7 +342,7 @@ export class CommandHandler {
         this.addMsg("Prøver å hente : " + name);
         const customers = await this.api.get(`api/biz/customers?expand=info&filter=startswith(info.name,'${name}')`);
         if (customers && customers.length > 0) {
-            this.addMsg("Fant kunden i selskapet");
+            this.addMsg("Fant kunden i selskapet", { type: "customer", id: customers[0].ID });
             return customers[0];
         } else {
             this.addMsg("Prøver å opprette kunden i selskapet");
@@ -345,7 +354,7 @@ export class CommandHandler {
         const orders = await this.api.get(`api/biz/orders?expand=info&filter=customerid eq ${customer.ID}`
             + ' and statuscode le 41003&top=1&orderby=ID desc');
         if (orders && orders.length > 0) {
-            this.addMsg("Fant en åpen ordre nr. " + orders[0].OrderNumber);
+            this.addMsg("Fant en åpen ordre nr. " + orders[0].OrderNumber, { type: "order", id: orders[0].ID } );
             return orders[0];
         } else {
             this.addMsg("Prøver å opprette ordre mot " + customer.CustomerNumber);
@@ -408,12 +417,14 @@ export class CommandHandler {
         }
         if (exist && exist.length > 0) {
             const prod = exist[0];
-            this.addMsg(`Produktet "${prod.Name}" finnes allerede som nr. ${prod.PartName} (id:${prod.ID}) og  pris ${ChatUtils.formatMoney(prod.PriceExVat)}`);
+            this.addMsg(`Produktet "${prod.Name}" finnes allerede som nr. ${prod.PartName} (id:${prod.ID}) og  pris ${ChatUtils.formatMoney(prod.PriceExVat)}`,
+                { type: "product", id: prod.ID });
             return;
         }
         const product = await this.api.post("api/biz/products", dto);
         if (product) {
-            this.addMsg(`Produkt ${product.ID} - ${product.Name} med pris ${ChatUtils.formatMoney(product.PriceExVat)}`);
+            this.addMsg(`Produkt ${product.ID} - ${product.Name} med pris ${ChatUtils.formatMoney(product.PriceExVat)}`
+                , { type: "product", id: product.ID });
         }
     }
 
@@ -423,9 +434,9 @@ export class CommandHandler {
         if (this.callBack) this.callBack(category ?? "error", msg);
     }
 
-    addMsg(msg, link) {
-        console.log(msg)
-        if (this.callBack) this.callBack("chat", msg);
+    addMsg(msg, context, link) {
+        console.log(msg, context);
+        if (this.callBack) this.callBack("chat", msg, context);
     }
 
     parseWork(input, rel, types) {
