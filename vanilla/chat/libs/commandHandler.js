@@ -205,7 +205,7 @@ export class CommandHandler {
             if (item.Items && item.Items.length) {
                 let n = 0;
                 item.Items.forEach( line => {
-                    n++; if (n == 10) { this.addMsg("..."); } if (n >= 10) return;
+                    n++; if (n == 10) { output.push("..."); } if (n >= 10) return;
                     output.push(`${line.Product?.PartName ?? "***"} ${line.ItemText}`
                         + (line.NumberOfItems
                             ? `(${line.NumberOfItems} * ${ChatUtils.formatMoney(line.PriceExVat)}) = ${ChatUtils.formatMoney(line.SumTotalExVat)}`
