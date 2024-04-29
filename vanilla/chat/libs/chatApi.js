@@ -31,6 +31,7 @@ export class ChatApi {
             + `"Hva er resultatet?" gir følgende kommando { "action": "incomestatement", "input": { "sum" } }`
             + `"Hvor mye skylder jeg?" gir { "action": "accountspayable", "input": { "subaction": "profit" } }`
             + `"Ny ordre til Ole Olsen?" gir { "action": "order", "input": { "subaction": "create", "Customer": "Ole Olsen" } }`
+            + `"Hent ordrene mine" gir { "action": "order", "input": { "subaction": "fetch" } }`
             + `"Working 9 to 5" gir { "action": "timetracking", "input": { "subaction": "create", "from": 9, "to": 5 } }`
             + ` basert på følgende kategorier ` + JSON.stringify(jsonSpec) + ' ?'
             + ` Legg også alltid med en subaction fra følgende liste` + JSON.stringify(this.subactions) + '.'
@@ -46,7 +47,7 @@ export class ChatApi {
 
     async chatNatural(msg) {
         const jsonSpec = this.cateGories;
-        const message = `$Du er en regnskapsfører og skal svare på følgende spørsmål: "${msg}"`
+        const message = `Du er en regnskapsfører og skal svare på følgende spørsmål: "${msg}"`
         return await this.api.http.post("/api/biz/comments?action=generate", {
             "Temperature": 0,
             "Prompt": message,
