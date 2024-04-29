@@ -20,6 +20,7 @@ class MicroPlugin extends HTMLElement {
     "Opprett nytt produkt 'USB-Lader' med pris 99",
     "Lag en ordre til 'Jon Terje Aksland'",
     "Legg til produktet 'USB-Lader' på ordren til 'Jon Terje Aksland'",
+    "Vis ordrene",
     "Jeg kom på jobb kl. 07:30 og gikk kl. 15:45 og hadde lunch i 20 minutter"
   ];
 
@@ -177,9 +178,11 @@ class MicroPlugin extends HTMLElement {
 
   handleApiError(err) {
     this.toggleSpinner(false);
-    const errMsg = err.status == 404
+    let errMsg = err.status == 404
       ? `Endepunkt for tjeneste er ikke tilgjengelig (${err.status} ${err.error})`
       : err.error;
+    if (err?.error?.Message) 
+      errMsg = "Svar fra api: \"" + err.error.Message + "\"";
     this.outputMessage("Beklager. " + errMsg, true, true, false, true);
   }
 
