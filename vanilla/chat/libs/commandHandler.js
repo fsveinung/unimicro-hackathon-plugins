@@ -199,7 +199,7 @@ export class CommandHandler {
                 return list[0];
             }
             const item = list[0];
-            const context = { type: "order", id: item.ID };
+            const context = { type: "order", id: item.ID, nr: item.OrderNumber };
             var output = [];
             item.Status = statusList[item.StatusCode] ?? item.StatusCode;
             output.push(`Ordre: ${item.OrderNumber} (${item.Status}): totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`);
@@ -223,7 +223,11 @@ export class CommandHandler {
     }
 
     async tryDeleteOrder(chatData) {
-        const nr = ChatUtils.getFuzzy(chatData.input, "ordernumber", "orderid", "ordrenr", "nr", "id");
+        let nr = ChatUtils.getFuzzy(chatData.input, "ordernumber", "orderid", "ordrenr", "nr", "id");
+        if (!(nr && Number(nr) >0) && this.objectHistory?.type == "order") {
+            console.log("using history:", this.objectHistory);
+            nr = this.objectHistory.nr;
+        }
         if (nr && Number(nr) > 0) {
             const orders = await this.api.get('/api/biz/orders?top=1&select=ID,OrderNumber,CustomerName,TaxInclusiveAmount&filter=ordernumber eq ' + nr);
             if (orders && orders.length === 1) {
@@ -238,6 +242,8 @@ export class CommandHandler {
             } else {
                 this.addError("Fant ikke ordre nr. " + nr);
             }
+        } else {
+            this.addError("Usikker på hvilken du mener.");
         }
     }
 
@@ -267,10 +273,10 @@ export class CommandHandler {
             const updated = await this.tryAddItems(order, chatData);
             if (updated) {
                 this.addMsg("Ordren har nå en totalsum på " + ChatUtils.formatMoney(order.TaxInclusiveAmount),
-                    { type: "order", id: order.ID });
+                    { type: "order", id: order.ID, nr: order.OrderNumber });
             } else {
                 this.addMsg("Ordre: " + order.OrderNumber,
-                    { type: "order", id: order.ID });
+                    { type: "order", id: order.ID, nr: order.OrderNumber });
             }
         }
     }
@@ -355,7 +361,7 @@ export class CommandHandler {
         const orders = await this.api.get(`api/biz/orders?expand=info&filter=customerid eq ${customer.ID}`
             + ' and statuscode le 41003&top=1&orderby=ID desc');
         if (orders && orders.length > 0) {
-            this.addMsg("Fant en åpen ordre nr. " + orders[0].OrderNumber, { type: "order", id: orders[0].ID } );
+            this.addMsg("Fant en åpen ordre nr. " + orders[0].OrderNumber, { type: "order", id: orders[0].ID, nr: orders[0].OrderNumber } );
             return orders[0];
         } else {
             this.addMsg("Prøver å opprette ordre mot " + customer.CustomerNumber);
@@ -439,7 +445,9 @@ export class CommandHandler {
     }
 
     addMsg(msg, context, link) {
-        //console.log(msg, context);
+        if (context) {
+            this.objectHistory = context;
+        }
         if (this.callBack) this.callBack("chat", msg, context);
     }
 

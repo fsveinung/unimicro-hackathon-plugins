@@ -185,9 +185,8 @@ class MicroPlugin extends HTMLElement {
 
   handleApiResult(result, commandText)
   {
-    const apiWrapper = new Api(this._api.http, err => this.handleApiError(err));
     this._chatHandler = this._chatHandler 
-      || new CommandHandler(apiWrapper, this._userid, 
+      || new CommandHandler(new Api(this._api.http, err => this.handleApiError(err)), this._userid, 
       (type, msg, context) => {
         if (context) {
           console.warn("context", context); 
