@@ -76,9 +76,15 @@ export class CommandHandler {
                 case "fetch":
                     this.handleFetch(entity);
                     return;
+
                 case "product":
                     this.tryCreateProduct(entity);
                     return;
+                case "productlist":
+                case "products":
+                    this.tryGetProducts(entity);
+                    return;
+
 
                 case "employees":
                     // { "action": "employees", "input": { "subaction": "fetch" }, "message": "Kan ikke svare på dette spørsmålet, da det ikke er klart hva som skal gjøres." }
@@ -93,10 +99,6 @@ export class CommandHandler {
                 case "accountspayable":
                 case "accountsreceivable":
                     this.addError("Holder på å lære meg kunde/leverandør-reskontro biten, så jeg håper snart å kunne svare bedre på dette :)");
-                    return;
-                case "productlist":
-                case "products":
-                    this.tryGetProducts(entity);
                     return;
 
                 case "create":
@@ -404,6 +406,9 @@ export class CommandHandler {
 
     async tryCreateProduct(chatData) {
         const productName = ChatUtils.getFuzzy(chatData.input, "type", "product", "name");
+        if (!productName) {
+            return this.tryGetProducts();
+        }
         const price = parseInt(ChatUtils.getFuzzy(chatData.input, "price", "pris"));
         const dto = { Name: productName, PriceExVat: price };
         const id = ChatUtils.getFuzzy(chatData.input, "partname", "id", "productnumber");

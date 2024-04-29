@@ -5,6 +5,7 @@ import { ChatApi } from "./libs/chatApi.js";
 import { CommandHandler } from "./libs/commandHandler.js";
 import { ChatLog } from "./libs/chatLogg.js";
 import { speech } from "./libs/speech.js";
+import { Api } from "../libs/api.js";
 
 class MicroPlugin extends HTMLElement {
 
@@ -184,8 +185,9 @@ class MicroPlugin extends HTMLElement {
 
   handleApiResult(result, commandText)
   {
+    const apiWrapper = new Api(this._api.http, err => this.handleApiError(err));
     this._chatHandler = this._chatHandler 
-      || new CommandHandler(this._api.http, this._userid, 
+      || new CommandHandler(apiWrapper, this._userid, 
       (type, msg, context) => {
         if (context) {
           console.warn("context", context); 
