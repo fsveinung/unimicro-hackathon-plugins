@@ -1,4 +1,5 @@
 import { ChatUtils } from "./chatUtils.js";
+import { KpiService } from "./kpi.js";
 
 export class CommandHandler {
 
@@ -57,7 +58,8 @@ export class CommandHandler {
                 case "imcome_statement":
                 case "businessstatus":
                 case "status":
-                    this.tryGetIncomeStatement();
+                    //this.tryGetIncomeStatement();
+                    this.tryGetStatus(entity);
                     return;
 
                 case "balance":
@@ -149,10 +151,64 @@ export class CommandHandler {
         const statement = await this.api.get(`/api/statistics?model=account&select=sum(l.amount) as profit&filter=between(accountnumber,3000,8199) and year(l.financialdate) eq ${year}&join=account.id eq journalentryline.accountid as l&wrap=false`);
         if (statement && statement.length > 0) {
             const profit = -statement[0].profit;
-            this.addMsg("Resultat før skatt (EBIT) er " + Intl.NumberFormat("nb-NO", { style: 'currency', currency: "NOK"}).format((profit)), 
+            this.addMsg("Resultat før skatt er " + Intl.NumberFormat("nb-NO", { style: 'currency', currency: "NOK"}).format((profit)), 
                 { type: "profit", id: year });
         }
     }
+
+    async tryGetStatus(chatData) {
+
+        const thisYear = new Date().getFullYear(); 
+        const year = ChatUtils.getFuzzy(chatData?.input, "year") == "last" ?  thisYear - 1 : thisYear;        
+        const isThisYear = year == thisYear;
+        const fromPeriod = 1;
+        const toPeriod = isThisYear ? new Date().getMonth() + 1 : 12;
+        // get kpi
+        const data = await this.api.get(`/api/biz/accounts?action=get-kpi&financialyear=${year}&period=${fromPeriod}-${toPeriod}`);
+        //console.log(data);
+        const parsed = KpiService.parseData(data);
+        console.log(parsed);
+
+        const periodInfo = toPeriod < 12
+        ? `for de ${toPeriod} første månedene i ${year}`
+        : `for ${year}`;
+
+        const kpiName = "EarningsBeforeTaxes";
+        var kpi = parsed.find( k => k.name == kpiName);
+        if (!kpi) {
+            this.addError("Fant ikke " + kpiName);
+            return;
+        }
+
+        const prefix = (isThisYear ? "" : `${year}: `);
+        this.addMsg(prefix + KpiService.buildKpiText(kpi, true));
+
+        const prompt = `Du er regnskapsfører.`
+        + ` Lag en kort kommentar til følgende fakta`
+        + ` ${periodInfo}`
+        + `: ${KpiService.buildKpiText(kpi, false)}`;
+
+        const finalComment = await this.prompt(prompt);
+        //console.log(finalComment);
+        this.addMsg("\n" + CommandHandler.trimLeadingLineBreaks(finalComment?.Text));
+        //this.addMsg("Fetched some data. Todo: show it :)");
+        // get last transaction
+    }
+    
+
+    async prompt(prompt) {
+        return await this.api.post("/api/biz/comments?action=generate", {
+            "Temperature": 0,
+            "Prompt": prompt,
+            "TopPercentage": 50
+        });        
+    }
+
+    static trimLeadingLineBreaks(value) {
+        if (value && value.startsWith("\n"))
+        return this.trimLeadingLineBreaks(value.substring(1));
+        return value;
+    }    
 
     async tryGetBankStatement() {
         const statement = await this.api.get('/api/statistics?model=account&select=sum(l.amount) as value&filter=between(accountnumber,1900,1949)&join=account.id eq journalentryline.accountid as l&wrap=false');
