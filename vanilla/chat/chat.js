@@ -178,11 +178,17 @@ class MicroPlugin extends HTMLElement {
 
   handleApiError(err) {
     this.toggleSpinner(false);
+
     let errMsg = err.status == 404
       ? `Endepunkt for tjeneste er ikke tilgjengelig (${err.status} ${err.error})`
-      : err.error;
-    if (err?.error?.Message) 
+      : err.status ? `${err.status} ${err.error}` : err.error;
+    
+      if (err?.error?.Message) 
       errMsg = "Svar fra api: \"" + err.error.Message + "\"";
+    
+      if (err?.error?.Messages?.length > 0) 
+      errMsg = "Svar fra api: \"" + err.error.Messages[0].Message + "\"";
+
     this.outputMessage("Beklager. " + errMsg, true, true, false, true);
   }
 
@@ -190,7 +196,7 @@ class MicroPlugin extends HTMLElement {
   {
     this._chatHandler = this._chatHandler 
       || new CommandHandler(new Api(this._api.http, err => this.handleApiError(err)), this._userid, 
-      (type, msg, context) => {
+      (type, msg, context, keepSpinning) => {
         if (context) {
           console.warn("context", context); 
         }
@@ -201,7 +207,7 @@ class MicroPlugin extends HTMLElement {
           return;
         }
         this.outputMessage(msg, true, type == "error", type == "praise", false, context);
-        this.toggleSpinner(false);
+        if (!keepSpinning) this.toggleSpinner(false);
     });
 
     // Process command

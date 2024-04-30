@@ -167,7 +167,7 @@ export class CommandHandler {
         const data = await this.api.get(`/api/biz/accounts?action=get-kpi&financialyear=${year}&period=${fromPeriod}-${toPeriod}`);
         //console.log(data);
         const parsed = KpiService.parseData(data);
-        console.log(parsed);
+        //console.log(parsed);
 
         const periodInfo = toPeriod < 12
         ? `for de ${toPeriod} første månedene i ${year}`
@@ -176,29 +176,31 @@ export class CommandHandler {
         const kpiName = "EarningsBeforeTaxes";
         var kpi = parsed.find( k => k.name == kpiName);
         if (!kpi) {
-            this.addError("Fant ikke " + kpiName);
+            this.addMsg(`Fant ingen omsetning ${periodInfo}. Kanskje du kan starte med å legge inn en åpningsbalanse eller sjekke status for i fjor ?`);
             return;
         }
 
+        // Initial comment:
         const prefix = (isThisYear ? "" : `${year}: `);
-        this.addMsg(prefix + KpiService.buildKpiText(kpi, true));
+        this.addMsg(prefix + KpiService.buildKpiText(kpi, true), { type: "profit", id: year }, true);
 
         const prompt = `Du er regnskapsfører.`
         + ` Lag en kort kommentar til følgende fakta`
         + ` ${periodInfo}`
         + `: ${KpiService.buildKpiText(kpi, false)}`;
 
-        const finalComment = await this.prompt(prompt);
+        const finalComment = await this.prompt(prompt, 75);
         //console.log(finalComment);
-        this.addMsg("\n" + CommandHandler.trimLeadingLineBreaks(finalComment?.Text));
+        //this.addMsg("\n" + CommandHandler.trimLeadingLineBreaks(finalComment?.Text));
+        this.addMsg(finalComment?.Text);
         //this.addMsg("Fetched some data. Todo: show it :)");
         // get last transaction
     }
     
 
-    async prompt(prompt) {
+    async prompt(prompt, temperature) {
         return await this.api.post("/api/biz/comments?action=generate", {
-            "Temperature": 0,
+            "Temperature": temperature || 0,
             "Prompt": prompt,
             "TopPercentage": 50
         });        
@@ -500,11 +502,11 @@ export class CommandHandler {
         if (this.callBack) this.callBack(category ?? "error", msg);
     }
 
-    addMsg(msg, context, link) {
+    addMsg(msg, context, keepSpinning ) {
         if (context) {
             this.objectHistory = context;
         }
-        if (this.callBack) this.callBack("chat", msg, context);
+        if (this.callBack) this.callBack("chat", msg, context, keepSpinning);
     }
 
     parseWork(input, rel, types) {
