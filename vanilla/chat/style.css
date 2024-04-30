@@ -67,6 +67,13 @@
     margin-right: 2rem;
   }
 
+  .arrow-link {
+    color: var(--color-c2a);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 18pt;
+  }
+
   .msg-err {
     background-color: var(--alert-warn);
     color: var(--text-color);

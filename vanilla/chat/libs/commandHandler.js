@@ -163,11 +163,12 @@ export class CommandHandler {
         const isThisYear = year == thisYear;
         const fromPeriod = 1;
         const toPeriod = isThisYear ? new Date().getMonth() + 1 : 12;
-        // get kpi
+        
+        // Fetch kpi-data
         const data = await this.api.get(`/api/biz/accounts?action=get-kpi&financialyear=${year}&period=${fromPeriod}-${toPeriod}`);
-        //console.log(data);
+        
+        // Parse data and compare years
         const parsed = KpiService.parseData(data);
-        //console.log(parsed);
 
         const periodInfo = toPeriod < 12
         ? `for de ${toPeriod} første månedene i ${year}`
@@ -184,17 +185,16 @@ export class CommandHandler {
         const prefix = (isThisYear ? "" : `${year}: `);
         this.addMsg(prefix + KpiService.buildKpiText(kpi, true), { type: "profit", id: year }, true);
 
+        // Make a second call for a comment:
         const prompt = `Du er regnskapsfører.`
         + ` Lag en kort kommentar til følgende fakta`
         + ` ${periodInfo}`
         + `: ${KpiService.buildKpiText(kpi, false)}`;
 
         const finalComment = await this.prompt(prompt, 75);
-        //console.log(finalComment);
-        //this.addMsg("\n" + CommandHandler.trimLeadingLineBreaks(finalComment?.Text));
         this.addMsg(finalComment?.Text);
-        //this.addMsg("Fetched some data. Todo: show it :)");
-        // get last transaction
+
+        // get last transaction ?
     }
     
 
@@ -327,7 +327,6 @@ export class CommandHandler {
         }
 
         if (order) {
-            //const link = "https://test.unimicro.no/#/sales/orders/" + updated.ID;
             const updated = await this.tryAddItems(order, chatData);
             if (updated) {
                 this.addMsg("Ordren har nå en totalsum på " + ChatUtils.formatMoney(order.TaxInclusiveAmount),

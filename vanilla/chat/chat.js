@@ -262,21 +262,28 @@ class MicroPlugin extends HTMLElement {
     const outlet = this.ownerDocument.getElementById("chat-outlet");
     if (outlet) {
       const pfx = isError ? this.randomSmiley(isError) : isPraise ? this.randomSmiley(false) : "";
+      const route = this.mapContextToRoute(context);
       if (intoSameBubble) {
         const bubble = this.getLastChatBubble();
         if (bubble) {
           bubble.appendChild(Utils.create("br", undefined));
           bubble.appendChild(this.ownerDocument.createTextNode(pfx + text));
+          if (route) {        
+            if (!bubble.parentNode.getAttribute("data-link")) {
+              bubble.parentNode.appendChild(Utils.create("a", "⤴", "href", route, "class", "arrow-link", "title", "Naviger til"));
+              bubble.parentNode.setAttribute("data-link", route);
+            }
+          }          
           bubble.scrollIntoView();
         }
       } else {
         const cls = "chat-message " + (isBot ? "msg-left" : "msg-right") + (isError ? " msg-err" : "");
-        const route = this.mapContextToRoute(context);
-        const msg = !!route
-          ? Utils.create("a", pfx + text, "href", route, "class", cls)
-          : Utils.create("p", pfx + text, "class", cls);
+        const msg = Utils.create("p", pfx + text, "class", cls);
         const row = Utils.create("div", undefined, "class", "chat-row");
         row.appendChild(msg);
+        if (route) {        
+          row.appendChild(Utils.create("a", "⤴", "href", route, "class", "arrow-link", "title", "Naviger til"));
+        }
         outlet.appendChild(row);
         row.scrollIntoView();
       }
