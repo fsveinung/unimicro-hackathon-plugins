@@ -1,7 +1,28 @@
 .journalentry {
     width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
 }
 
 .journalentry th {
+    padding: 0.5rem;
     text-align: left;
+    border-bottom: 1px solid #ccc;
+}
+
+.journalentry td {
+    padding: 0.5rem;
+}
+
+.journalentry .date {
+    width: 10em;
+}
+
+.journalentry .account {
+    width: 14em;
+}
+
+.journalentry .amount {
+    width: 14em;
+    text-align: right;
 }

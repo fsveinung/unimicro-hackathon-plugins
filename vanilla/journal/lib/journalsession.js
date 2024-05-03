@@ -3,6 +3,11 @@ export class JournalSession {
     _dataService;
     _settings;
     _vatTypes;
+    _rows = [];
+
+    get rows() {
+        return this._rows;
+    }
 
     constructor(dataService) {
         this._dataService = dataService;
@@ -18,7 +23,13 @@ export class JournalSession {
         // this._accounts = await this._dataService.getAll("accounts?filter=toplevelaccountgroupid gt 0 and isnull(visible,0) eq 1");
         // console.table(this._accounts);
         this._vatTypes = await this._dataService.getAll("vattypes");
-        console.table(this._vatTypes);
+        //console.table(this._vatTypes);
+    }
+
+    addRow() {
+        const row = {};
+        this._rows.push(row);
+        return row;
     }
 
 }

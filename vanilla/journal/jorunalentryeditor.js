@@ -44,6 +44,15 @@ class JournalEntryEditor extends HTMLElement {
 
     async updateUserInterface() {
         await this._session.initialize();
+        this.addRow();
+    }
+
+    addRow() {
+        const row = this._session.addRow();
+        const table = this.ownerDocument.getElementById("editor");
+        const tBody = table.querySelector("tbody");
+        const tr = Utils.create("tr");
+        tBody.append(tr);
     }
 
 }
