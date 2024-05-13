@@ -4,12 +4,14 @@ import { styles } from "./style.css";
 import { template } from "./template.html";
 import { DataService } from './lib/dataservice.js';
 import { JournalSession } from "./lib/journalsession.js";
+import { Editable } from "./lib/editable.js";
 
 class JournalEntryEditor extends HTMLElement {
     
     _session;
     _httpApi;
     _dataService;
+    _editable;
 
     set api(ref) {
         this._httpApi = new Api(ref.http, err => this.errHandler(err));
@@ -49,6 +51,10 @@ class JournalEntryEditor extends HTMLElement {
 
     setupTable(map) {
         const table = this.getEditor();
+        
+        this._editable = new Editable();
+        this._editable.init(table, map);
+
         if (!table) { console.log("No table"); return; }
         let thead = table.querySelector("thead");
         if (!thead) {

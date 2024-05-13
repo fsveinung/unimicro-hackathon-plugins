@@ -37,3 +37,7 @@
     width: 6em;
     text-align: right;
 }
+
+.journalentry td:focus {
+    background-color: #cef;
+}
