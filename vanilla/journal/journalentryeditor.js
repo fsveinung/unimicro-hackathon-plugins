@@ -47,6 +47,7 @@ class JournalEntryEditor extends HTMLElement {
         await this._session.initialize();
         this.setupTable(this._session.columns);
         this.addRows(10);
+        this._editable.startEdit();
     }
 
     setupTable(map) {

@@ -24,6 +24,10 @@ export class Editable {
             if (cell.nodeName !== "TD") return;
         }
 
+        if (!cell) {
+            cell = this.getCellAt(0 , 1);
+        }
+
         this.focusCell(cell);
 
     }
