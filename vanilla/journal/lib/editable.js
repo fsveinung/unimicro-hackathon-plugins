@@ -62,9 +62,17 @@ export class Editable {
                         ?? this.getCellAt(9999, pos.row - 1);
                 } else {
                     target = cell.nextSibling
-                        ?? this.getCellAt(1, pos.row + 1);
+                        ?? this.getCellAt(0, pos.row + 1);
                 }
                 break;
+            case 36: // HOME
+                target = evt.ctrlKey ? target = this.getCellAt(0, 1) 
+                    : target = this.getCellAt(0, pos.row);
+                break;
+            case 35: // END
+                target = evt.ctrlKey ? target = this.getCellAt(9999, -1)
+                : target = this.getCellAt(9999, pos.row);
+            break;
         }
         if (target) {
             const newPos = this.getCellPosition(target);
@@ -78,7 +86,9 @@ export class Editable {
         const table = this._tableNode;        
         if (!table) return;
         if (table.rows.length < rowIndex) return;
-        const row = table.rows[rowIndex];
+        const row = rowIndex > 0 
+            ? table.rows[rowIndex]
+            : table.rows[table.rows.length - 1];
         if (colIndex < 0) return row.cells[0];
         if (row.cells.length < colIndex) {
             return row.cells[row.cells.length - 1];
