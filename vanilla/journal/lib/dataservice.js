@@ -12,31 +12,32 @@ export class DataService {
 
     /**
      * Returns a single object
-     * @param {string} bizRoute 
+     * @param {string} bizEntity 
      * @param {number} id 
      */
-    async get(bizRoute, id) {
-
+    async get(bizEntity, id) {
+        const route = `/api/biz/${bizEntity}/${id}`;
+        return await this._api.get(route);
     }
 
     /**
      * Returns a single object
-     * @param {string} bizRoute 
+     * @param {string} bizEntity 
      */
-    async first(bizRoute) {
-        const route = `/api/biz/${bizRoute}`
-            + `${this.urlSeparator(bizRoute)}top=1`;
-        const result = this._api.get(route);
-        return result && result.length > 0 ? result[0] : undefined;
+    async first(bizEntity) {
+        const route = `/api/biz/${bizEntity}`
+            + `${this.urlSeparator(bizEntity)}top=1`;
+        const result = await this._api.get(route);
+        return Array.isArray(result) && result.length > 0 ? result[0] : undefined;
     }    
 
     /**
      * Returns a list of objects based on route
-     * @param {string} bizRoute 
+     * @param {string} bizEntity 
      */
-    async getAll(bizRoute) {
-        const route = `/api/biz/${bizRoute}`;
-        return this._api.get(route);
+    async getAll(bizEntity) {
+        const route = `/api/biz/${bizEntity}`;
+        return await this._api.get(route);
     }
 
 

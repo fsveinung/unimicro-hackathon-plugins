@@ -12,7 +12,6 @@ class JournalEntryEditor extends HTMLElement {
     _dataService;
 
     set api(ref) {
-        this._api = ref;
         this._httpApi = new Api(ref.http, err => this.errHandler(err));
         this._dataService = new DataService(ref.http);
         this._session = new JournalSession(this._dataService);
@@ -44,15 +43,49 @@ class JournalEntryEditor extends HTMLElement {
 
     async updateUserInterface() {
         await this._session.initialize();
-        this.addRow();
+        this.setupTable(this._session.columns);
+        this.addRows(10);
     }
 
-    addRow() {
-        const row = this._session.addRow();
-        const table = this.ownerDocument.getElementById("editor");
-        const tBody = table.querySelector("tbody");
+    setupTable(map) {
+        const table = this.getEditor();
+        if (!table) { console.log("No table"); return; }
+        let thead = table.querySelector("thead");
+        if (!thead) {
+            thead = Utils.create("thead");
+            table.appendChild(thead);
+        } else {
+            thead.querySelectorAll("*").forEach(n => n.remove());
+        }
         const tr = Utils.create("tr");
-        tBody.append(tr);
+        for (const [key, col] of map) {
+            const td = Utils.create("th", col.label, "class", col.type);
+            tr.appendChild(td);
+        }
+        thead.appendChild(tr);
+    }
+
+    getEditor() {
+        return this.ownerDocument.getElementById("editor");
+    }
+
+    addRows(count) {
+        const map = this._session.columns;
+        const table = this.getEditor();
+        let tBody = table.querySelector("tbody");
+        if (!tBody) {
+            tBody = Utils.create("tbody");
+            table.appendChild(tBody);
+        }
+        for (let i = 0; i < (count || 1); i++) {
+            const row = this._session.addRow();
+            const tr = Utils.create("tr");
+            for (const [key, col] of map) {
+                const td = Utils.create("td", "", "class", col.type);
+                tr.appendChild(td);
+            }        
+            tBody.append(tr);
+        }
     }
 
 }

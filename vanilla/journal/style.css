@@ -7,11 +7,22 @@
 .journalentry th {
     padding: 0.5rem;
     text-align: left;
-    border-bottom: 1px solid #ccc;
+}
+
+.journalentry tr td:first-of-type {
+    border-left: 1px solid #ccc;
+}
+
+.journalentry tr:first-of-type td {
+    border-top: 1px solid #ccc;
 }
 
 .journalentry td {
     padding: 0.5rem;
+    background-color: #fff;
+    height: 2rem;
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ccc;
 }
 
 .journalentry .date {
@@ -19,10 +30,10 @@
 }
 
 .journalentry .account {
-    width: 14em;
+    width: 10em;
 }
 
-.journalentry .amount {
-    width: 14em;
+.journalentry .money {
+    width: 6em;
     text-align: right;
 }
