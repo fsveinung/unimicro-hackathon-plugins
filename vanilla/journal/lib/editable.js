@@ -1,3 +1,5 @@
+import { CellEditor } from "./celleditor";
+
 export class Editable {
     
     _tableNode;
@@ -10,12 +12,12 @@ export class Editable {
     init(tableNode, colMap) {
         this._tableNode = tableNode;
         this._columns = colMap;
-        this._tableNode.addEventListener("click", evt => this.startEdit(evt));
+        this._tableNode.addEventListener("click", evt => this.onCellClick(evt));
         this._tableNode.addEventListener("keydown", evt => this.keyDown(evt));
         this._tableNode.addEventListener("resize", evt => this.onResize(evt));
     }
 
-    startEdit(event) {
+    onCellClick(event) {
         let cell = this._current.cell;
 
         // Event trigger?
@@ -76,7 +78,12 @@ export class Editable {
             case 35: // END
                 target = evt.ctrlKey ? target = this.getCellAt(9999, -1)
                 : target = this.getCellAt(9999, pos.row);
-            break;
+                break;
+            default:
+                if (this.isTyping(evt)) {
+                    this.startEditMode(evt.key);
+                }
+                break;
         }
         if (target) {
             const newPos = this.getCellPosition(target);
@@ -84,6 +91,16 @@ export class Editable {
             evt.preventDefault();
             this.focusCell(target);
         }
+    }
+
+    isTyping(evt) {
+        // console.log(`isTyping(${evt.key})`)
+        if (!(evt && evt.code && evt.key)) return false;
+        return (evt.code === `Key${evt.key.toUpperCase()}`);
+    }
+
+    startEditMode(key) {
+        console.log("StartEdit code: " + key);
     }
 
     getCellAt(colIndex, rowIndex) {
