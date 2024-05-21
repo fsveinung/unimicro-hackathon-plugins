@@ -6,7 +6,7 @@ export class CellEditor {
     _key = (Math.random() + 1).toString(36).substring(7);
 
     _editorTemplate = `<div style="display: flex;position:absolute;visibility:hidden;white-space:nowrap">
-    <input type="text"></input><button hidden></button>
+    <input style="flex: 1; height: auto;" type="text"></input><button hidden></button>
     </div>`; 
 
     create(owner) {
@@ -51,32 +51,16 @@ export class CellEditor {
         const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
         const scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         const prc = target.offsetParent?.getBoundingClientRect();
-        const prc2 = CellEditor.getOffset(target.offsetParent);
         if (prc) {
              rc.left -= prc.left;
              rc.top -= prc.top;
-        }
-        if (prc2) {
-            rc.left += prc2.left;
-            rc.top += prc2.top;
+            rc.left += target.offsetParent.offsetLeft;
+            rc.top += target.offsetParent.offsetTop;
        }        
         el.style.left = (rc.left) + "px";
         el.style.top = (rc.top) + "px";
         el.style.width = rc.width + "px";
         el.style.height = rc.height + "px";
-    }
-
-    /**
-     * Returns the current offset (position) of html-element
-     * @param {HTMLElement} el 
-     */
-    static getOffset(el) {
-        return { 
-            height: el.offsetHeight, 
-            width: el.offsetWidth, 
-            left: el.offsetLeft, 
-            top: el.offsetTop 
-        };
     }
 
     /**
