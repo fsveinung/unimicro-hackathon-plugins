@@ -1,13 +1,5 @@
 import { CellEditor } from "./celleditor.js";
-
-const Keys = {
-    ARROW_LEFT: 37, ARROW_UP: 38, ARROW_RIGHT: 39, ARROW_DOWN: 40,
-    ENTER: 13, ESC: 27, TAB: 9,
-    F2: 113, F3: 114, F4: 115, 
-    SPACE: 32, CTRL: 17, SHIFT: 16, HOME: 36, END: 35,
-    INSERT: 45, DELETE: 46,
-    PAGEUP: 33, PAGEDOWN: 34
-};
+import { TableNavigation } from "./keys.js";
 
 export class Editable {
     
@@ -58,55 +50,25 @@ export class Editable {
 
     keyDown(evt) {
         const cell = this._current.cell;
-        const pos = this.getCellPosition(cell);
-        let target;
-        switch (evt.keyCode) {
-            case 37: // LEFT
-                target = cell.previousSibling;
-                break;
-            case 39: // RIGHT
-                target = cell.nextSibling;
-                break;
-            case 38: // UP
-                if (pos.row > 1) target = this.getCellAt(pos.col, pos.row - 1)
-                break
-            case 40: // DOWN
-                target = this.getCellAt(pos.col, pos.row + 1)
-                break
-            case 9: // TAB
-            case 13: // ENTER
-                if (evt.shiftKey) {
-                    target = cell.previousSibling
-                        ?? this.getCellAt(9999, pos.row - 1);
-                } else {
-                    target = cell.nextSibling
-                        ?? this.getCellAt(0, pos.row + 1);
-                }
-                break;
-            case 36: // HOME
-                target = evt.ctrlKey ? target = this.getCellAt(0, 1) 
-                    : target = this.getCellAt(0, pos.row);
-                break;
-            case 35: // END
-                target = evt.ctrlKey ? target = this.getCellAt(9999, -1)
-                : target = this.getCellAt(9999, pos.row);
-                break;
-            default:
-                if (this.isTyping(evt)) {
-                    this.openEditor(evt.key);
-                }
-                break;
-        }
-        if (target) {
-            const newPos = this.getCellPosition(target);
-            if (newPos.row === 0) return;
+
+        const nav = TableNavigation.detectNavigation(cell, evt);
+        if (nav) {
+            const target = this.getCellAt(nav.col, nav.row);
+            if (target) {
+                this.focusCell(target);
+            }
             evt.preventDefault();
-            this.focusCell(target);
+            return;            
         }
+
+        if (this.isTyping(evt)) {
+            this.openEditor(evt.key);
+        }
+
     }
 
     isTyping(evt) {
-        console.log(`isTyping(key:${evt.key}, code:${evt.code}, keyCode:${evt.keyCode})`);
+        //console.log(`isTyping(key:${evt.key}, code:${evt.code}, keyCode:${evt.keyCode})`);
         if (!(evt && evt.code && evt.key)) return false;
         const isRegularKey = (evt.code === `Key${evt.key.toUpperCase()}`);
         if (isRegularKey) return true;
@@ -115,15 +77,24 @@ export class Editable {
     }
 
     openEditor(key) {
-        console.log("StartEdit code: " + key);
+        //console.log("StartEdit code: " + key);
         if (!this._current.editor) {
             this._current.editor = new CellEditor();
-            const input = this._current.editor.create(this._tableNode);
+            this._current.editor.create(this._tableNode);
+            this._current.editor.onKeyDown( e => this.handleEditEvents(e));
+            this._current.editor.onClose( e => this.handleEditClosing(e));
         }
         const cell = this._current.cell;
-        const pos = this.getCellPosition(cell);
         const text = cell.innerText ?? "";
-        this._current.editor.startEdit(text, cell, pos);
+        this._current.editor.startEdit(text, cell);
+    }
+
+    handleEditEvents(event) {
+        console.log("handleEditEvents", event);
+    }
+
+    handleEditClosing(event) {
+        console.log("handleEditClosing", event);
     }
 
     getCellAt(colIndex, rowIndex) {

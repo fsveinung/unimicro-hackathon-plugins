@@ -1,3 +1,5 @@
+import { DataService } from "../../libs/dataservice.js";
+
 export class JournalSession {
 
     _dataService;

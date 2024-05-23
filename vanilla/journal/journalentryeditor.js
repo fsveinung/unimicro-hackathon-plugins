@@ -2,7 +2,7 @@ import { Utils } from "../libs/utils.js";
 import { Api } from "../libs/api.js";
 import { styles } from "./style.css";
 import { template } from "./template.html";
-import { DataService } from './lib/dataservice.js';
+import { DataService } from '../libs/dataservice.js';
 import { JournalSession } from "./lib/journalsession.js";
 import { Editable } from "./lib/editable.js";
 
