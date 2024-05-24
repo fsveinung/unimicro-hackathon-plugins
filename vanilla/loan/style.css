@@ -13,3 +13,18 @@ footer {
 .label { 
     display: block; 
 }
+
+.page table td {
+    height: 2rem;
+    padding: 0.3rem;
+    border: 1px solid #ccc;
+    min-width: 6rem;
+}
+
+.page table {
+    border-collapse: collapse;
+}
+
+.page table td:focus {
+    background-color: #cef;
+}

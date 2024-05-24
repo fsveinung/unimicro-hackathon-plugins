@@ -6,6 +6,7 @@ export class CellEditor {
     #table;
     #rootElement;
     #inputBox;
+    /** @type {DomEvents} */
     #events = new DomEvents();
     #cell;
     #eventMap = new Map();
@@ -45,7 +46,7 @@ export class CellEditor {
     #addEventHandlers(root) {
         const input = root.querySelector("input");
         if (!input) return;
-        this.#events.create(input, "keydown", event => this.#onEditKeyDown(event) );
+        this.#events.add(input, "keydown", event => this.#onEditKeyDown(event) );
 
 
         return input;

@@ -21,8 +21,8 @@ export class Editable {
         this.#tableNode.addEventListener("resize", evt => this.#onResize(evt));
     }
 
-    focus() {
-        this.#onCellClick();
+    focus(startEdit) {
+        this.#onCellClick(undefined, startEdit);
     }
 
     #onCellDblClick(event) {
@@ -52,12 +52,14 @@ export class Editable {
     }
 
     #focusCell(cell, startEdit) {
+        console.log(`#focusCell(${typeof cell}, ${startEdit})`);
         if (!cell.getAttribute("tabindex")) {
             cell.setAttribute("tabindex", this.#calcCellIndex(cell));
         }
         cell.focus();
         this.#current.cell = cell;
         if (startEdit) {
+            console.log("Trying to open editor");
             this.#openEditor();
         }
     }

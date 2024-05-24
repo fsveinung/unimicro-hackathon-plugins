@@ -4,7 +4,7 @@ import { styles } from "./style.css";
 import { template } from "./template.html";
 import { DataService } from '../libs/dataservice.js';
 import { JournalSession } from "./lib/journalsession.js";
-import { Editable } from "../libs/editable/editable.js";
+import { Table } from "../libs/editable/table.js";
 
 class JournalEntryEditor extends HTMLElement {
     
@@ -46,53 +46,14 @@ class JournalEntryEditor extends HTMLElement {
     async updateUserInterface() {
         await this._session.initialize();
         this.setupTable(this._session.columns);
-        this.addRows(10);
-        this._editable.focus();
+
     }
 
     setupTable(map) {
-        const table = this.getTableElement();
-        
-        this._editable = new Editable();
-        this._editable.init(table, map);
-
-        if (!table) { console.log("No table"); return; }
-        let thead = table.querySelector("thead");
-        if (!thead) {
-            thead = Utils.create("thead");
-            table.appendChild(thead);
-        } else {
-            thead.querySelectorAll("*").forEach(n => n.remove());
-        }
-        const tr = Utils.create("tr");
-        for (const [key, col] of map) {
-            const td = Utils.create("th", col.label, "class", col.type);
-            tr.appendChild(td);
-        }
-        thead.appendChild(tr);
-    }
-
-    getTableElement() {
-        return this.ownerDocument.getElementById("editor");
-    }
-
-    addRows(count) {
-        const map = this._session.columns;
-        const table = this.getTableElement();
-        let tBody = table.querySelector("tbody");
-        if (!tBody) {
-            tBody = Utils.create("tbody");
-            table.appendChild(tBody);
-        }
-        for (let i = 0; i < (count || 1); i++) {
-            const row = this._session.addRow();
-            const tr = Utils.create("tr");
-            for (const [key, col] of map) {
-                const td = Utils.create("td", "", "class", col.type);
-                tr.appendChild(td);
-            }        
-            tBody.append(tr);
-        }
+        this._editable = new Table();
+        this._editable.setup(this.ownerDocument.getElementById("editor"), map, true);
+        this._editable.addRows(10);
+        this._editable.focus(true);
     }
 
 }

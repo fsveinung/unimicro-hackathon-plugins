@@ -1,6 +1,7 @@
 import { Utils } from "../libs/utils.js";
 import { template } from "./loan.html";
 import { styles } from "./style.css";
+import { Table } from "../libs/editable/table.js";
 
 class Loan extends HTMLElement {
 
@@ -12,7 +13,12 @@ class Loan extends HTMLElement {
     { label: "Sikkerhet", value: "page2", ref: undefined },
     { label: "Fremtidige inntekter", value: "page3", ref: undefined}    
   ];
-
+  
+  /** Table property reference
+   * @type {Table}
+   * @private
+  */
+  _incomeTable;
 
   constructor() {
     super();
@@ -91,10 +97,27 @@ class Loan extends HTMLElement {
         if (!step.ref) step.ref = this.getElementsByClassName("page")[index++];
         if (step.value == stepValue) {
             step.ref.getElementsByClassName("pagetitle")[0].innerText = step.label;
+            this.onShowPage(step);
             step.ref.classList.remove("hidden");
         } else {
             step.ref.classList.add("hidden");
         }
+    }
+  }
+
+  onShowPage(step) {
+    if (step.value === "page3") {
+      if (!this._incomeTable) {
+        const tbl = step.ref.querySelector("#future-incomes");
+        if (!tbl) { console.error("Could not find the table!"); return; }
+        this._incomeTable = new Table();
+        const map = new Map();
+        map.set("source", { name: "source", label: "Kilde", type: "account" });
+        map.set("amount", { name: "amount", label: "Beløp", type: "money" });
+        this._incomeTable.setup( tbl, map, true );
+        this._incomeTable.addRows(5);
+      }
+      setTimeout(() => { this._incomeTable?.focus(true); }, 100);    
     }
   }
 
