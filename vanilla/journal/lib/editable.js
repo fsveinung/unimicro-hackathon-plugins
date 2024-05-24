@@ -7,7 +7,8 @@ export class Editable {
     _columns;
     _current = {
         cell: undefined,
-        editor: undefined
+        editor: undefined,
+        isEditing: false
     };
 
     
@@ -34,6 +35,11 @@ export class Editable {
 
         if (!cell) {
             cell = this.getCellAt(0 , 1);
+        }
+
+        if (this._current.isEditing) {
+            this._current.editor.stopEdit(true, this.getCellPosition(cell) );
+            return;
         }
 
         this.focusCell(cell);
@@ -72,6 +78,8 @@ export class Editable {
         if (!(evt && evt.code && evt.key)) return false;
         const isRegularKey = (evt.code === `Key${evt.key.toUpperCase()}`);
         if (isRegularKey) return true;
+        if (evt.key === "Tab") return false;
+        if (evt.key === "Shift") return false;
         // todo: check for virtual keys to ignore
         return true; 
     }
@@ -86,6 +94,7 @@ export class Editable {
         }
         const cell = this._current.cell;
         const text = cell.innerText ?? "";
+        this._current.isEditing = true;
         this._current.editor.startEdit(text, cell);
     }
 
@@ -95,19 +104,22 @@ export class Editable {
 
     /**
      * Handler for when editor is closing
-     * @param {{text: string, commit: boolean, nav: CellPosition}} event 
+     * @param {{cell: HTMLTableCellElement, text: string, commit: boolean, nav: CellPosition}} event 
      */
     handleEditClosing(event) {  
         //console.log("handleEditClosing", event);
+        this._current.isEditing = false;
+        let cell = event.cell ?? this._current.cell;
         if (event.commit) {
-            this._current.cell.innerText = event.text;            
+            cell.innerText = event.text;            
         }
         if (event.nav) {
             const nextCell = this.getCellAt(event.nav.col, event.nav.row);
             if (nextCell) {
-                this.focusCell(nextCell);
+                cell = nextCell;
             }
-        }
+        }        
+        this.focusCell(cell);
     }
 
     getCellAt(colIndex, rowIndex) {

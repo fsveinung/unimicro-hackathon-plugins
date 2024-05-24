@@ -53,6 +53,12 @@ export class CellEditor {
 
     #onEditKeyDown(event) {
 
+        // Escape?
+        if (event.key === "Escape") {
+            this.stopEdit(false);
+            return;
+        }
+
         // Check navigation?
         const caret = this.#getCaretPosition(this.#inputBox);
         let checkNavigationFirst = true;
@@ -62,6 +68,13 @@ export class CellEditor {
             || (event.key === "ArrowRight" && !caret.isAtEnd)) {
                 checkNavigationFirst = false;
         }
+
+        // Home/end keys should navigate inside text
+        if (event.key === "Home" || event.key === "End") {
+            checkNavigationFirst = false;
+        }
+
+        if (event.key === "Tab") checkNavigationFirst = true;
 
         // Check for navigation
         if (checkNavigationFirst) {
@@ -73,6 +86,7 @@ export class CellEditor {
             }            
         }
 
+        // Custom eventhandler?
         if (this.#eventMap.has("keydown")) {
             const fx = this.#eventMap.get("keydown");
             fx(event);
@@ -89,7 +103,12 @@ export class CellEditor {
     stopEdit(commitChanges, nav) {
         if (this.#eventMap.has("close")) {
             const handler = this.#eventMap.get("close");
-            const content = { text: this.#inputBox.value, commit: !!commitChanges, nav: nav };
+            const content = { 
+                cell: this.#cell,
+                text: this.#inputBox.value, 
+                commit: !!commitChanges, 
+                nav: nav 
+            };
             handler(content);
         }
         this.#rootElement.style.visibility = "hidden";
@@ -108,7 +127,8 @@ export class CellEditor {
         this.#rootElement.style.visibility = "visible";
         const input = this.#inputBox;
         input.value = text;
-        input.focus();
+        input.select();
+        //input.focus();
     }
 
     /**
