@@ -8,7 +8,7 @@ export class CellEditor {
     #inputBox;
     #events = new DomEvents();
     #cell;
-    #eventMap = new WeakMap();
+    #eventMap = new Map();
 
     #editorTemplate = `<div style="display: flex;position:absolute;visibility:hidden;white-space:nowrap">
     <input style="flex: 1; height: auto;" type="text"></input><button hidden></button>
@@ -33,10 +33,12 @@ export class CellEditor {
     }
 
     onKeyDown(callBack) {
+        //console.log("onKeyDown setup");
         this.#eventMap.set("keydown", callBack);
     }
 
     onClose(callBack) {
+        //console.log("onClose setup");
         this.#eventMap.set("close", callBack);
     }
 
@@ -51,28 +53,44 @@ export class CellEditor {
 
     #onEditKeyDown(event) {
 
+        // Check navigation?
+        const caret = this.#getCaretPosition(this.#inputBox);
+        let checkNavigationFirst = true;
+
+        // Arrow-keys should be allowed to navigate inside text-input
+        if (event.shiftKey || (event.key === "ArrowLeft" && !caret.isAtStart)
+            || (event.key === "ArrowRight" && !caret.isAtEnd)) {
+                checkNavigationFirst = false;
+        }
+
+        // Check for navigation
+        if (checkNavigationFirst) {
+            const nav = TableNavigation.detectNavigation(this.#cell, event);
+            if (nav) {
+                this.stopEdit(true, nav);
+                event.preventDefault();
+                return;
+            }            
+        }
+
         if (this.#eventMap.has("keydown")) {
             const fx = this.#eventMap.get("keydown");
             fx(event);
             return;
         }
 
-        console.log("onEditKeyDown: " + event.code);
-        const nav = TableNavigation.detectNavigation(this.#cell, event);
-        if (nav) {
-            this.stopEdit(true);
-        }
     }
 
     /**
      * Closes the editor
-     * @param {boolean} commitChanges 
+     * @param {boolean} commitChanges - true if changes should be commited
+     * @param {{ col: number, row: number } || undefined} nav - optional suggested navigation after closing edtior
      */
-    stopEdit(commitChanges) {
+    stopEdit(commitChanges, nav) {
         if (this.#eventMap.has("close")) {
-            const fx = this.#eventMap.get("close");
-            const content = { text: this.#inputBox.value, commit: !!commitChanges };
-            fx(content);
+            const handler = this.#eventMap.get("close");
+            const content = { text: this.#inputBox.value, commit: !!commitChanges, nav: nav };
+            handler(content);
         }
         this.#rootElement.style.visibility = "hidden";
         this.#table.focus();
@@ -129,6 +147,31 @@ export class CellEditor {
                 return target.style.setProperty(property, fresh);
             }
         }        
+    }
+
+    /**
+     * Analyze caret-position inside a text-input
+     * @param {HTMLInputElement} input 
+     * @returns {{ index: number; isAtStart: boolean; isAtEnd: boolean; }}
+     */
+    #getCaretPosition(input) {
+        var hasSelection = false;
+        var caretDetails = {
+            index: -1,
+            isAtStart: false,
+            isAtEnd: false
+        };
+        if (input.selectionStart || input.selectionEnd) {
+            if (input.selectionEnd !== input.selectionStart) {
+                hasSelection = true;
+            }
+        }
+        caretDetails.index = 'selectionStart' in input ? input.selectionStart : '' || Math.abs(doc.selection.createRange().moveStart('character', -input.value.length));
+        if (!hasSelection) {
+            caretDetails.isAtStart = caretDetails.index <= 0;
+            caretDetails.isAtEnd = caretDetails.index === input.value.length;
+        }
+        return caretDetails;
     }
 
 }

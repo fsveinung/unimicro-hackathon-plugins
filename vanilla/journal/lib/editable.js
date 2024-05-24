@@ -1,5 +1,5 @@
 import { CellEditor } from "./celleditor.js";
-import { TableNavigation } from "./keys.js";
+import { CellPosition, TableNavigation } from "./keys.js";
 
 export class Editable {
     
@@ -90,11 +90,24 @@ export class Editable {
     }
 
     handleEditEvents(event) {
-        console.log("handleEditEvents", event);
+        //console.log("handleEditEvents", event);
     }
 
-    handleEditClosing(event) {
-        console.log("handleEditClosing", event);
+    /**
+     * Handler for when editor is closing
+     * @param {{text: string, commit: boolean, nav: CellPosition}} event 
+     */
+    handleEditClosing(event) {  
+        //console.log("handleEditClosing", event);
+        if (event.commit) {
+            this._current.cell.innerText = event.text;            
+        }
+        if (event.nav) {
+            const nextCell = this.getCellAt(event.nav.col, event.nav.row);
+            if (nextCell) {
+                this.focusCell(nextCell);
+            }
+        }
     }
 
     getCellAt(colIndex, rowIndex) {

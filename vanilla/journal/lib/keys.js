@@ -17,12 +17,12 @@ export class CellPosition {
     }
 
     /**
-     * Adds a number to the given column and returns the object
-     * @param {number} number
-     * @param {boolean | undefined} wrap
+     * "Fluently" adds a number to the given column
+     * @param {number} number - the number of cells you want to navigate
+     * @param {boolean | undefined} wrap - true if you want overflow to wrap to next/previous row
      * @returns {CellPosition}
      */
-    addCol(number, wrap) {
+    nextCol(number, wrap) {
 
         this.col += number;
         
@@ -46,11 +46,11 @@ export class CellPosition {
     }
 
     /**
-     * Adds a number to the given row and returns the object
+     * "Fluently" navigates to a set of rownumbers (row-position)
      * @param {number} number 
      * @returns {CellPosition}
      */
-    addRow(number) {
+    nextRow(number) {
         this.row += number;
         if (this.row < 1) this.row = 1;
         if (this.row > this.numRows - 1) this.row = this.numRows - 1;
@@ -58,7 +58,7 @@ export class CellPosition {
     }
 
     /**
-     * Sets a position
+     * "Fluently" sets a position
      * @param {number} col 
      * @param {number} row 
      * @returns {CellPosition}
@@ -104,18 +104,20 @@ export class TableNavigation {
     static detectNavigation(cell, event) {
         const pos = this.getCellPosition(cell);
         switch (event.key) {
-            case KeyName.ARROW_LEFT: return pos.addCol(-1);
-            case KeyName.ARROW_RIGHT: return pos.addCol(1);
-            case KeyName.ARROW_UP: return pos.addRow(-1);
-            case KeyName.ARROW_DOWN: return pos.addRow(+1);
+            case KeyName.ARROW_LEFT: return pos.nextCol(-1);
+            case KeyName.ARROW_RIGHT: return pos.nextCol(1);
+            case KeyName.ARROW_UP: return pos.nextRow(-1);
+            case KeyName.ARROW_DOWN: return pos.nextRow(+1);
             case KeyName.TAB:
-                return (event.shiftKey) ? pos.addCol(-1, true) : pos.addCol(1, true);
+                return (event.shiftKey) ? pos.nextCol(-1, true) : pos.nextCol(1, true);
             case KeyName.ENTER:
-                return pos.addCol(1, true);
+                return pos.nextCol(1, true);
             case "Home":
                 return event.ctrlKey ? pos.setPos(0, 0) : pos.setPos(0, pos.row);
             case "End":
                 return event.ctrlKey ? pos.setPos(-1, -1) : pos.setPos(pos.numCols - 1, pos.row);
         }
     }
+
+    static isLeftRightArrowKeys
 }
