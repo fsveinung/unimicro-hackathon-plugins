@@ -1,5 +1,5 @@
 import { TableNavigation } from "./keys.js";
-import { DomEvents } from "../../libs/domevents.js";
+import { DomEvents } from "./domevents.js";
 
 export class CellEditor {
 

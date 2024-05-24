@@ -4,7 +4,7 @@ import { styles } from "./style.css";
 import { template } from "./template.html";
 import { DataService } from '../libs/dataservice.js';
 import { JournalSession } from "./lib/journalsession.js";
-import { Editable } from "./lib/editable.js";
+import { Editable } from "../libs/editable/editable.js";
 
 class JournalEntryEditor extends HTMLElement {
     
@@ -51,7 +51,7 @@ class JournalEntryEditor extends HTMLElement {
     }
 
     setupTable(map) {
-        const table = this.getEditor();
+        const table = this.getTableElement();
         
         this._editable = new Editable();
         this._editable.init(table, map);
@@ -72,13 +72,13 @@ class JournalEntryEditor extends HTMLElement {
         thead.appendChild(tr);
     }
 
-    getEditor() {
+    getTableElement() {
         return this.ownerDocument.getElementById("editor");
     }
 
     addRows(count) {
         const map = this._session.columns;
-        const table = this.getEditor();
+        const table = this.getTableElement();
         let tBody = table.querySelector("tbody");
         if (!tBody) {
             tBody = Utils.create("tbody");

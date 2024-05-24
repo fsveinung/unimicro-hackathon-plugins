@@ -14,7 +14,7 @@ class Event {
 
     cleanup() {
         if (this.isActive) {
-            console.log(`Removing evet-listener: ${this.eventName} on ${typeof this.object}`);
+            console.log(`Removing event-listener: ${this.eventName} on ${typeof this.object}`);
             this.object.removeEventListener(this.eventName, this.handler);
             this.isActive = false;
         }

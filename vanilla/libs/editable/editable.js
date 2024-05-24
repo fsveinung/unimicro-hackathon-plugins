@@ -3,9 +3,9 @@ import { CellPosition, TableNavigation } from "./keys.js";
 
 export class Editable {
     
-    _tableNode;
-    _columns;
-    _current = {
+    #tableNode;
+    #columns;
+    #current = {
         cell: undefined,
         editor: undefined,
         isEditing: false
@@ -13,12 +13,12 @@ export class Editable {
 
     
     init(tableNode, colMap) {
-        this._tableNode = tableNode;
-        this._columns = colMap;
-        this._tableNode.addEventListener("click", evt => this.#onCellClick(evt));        
-        this._tableNode.addEventListener("dblclick", evt => this.#onCellDblClick(evt));
-        this._tableNode.addEventListener("keydown", evt => this.#keyDown(evt));
-        this._tableNode.addEventListener("resize", evt => this.#onResize(evt));
+        this.#tableNode = tableNode;
+        this.#columns = colMap;
+        this.#tableNode.addEventListener("click", evt => this.#onCellClick(evt));        
+        this.#tableNode.addEventListener("dblclick", evt => this.#onCellDblClick(evt));
+        this.#tableNode.addEventListener("keydown", evt => this.#keyDown(evt));
+        this.#tableNode.addEventListener("resize", evt => this.#onResize(evt));
     }
 
     focus() {
@@ -30,7 +30,7 @@ export class Editable {
     }
 
     #onCellClick(event, startEdit) {
-        let cell = this._current.cell;
+        let cell = this.#current.cell;
 
         // Event trigger?
         if (event && event.target) {
@@ -42,8 +42,8 @@ export class Editable {
             cell = this.#getCellAt(0 , 1);
         }
 
-        if (this._current.isEditing) {
-            this._current.editor.stopEdit(true, this.#getCellPosition(cell) );
+        if (this.#current.isEditing) {
+            this.#current.editor.stopEdit(true, this.#getCellPosition(cell) );
             return;
         }
 
@@ -56,14 +56,14 @@ export class Editable {
             cell.setAttribute("tabindex", this.#calcCellIndex(cell));
         }
         cell.focus();
-        this._current.cell = cell;
+        this.#current.cell = cell;
         if (startEdit) {
             this.#openEditor();
         }
     }
 
     #keyDown(evt) {
-        const cell = this._current.cell;
+        const cell = this.#current.cell;
 
         const nav = TableNavigation.detectNavigation(cell, evt);
         if (nav) {
@@ -94,16 +94,16 @@ export class Editable {
 
     #openEditor() {
         //console.log("StartEdit code: " + key);
-        if (!this._current.editor) {
-            this._current.editor = new CellEditor();
-            this._current.editor.create(this._tableNode);
-            this._current.editor.onKeyDown( e => this.#handleEditEvents(e));
-            this._current.editor.onClose( e => this.#handleEditClosing(e));
+        if (!this.#current.editor) {
+            this.#current.editor = new CellEditor();
+            this.#current.editor.create(this.#tableNode);
+            this.#current.editor.onKeyDown( e => this.#handleEditEvents(e));
+            this.#current.editor.onClose( e => this.#handleEditClosing(e));
         }
-        const cell = this._current.cell;
+        const cell = this.#current.cell;
         const text = cell.innerText ?? "";
-        this._current.isEditing = true;
-        this._current.editor.startEdit(text, cell);
+        this.#current.isEditing = true;
+        this.#current.editor.startEdit(text, cell);
     }
 
     #handleEditEvents(event) {
@@ -116,8 +116,8 @@ export class Editable {
      */
     #handleEditClosing(event) {  
         //console.log("handleEditClosing", event);
-        this._current.isEditing = false;
-        let cell = event.cell ?? this._current.cell;
+        this.#current.isEditing = false;
+        let cell = event.cell ?? this.#current.cell;
         if (event.commit) {
             cell.innerText = event.text;            
         }
@@ -131,7 +131,7 @@ export class Editable {
     }
 
     #getCellAt(colIndex, rowIndex) {
-        const table = this._tableNode;        
+        const table = this.#tableNode;        
         if (!table) return;
         if (table.rows.length < rowIndex) return;
         const row = rowIndex > 0 
