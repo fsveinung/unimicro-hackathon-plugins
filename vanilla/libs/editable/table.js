@@ -1,39 +1,58 @@
 import { Editable } from "./editable.js";
+import { Field } from "./field.js";
+import { Utils } from "../utils.js";
+import { css } from "./table.css";
 
 export class Table {
 
-    #table;
-    #columns;
-
-    /** @type {Editable} */
-    #editable;
+    /** @type {HTMLTableElement} */ #table;
+    /** @type {Map<string, Field>} */ #columns;
+    /** @type {Editable} */ #editable;
+    /** @type {Map<string, CallableFunction>} */ #eventMap = new Map();
 
     /**
      * Set focus on table if it is editable
-     * @param {bool} startEdit - true to trigger editor
+     * @param {bool} startEdit - true to start editing directly
      */
     focus(startEdit) {
         if (this.#editable) {
             this.#editable.focus(startEdit);
         }
     }
+
+    /**
+     * Set callback-function to handle changes
+     * @param {requestCallback(change: { colName: string, rowIndex: number, value: string, commit: boolean })} callBack 
+     */
+    onChange(callBack) {
+        this.#eventMap.set("change", callBack);
+    }
     
     /**
      * Sets up the table
-     * @param {HTMLTableElement} table - the Htmltable dom-element
-     * @param {Map<string, {name: string, label: string, type: string}>} columns - map of fields in the layout of the table
+     * @param {Map<string, Field>} columns - map of fields in the layout of the table
      * @param {bool} editable - true if the table should be editable
+     * @param {HTMLTableElement | undefined} table - optioanl existing Htmltable dom-element
+     * @returns {HTMLTableElement} - the html-table element
      */
-    setup(table, columns, editable) {
+    setup(columns, editable, table) {
+
+        if (!table) {
+            table = document.createElement("table");
+        }
+
+        table.classList.add("editable");
+        Utils.addStyleSheet("editable", css);
+
+        this.#table = table;
+        this.#columns = columns;
 
         if (editable) {
             this.#editable = new Editable();
             this.#editable.init(table, columns);
+            this.#editable.onChange(change => this.#fireCallBack("change", change) );
         }
 
-        this.#table = table;
-        this.#columns = columns;
-        if (!table) return;
         let thead = table.querySelector("thead");
         if (!thead) {
             thead = Utils.create("thead");
@@ -41,12 +60,15 @@ export class Table {
         } else {
             thead.querySelectorAll("*").forEach(n => n.remove());
         }
+
         const tr = Utils.create("tr");
         for (const [key, col] of columns) {
             const td = Utils.create("th", col.label, "class", col.type);
             tr.appendChild(td);
         }
         thead.appendChild(tr);
+
+        return table;
     }
 
     /**
@@ -71,5 +93,19 @@ export class Table {
             }        
             tBody.append(tr);
         }
+    }
+
+    /**
+     * Will try to call given callback if registered
+     * @param {string} name - eventname
+     * @param {any} cargo - event-parameter
+     * @returns {true | false}
+     */
+    #fireCallBack(name, cargo) {
+        if (this.#eventMap.has(name)) {
+            const handler = this.#eventMap.get(name);
+            return handler(cargo);
+        }
+        return true;
     }    
 }

@@ -114,7 +114,7 @@ class Loan extends HTMLElement {
         const map = new Map();
         map.set("source", { name: "source", label: "Kilde", type: "account" });
         map.set("amount", { name: "amount", label: "Beløp", type: "money" });
-        this._incomeTable.setup( tbl, map, true );
+        this._incomeTable.setup( map, true, tbl );
         this._incomeTable.addRows(5);
       }
       setTimeout(() => { this._incomeTable?.focus(true); }, 100);    

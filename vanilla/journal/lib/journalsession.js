@@ -1,24 +1,25 @@
 import { DataService } from "../../libs/dataservice.js";
+import { Field } from "../../libs/editable/field.js";
 
 export class JournalSession {
 
-    _dataService;
-    _settings;
-    _vatTypes;
-    _rows = [];
-    _columns = new Map();
+    #dataService;
+    #settings;
+    #vatTypes;
+    #rows = [];
+    /** @type {Map<string, Field>} */ #columns = new Map();
 
     get rows() {
-        return this._rows;
+        return this.#rows;
     }
 
     get columns() {
-        if (this._columns.size === 0) this._columns = this.setupColumns();
-        return this._columns;
+        if (this.#columns.size === 0) this.#columns = this.setupColumns();
+        return this.#columns;
     }    
 
     constructor(dataService) {
-        this._dataService = dataService;
+        this.#dataService = dataService;
     }
 
     /**
@@ -26,11 +27,11 @@ export class JournalSession {
      * Ensures that all dependencies are fetched (settings etc.)
      */
     async initialize() {
-        this._settings = await this._dataService.first("companysettings");
-        console.log(this._settings);
+        this.#settings = await this.#dataService.first("companysettings");
+        console.log(this.#settings);
         // this._accounts = await this._dataService.getAll("accounts?filter=toplevelaccountgroupid gt 0 and isnull(visible,0) eq 1");
         // console.table(this._accounts);
-        this._vatTypes = await this._dataService.getAll("vattypes");
+        this.#vatTypes = await this.#dataService.getAll("vattypes");
         //console.table(this._vatTypes);
     }
 
@@ -46,7 +47,7 @@ export class JournalSession {
 
     addRow() {
         const row = {};
-        this._rows.push(row);
+        this.#rows.push(row);
         return row;
     }
 

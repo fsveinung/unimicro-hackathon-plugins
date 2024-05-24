@@ -36,7 +36,7 @@ export class DomEvents {
      * @param {*} handler - callback
      */
     add(object, eventName, handler) {
-        console.log(`Adding event-listener: ${eventName} on ${object.tagName}`);
+        // console.log(`Adding event-listener: ${eventName} on ${object.tagName}`);
         object.addEventListener(eventName, handler);
         this.eventList.push(new Event(object, eventName, handler));    
     }

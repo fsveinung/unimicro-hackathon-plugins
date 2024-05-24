@@ -6,10 +6,10 @@ export class CellEditor {
     #table;
     #rootElement;
     #inputBox;
-    /** @type {DomEvents} */
-    #events = new DomEvents();
     #cell;
     #eventMap = new Map();
+    #isClosing = false;
+    /** @type {DomEvents} */ #events = new DomEvents();
 
     #editorTemplate = `<div style="display: flex;position:absolute;visibility:hidden;white-space:nowrap">
     <input style="flex: 1; height: auto;" type="text"></input><button hidden></button>
@@ -47,8 +47,7 @@ export class CellEditor {
         const input = root.querySelector("input");
         if (!input) return;
         this.#events.add(input, "keydown", event => this.#onEditKeyDown(event) );
-
-
+        this.#events.add(input, "blur", event => this.#onBlur(event) );
         return input;
     }
 
@@ -96,24 +95,39 @@ export class CellEditor {
 
     }
 
+    #onBlur(event) {
+        //console.log("onBlur");
+        this.stopEdit(true)
+    }
+
+
     /**
      * Closes the editor
      * @param {boolean} commitChanges - true if changes should be commited
      * @param {{ col: number, row: number } || undefined} nav - optional suggested navigation after closing edtior
      */
     stopEdit(commitChanges, nav) {
-        if (this.#eventMap.has("close")) {
-            const handler = this.#eventMap.get("close");
-            const content = { 
-                cell: this.#cell,
-                text: this.#inputBox.value, 
-                commit: !!commitChanges, 
-                nav: nav 
-            };
-            handler(content);
+        //console.log(`stopEdit(${commitChanges}, ${nav})`);
+        if (this.#isClosing) {
+            //console.log("busy closing.. exiting");
+            return;
         }
-        this.#rootElement.style.visibility = "hidden";
-        this.#table.focus();
+        this.#isClosing = true;
+        try {
+            if (this.#eventMap.has("close")) {
+                const handler = this.#eventMap.get("close");
+                const content = { 
+                    cell: this.#cell,
+                    text: this.#inputBox.value, 
+                    commit: !!commitChanges, 
+                    nav: nav 
+                };
+                handler(content);
+            }
+            this.#rootElement.style.visibility = "hidden";
+            this.#table.focus();
+        } catch {}
+        this.#isClosing = false;
     }
 
     /**

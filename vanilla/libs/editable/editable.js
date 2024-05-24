@@ -1,20 +1,23 @@
 import { CellEditor } from "./celleditor.js";
 import { CellPosition, TableNavigation } from "./keys.js";
+import { Field } from "./field.js";
 
 export class Editable {
     
     #tableNode;
-    #columns;
+    #eventMap = new Map();
+    /** @type {Map<string, Field>} */ #fields;
     #current = {
         cell: undefined,
         editor: undefined,
-        isEditing: false
+        isEditing: false,
+        field: undefined
     };
 
     
     init(tableNode, colMap) {
         this.#tableNode = tableNode;
-        this.#columns = colMap;
+        this.#fields = colMap;
         this.#tableNode.addEventListener("click", evt => this.#onCellClick(evt));        
         this.#tableNode.addEventListener("dblclick", evt => this.#onCellDblClick(evt));
         this.#tableNode.addEventListener("keydown", evt => this.#keyDown(evt));
@@ -24,6 +27,14 @@ export class Editable {
     focus(startEdit) {
         this.#onCellClick(undefined, startEdit);
     }
+
+    /**
+     * Set callback-function to handle changes
+     * @param {requestCallback(change: { colName: string, rowIndex: number, value: string, commit: boolean })} callBack 
+     */
+    onChange(callBack) {
+        this.#eventMap.set("change", callBack);
+    }    
 
     #onCellDblClick(event) {
         this.#onCellClick(event, true);
@@ -52,14 +63,15 @@ export class Editable {
     }
 
     #focusCell(cell, startEdit) {
-        console.log(`#focusCell(${typeof cell}, ${startEdit})`);
+        
+        //console.log(`#focusCell(${typeof cell}, startEdit = ${!!startEdit})`);
         if (!cell.getAttribute("tabindex")) {
             cell.setAttribute("tabindex", this.#calcCellIndex(cell));
         }
         cell.focus();
         this.#current.cell = cell;
         if (startEdit) {
-            console.log("Trying to open editor");
+            //console.log("Trying to open editor");
             this.#openEditor();
         }
     }
@@ -117,12 +129,14 @@ export class Editable {
      * @param {{cell: HTMLTableCellElement, text: string, commit: boolean, nav: CellPosition}} event 
      */
     #handleEditClosing(event) {  
-        //console.log("handleEditClosing", event);
+        console.log("handleEditClosing", event);
         this.#current.isEditing = false;
         let cell = event.cell ?? this.#current.cell;
+
         if (event.commit) {
-            cell.innerText = event.text;            
+            this.#tryCommitUserInput(cell, event.text);
         }
+
         if (event.nav) {
             const nextCell = this.#getCellAt(event.nav.col, event.nav.row);
             if (nextCell) {
@@ -130,6 +144,40 @@ export class Editable {
             }
         }        
         this.#focusCell(cell);
+    }
+
+    #tryCommitUserInput(cell, text) {
+        let update = true;
+        const pos = this.#getCellPosition(cell);
+        const fld = this.#getCellDef(cell);
+        if (fld) {
+            const cargo = { field: fld, rowIndex: pos.row, value: text, commit: true };
+            update = this.#fireCallBack("change", cargo);
+            if (update === false || cargo.commit === false ) {
+                update = false;
+            } else {
+                text = cargo.value;
+            }
+        }
+        if (update) {
+            cell.innerText = text;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Will try to call given callback if registered
+     * @param {string} name - eventname
+     * @param {any} cargo - event-parameter
+     * @returns {true | false}
+     */
+    #fireCallBack(name, cargo) {
+        if (this.#eventMap.has(name)) {
+            const handler = this.#eventMap.get(name);
+            return handler(cargo);
+        }
+        return true;
     }
 
     #getCellAt(colIndex, rowIndex) {
@@ -162,6 +210,19 @@ export class Editable {
             col: cell.cellIndex
         };
     }    
+
+    /**
+     * Returns the current field-definition of the given table-cell
+     * @param {HTMLTableCellElement} cell 
+     * @returns Field
+     */
+    #getCellDef(cell) {
+        if (!this.#fields) return undefined;
+        const index = cell.cellIndex;
+        if (index >= 0 && index < this.#fields.size - 1) {
+            return this.#fields.get(Array.from(this.#fields.keys())[index]);
+        }
+    }
 
     #onResize() {
 

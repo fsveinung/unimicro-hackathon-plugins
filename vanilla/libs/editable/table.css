@@ -1,0 +1,43 @@
+table.editable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+table.editable th {
+    padding: 0.5rem;
+    text-align: left;
+}
+
+table.editable tr td:first-of-type {
+    border-left: 1px solid #ccc;
+}
+
+table.editable tr:first-of-type td {
+    border-top: 1px solid #ccc;
+}
+
+table.editable td {
+    padding: 0.5rem;
+    background-color: #fff;
+    height: 2rem;
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+
+table.editable .date {
+    width: 10em;
+}
+
+table.editable .account {
+    width: 10em;
+}
+
+table.editable .money {
+    width: 8em;
+    text-align: right;
+}
+
+table.editable td:focus {
+    background-color: #cef;
+}

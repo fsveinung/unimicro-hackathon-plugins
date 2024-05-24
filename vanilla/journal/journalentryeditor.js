@@ -8,16 +8,16 @@ import { Table } from "../libs/editable/table.js";
 
 class JournalEntryEditor extends HTMLElement {
     
-    _session;
-    _httpApi;
-    _dataService;
-    _editable;
+    /** @type {JournalSession} */ #session;
+    /** @type {Table} */ #editable;
+    /** @type {DataService} */ #dataService;
+    /** @type {Api} */ #httpApi;
 
     set api(ref) {
-        this._httpApi = new Api(ref.http, err => this.errHandler(err));
-        this._dataService = new DataService(ref.http);
-        this._session = new JournalSession(this._dataService);
-        this.updateUserInterface();
+        this.#httpApi = new Api(ref.http, err => this.#errHandler(err));
+        this.#dataService = new DataService(ref.http);
+        this.#session = new JournalSession(this.#dataService);
+        this.#updateUserInterface();
       }    
     
     constructor() {
@@ -25,35 +25,40 @@ class JournalEntryEditor extends HTMLElement {
     }
 
     connectedCallback() {
-        this.checkContent();
+        this.#checkContent();
     }
     
-    errHandler(err) {
+    #errHandler(err) {
         console.error(err);
     }
 
-    checkContent() {
+    #checkContent() {
         if (this.ownerDocument.defaultView) {
             if (this.childNodes.length == 0) {
                 // Create initial content
                 this.appendChild( Utils.createFromTemplate(template) );
             } else {
-                this.updateUserInterface();
+                this.#updateUserInterface();
             }
         }
     }
 
-    async updateUserInterface() {
-        await this._session.initialize();
-        this.setupTable(this._session.columns);
+    async #updateUserInterface() {
+        await this.#session.initialize();
+        this.#setupTable(this.#session.columns);
 
     }
 
-    setupTable(map) {
-        this._editable = new Table();
-        this._editable.setup(this.ownerDocument.getElementById("editor"), map, true);
-        this._editable.addRows(10);
-        this._editable.focus(true);
+    #setupTable(map) {
+        this.#editable = new Table();
+        this.#editable.onChange( change => this.#onChange(change));
+        this.appendChild(this.#editable.setup(map, true));
+        this.#editable.addRows(10);
+        this.#editable.focus(true);
+    }
+
+    #onChange(change) {
+        console.log("jornal-change", change);
     }
 
 }
