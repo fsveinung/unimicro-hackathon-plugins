@@ -44,7 +44,7 @@ export class CellEditor {
         const input = root.querySelector("input");
         if (!input) return;
         this.#events.add(input, "keydown", event => this.#onEditKeyDown(event) );
-        //this.#events.add(input, "blur", event => this.#onBlur(event) );
+        this.#events.add(input, "blur", event => this.#onBlur(event) );
         return input;
     }
 
