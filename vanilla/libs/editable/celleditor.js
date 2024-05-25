@@ -1,5 +1,6 @@
 import { TableNavigation } from "./keys.js";
 import { DomEvents } from "./domevents.js";
+import { cellEditorTemplate } from "./celleditor.html";
 
 export class CellEditor {
 
@@ -11,10 +12,6 @@ export class CellEditor {
     #isClosing = false;
     /** @type {DomEvents} */ #events = new DomEvents();
 
-    #editorTemplate = `<div style="display: flex;position:absolute;visibility:hidden;white-space:nowrap">
-    <input style="flex: 1; height: auto;" type="text"></input><button hidden></button>
-    </div>`; 
-
     /**
      * Creates the movable editor and stores references to the given table
      * @param {HTMLTableElement} table 
@@ -24,7 +21,7 @@ export class CellEditor {
         this.#table = table;
         if (!this.#rootElement) {
             const template = document.createElement("template");            
-            template.innerHTML = this.#editorTemplate;
+            template.innerHTML = cellEditorTemplate;
             const div = template.content.cloneNode(true);            
             this.#inputBox = this.#addEventHandlers(div);
             table.parentNode.appendChild(div);
@@ -47,7 +44,7 @@ export class CellEditor {
         const input = root.querySelector("input");
         if (!input) return;
         this.#events.add(input, "keydown", event => this.#onEditKeyDown(event) );
-        this.#events.add(input, "blur", event => this.#onBlur(event) );
+        //this.#events.add(input, "blur", event => this.#onBlur(event) );
         return input;
     }
 
@@ -115,14 +112,14 @@ export class CellEditor {
         this.#isClosing = true;
         try {
             if (this.#eventMap.has("close")) {
-                const handler = this.#eventMap.get("close");
+                const eventHandler = this.#eventMap.get("close");
                 const content = { 
                     cell: this.#cell,
                     text: this.#inputBox.value, 
                     commit: !!commitChanges, 
                     nav: nav 
                 };
-                handler(content);
+                eventHandler(content);
             }
             this.#rootElement.style.visibility = "hidden";
             this.#table.focus();

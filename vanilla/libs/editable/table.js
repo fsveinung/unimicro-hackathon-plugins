@@ -50,7 +50,7 @@ export class Table {
         if (editable) {
             this.#editable = new Editable();
             this.#editable.init(table, columns);
-            this.#editable.onChange(change => this.#fireCallBack("change", change) );
+            this.#editable.onChange(change => this.#raiseEvent("change", change) );
         }
 
         let thead = table.querySelector("thead");
@@ -101,7 +101,7 @@ export class Table {
      * @param {any} cargo - event-parameter
      * @returns {true | false}
      */
-    #fireCallBack(name, cargo) {
+    #raiseEvent(name, cargo) {
         if (this.#eventMap.has(name)) {
             const handler = this.#eventMap.get(name);
             return handler(cargo);

@@ -129,7 +129,7 @@ export class Editable {
      * @param {{cell: HTMLTableCellElement, text: string, commit: boolean, nav: CellPosition}} event 
      */
     #handleEditClosing(event) {  
-        console.log("handleEditClosing", event);
+        //console.log("handleEditClosing", event);
         this.#current.isEditing = false;
         let cell = event.cell ?? this.#current.cell;
 
@@ -152,10 +152,12 @@ export class Editable {
         const fld = this.#getCellDef(cell);
         if (fld) {
             const cargo = { field: fld, rowIndex: pos.row, value: text, commit: true };
-            update = this.#fireCallBack("change", cargo);
+            update = this.#raiseEvent("change", cargo);
+            //console.log(update, cargo);
             if (update === false || cargo.commit === false ) {
                 update = false;
             } else {
+                update = true;
                 text = cargo.value;
             }
         }
@@ -172,7 +174,7 @@ export class Editable {
      * @param {any} cargo - event-parameter
      * @returns {true | false}
      */
-    #fireCallBack(name, cargo) {
+    #raiseEvent(name, cargo) {
         if (this.#eventMap.has(name)) {
             const handler = this.#eventMap.get(name);
             return handler(cargo);

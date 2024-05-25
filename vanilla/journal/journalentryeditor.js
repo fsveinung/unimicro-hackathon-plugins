@@ -58,7 +58,8 @@ class JournalEntryEditor extends HTMLElement {
     }
 
     #onChange(change) {
-        console.log("jornal-change", change);
+        console.log("journal-change-event triggered", change);
+        //return true;
     }
 
 }
