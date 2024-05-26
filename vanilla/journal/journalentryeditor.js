@@ -53,20 +53,12 @@ class JournalEntryEditor extends HTMLElement {
         if (this.#editable) return;
         this.#editable = new Table();
         this.appendChild(this.#editable.setup(map, true));
-        this.#editable.eventMap.on("change", change => this.#onChange(change));
+        this.#editable.eventMap.on("change", change => {
+            console.log("change", change);
+            this.#session.trySetValue(change.field.name, change.value, change.rowIndex);
+        });
         this.#editable.addRows(10);
         this.#editable.focus(true);
-    }
-
-    /**
-     * Handle editor-changes
-     * @param {{ colName: string, rowIndex: number, value: string, commit: boolean }} change 
-     * @returns {boolean} true if update should be allowed
-     */
-    #onChange(change) {
-        console.log("journal-change-event triggered", change);
-        return change.value == "2";
-        //return true;
     }
 
 }

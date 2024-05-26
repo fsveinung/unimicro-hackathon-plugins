@@ -51,4 +51,21 @@ export class JournalSession {
         return row;
     }
 
+    /**
+     * Tries to set a value
+     * @param {string} name
+     * @param {any} value 
+     * @param {number} rowIndex 
+     * @returns {boolean} true if successfull
+     */
+    trySetValue(name, value, rowIndex) {
+        while (rowIndex > this.#rows.length - 1) {
+            this.addRow();
+        }
+        const row = this.#rows[rowIndex];
+        row[name] = value;
+        //console.table(this.#rows);
+        return true;
+    }
+
 }

@@ -144,7 +144,7 @@ export class Editable {
         const pos = this.#getCellPosition(cell);
         const fld = this.#getCellDef(cell);
         if (fld) {
-            const cargo = { field: fld, rowIndex: pos.row, value: text, commit: true };
+            const cargo = { field: fld, rowIndex: pos.row - 1, value: text, commit: true };
             update = this.eventMap.raiseEvent("change", cargo);
             if (update === false || cargo.commit === false ) {
                 update = false;

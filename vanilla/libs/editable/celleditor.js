@@ -10,7 +10,6 @@ export class CellEditor {
     #rootElement;
     #inputBox;
     #cell;
-    //#eventMap = new Map();
     #isClosing = false;
     /** @type {DomEvents} */ #events = new DomEvents();
 
@@ -31,16 +30,6 @@ export class CellEditor {
         }
         return this.#inputBox;
     }
-
-    // onKeyDown(callBack) {
-    //     //console.log("onKeyDown setup");
-    //     this.#eventMap.set("keydown", callBack);
-    // }
-
-    // onClose(callBack) {
-    //     //console.log("onClose setup");
-    //     this.#eventMap.set("close", callBack);
-    // }
 
     #addEventHandlers(root) {
         const input = root.querySelector("input");
