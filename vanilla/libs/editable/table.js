@@ -2,13 +2,14 @@ import { Editable } from "./editable.js";
 import { Field } from "./field.js";
 import { Utils } from "../utils.js";
 import { css } from "./table.css";
+import { EventMap } from "./eventmap.js";
 
 export class Table {
 
+    eventMap = new EventMap();
     /** @type {HTMLTableElement} */ #table;
     /** @type {Map<string, Field>} */ #columns;
-    /** @type {Editable} */ #editable;
-    /** @type {Map<string, CallableFunction>} */ #eventMap = new Map();
+    /** @type {Editable} */ #editable;    
 
     /**
      * Set focus on table if it is editable
@@ -18,14 +19,6 @@ export class Table {
         if (this.#editable) {
             this.#editable.focus(startEdit);
         }
-    }
-
-    /**
-     * Set callback-function to handle changes
-     * @param {requestCallback(change: { colName: string, rowIndex: number, value: string, commit: boolean })} callBack 
-     */
-    onChange(callBack) {
-        this.#eventMap.set("change", callBack);
     }
     
     /**
@@ -50,7 +43,7 @@ export class Table {
         if (editable) {
             this.#editable = new Editable();
             this.#editable.init(table, columns);
-            this.#editable.onChange(change => this.#raiseEvent("change", change) );
+            this.#editable.eventMap.on("change", change => this.eventMap.raiseEvent("change", change) );
         }
 
         let thead = table.querySelector("thead");
@@ -94,18 +87,5 @@ export class Table {
             tBody.append(tr);
         }
     }
-
-    /**
-     * Will try to call given callback if registered
-     * @param {string} name - eventname
-     * @param {any} cargo - event-parameter
-     * @returns {true | false}
-     */
-    #raiseEvent(name, cargo) {
-        if (this.#eventMap.has(name)) {
-            const handler = this.#eventMap.get(name);
-            return handler(cargo);
-        }
-        return true;
-    }    
+   
 }

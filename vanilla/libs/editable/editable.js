@@ -1,11 +1,12 @@
 import { CellEditor } from "./celleditor.js";
 import { CellPosition, TableNavigation } from "./keys.js";
 import { Field } from "./field.js";
+import { EventMap } from "./eventmap.js";
 
 export class Editable {
-    
+
+    eventMap = new EventMap();
     #tableNode;
-    #eventMap = new Map();
     /** @type {Map<string, Field>} */ #fields;
     #current = {
         cell: undefined,
@@ -27,14 +28,6 @@ export class Editable {
     focus(startEdit) {
         this.#onCellClick(undefined, startEdit);
     }
-
-    /**
-     * Set callback-function to handle changes
-     * @param {requestCallback(change: { colName: string, rowIndex: number, value: string, commit: boolean })} callBack 
-     */
-    onChange(callBack) {
-        this.#eventMap.set("change", callBack);
-    }    
 
     #onCellDblClick(event) {
         this.#onCellClick(event, true);
@@ -111,8 +104,8 @@ export class Editable {
         if (!this.#current.editor) {
             this.#current.editor = new CellEditor();
             this.#current.editor.create(this.#tableNode);
-            this.#current.editor.onKeyDown( e => this.#handleEditEvents(e));
-            this.#current.editor.onClose( e => this.#handleEditClosing(e));
+            this.#current.editor.eventMap.on("keydown", e => this.#handleEditEvents(e));
+            this.#current.editor.eventMap.on("close", e => this.#handleEditClosing(e));
         }
         const cell = this.#current.cell;
         const text = cell.innerText ?? "";
@@ -152,8 +145,7 @@ export class Editable {
         const fld = this.#getCellDef(cell);
         if (fld) {
             const cargo = { field: fld, rowIndex: pos.row, value: text, commit: true };
-            update = this.#raiseEvent("change", cargo);
-            //console.log(update, cargo);
+            update = this.eventMap.raiseEvent("change", cargo);
             if (update === false || cargo.commit === false ) {
                 update = false;
             } else {
@@ -166,20 +158,6 @@ export class Editable {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Will try to call given callback if registered
-     * @param {string} name - eventname
-     * @param {any} cargo - event-parameter
-     * @returns {true | false}
-     */
-    #raiseEvent(name, cargo) {
-        if (this.#eventMap.has(name)) {
-            const handler = this.#eventMap.get(name);
-            return handler(cargo);
-        }
-        return true;
     }
 
     #getCellAt(colIndex, rowIndex) {

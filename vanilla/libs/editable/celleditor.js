@@ -1,14 +1,16 @@
 import { TableNavigation } from "./keys.js";
 import { DomEvents } from "./domevents.js";
 import { cellEditorTemplate } from "./celleditor.html";
+import { EventMap } from "./eventmap.js";
 
 export class CellEditor {
 
+    eventMap = new EventMap();
     #table;
     #rootElement;
     #inputBox;
     #cell;
-    #eventMap = new Map();
+    //#eventMap = new Map();
     #isClosing = false;
     /** @type {DomEvents} */ #events = new DomEvents();
 
@@ -30,15 +32,15 @@ export class CellEditor {
         return this.#inputBox;
     }
 
-    onKeyDown(callBack) {
-        //console.log("onKeyDown setup");
-        this.#eventMap.set("keydown", callBack);
-    }
+    // onKeyDown(callBack) {
+    //     //console.log("onKeyDown setup");
+    //     this.#eventMap.set("keydown", callBack);
+    // }
 
-    onClose(callBack) {
-        //console.log("onClose setup");
-        this.#eventMap.set("close", callBack);
-    }
+    // onClose(callBack) {
+    //     //console.log("onClose setup");
+    //     this.#eventMap.set("close", callBack);
+    // }
 
     #addEventHandlers(root) {
         const input = root.querySelector("input");
@@ -84,11 +86,7 @@ export class CellEditor {
         }
 
         // Custom eventhandler?
-        if (this.#eventMap.has("keydown")) {
-            const fx = this.#eventMap.get("keydown");
-            fx(event);
-            return;
-        }
+        this.eventMap.raiseEvent("keydown", event);
 
     }
 
@@ -104,23 +102,17 @@ export class CellEditor {
      * @param {{ col: number, row: number } || undefined} nav - optional suggested navigation after closing edtior
      */
     stopEdit(commitChanges, nav) {
-        //console.log(`stopEdit(${commitChanges}, ${nav})`);
         if (this.#isClosing) {
-            //console.log("busy closing.. exiting");
             return;
         }
         this.#isClosing = true;
         try {
-            if (this.#eventMap.has("close")) {
-                const eventHandler = this.#eventMap.get("close");
-                const content = { 
-                    cell: this.#cell,
-                    text: this.#inputBox.value, 
-                    commit: !!commitChanges, 
-                    nav: nav 
-                };
-                eventHandler(content);
-            }
+            this.eventMap.raiseEvent("close", { 
+                cell: this.#cell,
+                text: this.#inputBox.value, 
+                commit: !!commitChanges, 
+                nav: nav 
+            });            
             this.#rootElement.style.visibility = "hidden";
             this.#table.focus();
         } catch {}
