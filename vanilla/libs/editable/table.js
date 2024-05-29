@@ -8,7 +8,7 @@ export class Table {
 
     eventMap = new EventMap();
     /** @type {HTMLTableElement} */ #table;
-    /** @type {Map<string, Field>} */ #columns;
+    /** @type {Field[]} */ #fields;
     /** @type {Editable} */ #editable;    
 
     /**
@@ -23,12 +23,12 @@ export class Table {
     
     /**
      * Sets up the table
-     * @param {Map<string, Field>} columns - map of fields in the layout of the table
+     * @param {Field[]} fields - map of fields in the layout of the table
      * @param {bool} editable - true if the table should be editable
      * @param {HTMLTableElement | undefined} table - optioanl existing Htmltable dom-element
      * @returns {HTMLTableElement} - the html-table element
      */
-    setup(columns, editable, table) {
+    setup(fields, editable, table) {
 
         if (!table) {
             table = document.createElement("table");
@@ -38,11 +38,11 @@ export class Table {
         Utils.addStyleSheet("editable", css);
 
         this.#table = table;
-        this.#columns = columns;
+        this.#fields = fields;
 
         if (editable) {
             this.#editable = new Editable();
-            this.#editable.init(table, columns);
+            this.#editable.init(table, fields);
             this.#editable.eventMap.on("change", change => this.eventMap.raiseEvent("change", change) );
         }
 
@@ -55,8 +55,8 @@ export class Table {
         }
 
         const tr = Utils.create("tr");
-        for (const [key, col] of columns) {
-            const td = Utils.create("th", col.label, "class", col.type);
+        for (const fld of fields) {
+            const td = Utils.create("th", fld.label, "class", fld.type);
             tr.appendChild(td);
         }
         thead.appendChild(tr);
@@ -69,7 +69,6 @@ export class Table {
      * @param {number} count - number of rows to add
      */
     addRows(count) {
-        const map = this.#columns;
         const table = this.#table;
         if (!table) { console.log("No table?");  return; }
         let tBody = table.querySelector("tbody");
@@ -80,7 +79,7 @@ export class Table {
         for (let i = 0; i < (count || 1); i++) {
             //const row = this._session.addRow();
             const tr = Utils.create("tr");
-            for (const [key, col] of map) {
+            for (const col of this.#fields) {
                 const td = Utils.create("td", "", "class", col.type);
                 tr.appendChild(td);
             }        

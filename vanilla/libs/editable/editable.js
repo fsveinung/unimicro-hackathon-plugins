@@ -7,7 +7,7 @@ export class Editable {
 
     eventMap = new EventMap();
     #tableNode;
-    /** @type {Map<string, Field>} */ #fields;
+    /** @type {Field[]} */ #fields;
     #current = {
         cell: undefined,
         editor: undefined,
@@ -16,9 +16,9 @@ export class Editable {
     };
 
     
-    init(tableNode, colMap) {
+    init(tableNode, fields) {
         this.#tableNode = tableNode;
-        this.#fields = colMap;
+        this.#fields = fields;
         this.#tableNode.addEventListener("click", evt => this.#onCellClick(evt));        
         this.#tableNode.addEventListener("dblclick", evt => this.#onCellDblClick(evt));
         this.#tableNode.addEventListener("keydown", evt => this.#keyDown(evt));
@@ -198,10 +198,7 @@ export class Editable {
      */
     #getCellDef(cell) {
         if (!this.#fields) return undefined;
-        const index = cell.cellIndex;
-        if (index >= 0 && index < this.#fields.size - 1) {
-            return this.#fields.get(Array.from(this.#fields.keys())[index]);
-        }
+        return this.#fields[cell.cellIndex];
     }
 
     #onResize() {

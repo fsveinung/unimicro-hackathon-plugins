@@ -56,8 +56,9 @@ class JournalEntryEditor extends HTMLElement {
         this.#editable.setup(fields, true, this.querySelector("#journalentry"));
         //this.appendChild());
         this.#editable.eventMap.on("change", change => {
-            console.log("change", change);
-            this.#session.trySetValue(change.field.name, change.value, change.rowIndex);
+            const result = this.#session.trySetValue(change.field.name, change.value, change.rowIndex);
+            if (result.valid) change.value = result.textValue;
+            return result.valid;
         });
         this.#editable.addRows(10);
         this.#editable.focus(true);

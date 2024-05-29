@@ -1,3 +1,5 @@
+import { Dates } from "../dates.js";
+
 export class Field {
 
     /** @type {string} */ name;
@@ -10,4 +12,46 @@ export class Field {
         this.type = type;
     }
 
+    /**
+     * Validates the input
+     * @param {any} input 
+     * @returns {Validation}
+     */
+    validate(input) {
+        const res = new Validation().setValue(input);
+        switch (this.type) {
+            case "date":
+                return this.#checkDate(res);
+        }
+        return res;
+    }
+
+    #checkDate(res) {
+        const dt = Dates.parseDate(res.value);
+        if (dt) {
+            res.setValue(dt, dt.toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" }) );
+        }
+        return res;
+    }
+
+
+}
+
+export class Validation {
+    valid = false;
+    message;
+    value;
+    textValue;
+
+    setMessage(msg) {
+        this.message = msg;
+        this.valid = false;
+    }
+
+    setValue(value, textValue) {
+        this.value = value;
+        this.textValue = textValue ?? ("" + value);
+        this.valid = true;
+        return this;
+    }
 }

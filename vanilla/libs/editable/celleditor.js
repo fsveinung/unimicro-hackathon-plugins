@@ -96,7 +96,7 @@ export class CellEditor {
             return;
         }
         this.#isClosing = true;
-        try {
+        //try {
             // Prepare event-cargo
             const cargo = { 
                 cell: this.#cell,
@@ -111,7 +111,7 @@ export class CellEditor {
             this.eventMap.raiseEvent("close", cargo);            
             this.#rootElement.style.visibility = "hidden";
             this.#table.focus();
-        } catch {}
+        //} catch {}
         this.#isClosing = false;
     }
 
