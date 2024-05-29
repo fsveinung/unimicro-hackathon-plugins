@@ -26,6 +26,7 @@ table.editable td {
 }
 
 table.editable .date {
+    text-align: center;
     width: 10em;
 }
 

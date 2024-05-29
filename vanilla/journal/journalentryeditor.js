@@ -56,9 +56,8 @@ class JournalEntryEditor extends HTMLElement {
         this.#editable.setup(fields, true, this.querySelector("#journalentry"));
         //this.appendChild());
         this.#editable.eventMap.on("change", change => {
-            const result = this.#session.trySetValue(change.field.name, change.value, change.rowIndex);
-            if (result.valid) change.value = result.textValue;
-            return result.valid;
+            this.#session.setValue(change.field.name, change.value, change.rowIndex);
+            return true;
         });
         this.#editable.addRows(10);
         this.#editable.focus(true);
@@ -66,9 +65,7 @@ class JournalEntryEditor extends HTMLElement {
 
 }
 
-console.log("Ready to register journal-plugin");
 if (Utils.defineComponent("journal-plugin", JournalEntryEditor)) {
     Utils.addStyleSheet("journal-plugin-stylesheet", styles);
 }
-console.log("plugin-registered ok");
   

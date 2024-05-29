@@ -40,44 +40,24 @@ export class JournalSession {
         //console.table(this._vatTypes);
     }
 
+
+    setValue(name, value, rowIndex) {
+        const row = this.#getRowAt(rowIndex);
+        row[name] = value;
+    }
+
     addRow() {
         const row = {};
         this.#rows.push(row);
         return row;
     }
 
-    /**
-     * Tries to set a value
-     * @param {string} name
-     * @param {any} value 
-     * @param {number} rowIndex 
-     * @returns {Validation} returns a Validation object
-     */
-    trySetValue(name, value, rowIndex) {
-        
-        let res = new Validation();
-
-        // Locate correct field
-        const field = this.#fields.find( f => f.name === name);
-        if (!field) return res.setMessage("Could not find field " + name); 
-        
-        // Validate input
-        res = field.validate(value);
-        if (!res.valid) return res;
-
-        // Ensure we have prepared empty rows
+    #getRowAt(rowIndex) {
         while (rowIndex > this.#rows.length - 1) {
             this.addRow();
         }
-
-        // Locate row
-        const row = this.#rows[rowIndex];
-
-        // Set value
-        row[name] = res.value;
-        
-        //console.table(this.#rows);
-        return res
+        return this.#rows[rowIndex];
     }
+
 
 }

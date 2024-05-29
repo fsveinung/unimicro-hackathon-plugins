@@ -29,9 +29,9 @@ export class Field {
     #checkDate(res) {
         const dt = Dates.parseDate(res.value);
         if (dt) {
-            res.setValue(dt, dt.toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" }) );
+            return res.setValue(dt, dt.toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" }) );
         }
-        return res;
+        return res.setMessage("Invalid date");
     }
 
 
@@ -46,6 +46,7 @@ export class Validation {
     setMessage(msg) {
         this.message = msg;
         this.valid = false;
+        return this;
     }
 
     setValue(value, textValue) {

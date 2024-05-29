@@ -144,13 +144,19 @@ export class Editable {
         const pos = this.#getCellPosition(cell);
         const fld = this.#getCellDef(cell);
         if (fld) {
-            const cargo = { field: fld, rowIndex: pos.row - 1, value: text, commit: true };
+            
+            const chk = fld.validate(text);
+            if (!chk.valid) {
+                return false;
+            }
+
+            const cargo = { field: fld, rowIndex: pos.row - 1, value: chk.value, commit: true };
             update = this.eventMap.raiseEvent("change", cargo);
             if (update === false || cargo.commit === false ) {
                 update = false;
             } else {
                 update = true;
-                text = cargo.value;
+                text = chk.textValue;
             }
         }
         if (update) {

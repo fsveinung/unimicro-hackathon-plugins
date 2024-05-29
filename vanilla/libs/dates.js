@@ -11,7 +11,7 @@ export class Dates {
 
         if (value === null) { return; }
     
-        if (typeof value === 'object' && value.getMonth) {
+        if (value instanceof Date) {
             return value;
         }
     
