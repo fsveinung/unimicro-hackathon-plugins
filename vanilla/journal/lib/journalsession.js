@@ -7,15 +7,15 @@ export class JournalSession {
     #settings;
     #vatTypes;
     #rows = [];
-    /** @type {Map<string, Field>} */ #columns = new Map();
+    /** @type {Map<string, Field>} */ #fields = new Map();
 
     get rows() {
         return this.#rows;
     }
 
-    get columns() {
-        if (this.#columns.size === 0) this.#columns = this.setupColumns();
-        return this.#columns;
+    get fields() {
+        if (this.#fields.size === 0) this.#fields = this.setupFields();
+        return this.#fields;
     }    
 
     constructor(dataService) {
@@ -35,7 +35,7 @@ export class JournalSession {
         //console.table(this._vatTypes);
     }
 
-    setupColumns() {
+    setupFields() {
         const map = new Map();
         map.set("FinancialDate", { name: "FinancialDate", label: "Dato", type: "date" });
         map.set("DebitAccount", { name: "DebitAccount", label: "Debet", type: "account" });

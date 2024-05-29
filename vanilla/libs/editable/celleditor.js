@@ -11,6 +11,7 @@ export class CellEditor {
     #inputBox;
     #cell;
     #isClosing = false;
+    #originalValue;
     /** @type {DomEvents} */ #events = new DomEvents();
 
     /**
@@ -96,12 +97,18 @@ export class CellEditor {
         }
         this.#isClosing = true;
         try {
-            this.eventMap.raiseEvent("close", { 
+            // Prepare event-cargo
+            const cargo = { 
                 cell: this.#cell,
                 text: this.#inputBox.value, 
                 commit: !!commitChanges, 
                 nav: nav 
-            });            
+            };
+            // Set "commit" to false if value did not change
+            if (cargo.commit && this.#originalValue === cargo.text ) {
+                cargo.commit = false;
+            }
+            this.eventMap.raiseEvent("close", cargo);            
             this.#rootElement.style.visibility = "hidden";
             this.#table.focus();
         } catch {}
@@ -120,6 +127,7 @@ export class CellEditor {
         this.#rootElement.style.visibility = "visible";
         const input = this.#inputBox;
         input.value = text;
+        this.#originalValue = text;
         input.select();
         //input.focus();
     }

@@ -1,0 +1,41 @@
+:host {
+    display: flex;
+    justify-content: space-between;
+}
+
+button {
+    cursor: pointer;
+    font-weight: var(--button-secondary-font-weight);
+    background-color: var(--btn-secondary);
+    color: var(--btn-secondary-text);
+    font-size: var(--button-font-size);
+    border-radius: var(--button-radius);
+    border: none;
+    padding: 0.5rem 1rem;
+    box-shadow: inset 0 0 0 var(--btn-secondary-border-width) var(--btn-secondary-border);
+}
+
+button:hover {
+    /* filter: brightness(95%); */
+    color: var(--btn-secondary-text--hover);
+    box-shadow: inset 0 0 0 var(--btn-secondary-border-width--hover) var(--btn-secondary-border--hover);    
+}
+
+button.c2a {
+    cursor: pointer;
+    font-weight: var(--button-primary-font-weight);
+    background-color: var(--button-c2a);
+    color: var(--button-c2a-text);
+    font-size: var(--button-font-size);
+    border-radius: var(--button-radius);
+    border: none;
+    padding: 0.5rem 1rem;
+    box-shadow: inset 0 0 0 var(--button-c2a-border-width) var(--btn-c2a-border);
+}
+
+button.c2a:hover {
+    /* filter: brightness(95%); */
+    color: var(--button-c2a-text-hover, var(--button-c2a-text-hover));
+    background-color: var(--button-c2a-hover, var(--button-c2a-hover));
+    box-shadow: inset 0 0 0 2px var(--button-c2a-border-hover, var(--button-c2a-border-hover));  
+}

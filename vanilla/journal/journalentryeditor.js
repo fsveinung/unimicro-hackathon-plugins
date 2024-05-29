@@ -5,6 +5,7 @@ import { template } from "./template.html";
 import { DataService } from '../libs/dataservice.js';
 import { JournalSession } from "./lib/journalsession.js";
 import { Table } from "../libs/editable/table.js";
+import { ToolbarComponent } from "../libs/toolbar/toolbar.js";
 
 class JournalEntryEditor extends HTMLElement {
     
@@ -45,14 +46,15 @@ class JournalEntryEditor extends HTMLElement {
 
     async #updateUserInterface() {
         await this.#session.initialize();
-        this.#setupTable(this.#session.columns);
+        this.#setupTable(this.#session.fields);
 
     }
 
-    #setupTable(map) {
+    #setupTable(fields) {
         if (this.#editable) return;
         this.#editable = new Table();
-        this.appendChild(this.#editable.setup(map, true));
+        this.#editable.setup(fields, true, this.querySelector("#journalentry"));
+        //this.appendChild());
         this.#editable.eventMap.on("change", change => {
             console.log("change", change);
             this.#session.trySetValue(change.field.name, change.value, change.rowIndex);
@@ -63,7 +65,9 @@ class JournalEntryEditor extends HTMLElement {
 
 }
 
+console.log("Ready to register journal-plugin");
 if (Utils.defineComponent("journal-plugin", JournalEntryEditor)) {
     Utils.addStyleSheet("journal-plugin-stylesheet", styles);
 }
+console.log("plugin-registered ok");
   
