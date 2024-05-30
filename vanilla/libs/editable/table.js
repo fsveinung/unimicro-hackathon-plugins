@@ -26,7 +26,7 @@ export class Table {
      * @param {Field[]} fields - map of fields in the layout of the table
      * @param {bool} editable - true if the table should be editable
      * @param {HTMLTableElement | undefined} table - optioanl existing Htmltable dom-element
-     * @returns {HTMLTableElement} - the html-table element
+     * @returns {HTMLTableElement} - the html-table element (optional)
      */
     setup(fields, editable, table) {
 

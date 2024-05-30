@@ -30,7 +30,7 @@ table.editable .date {
     width: 10em;
 }
 
-table.editable .account {
+table.editable .account, table.editable .integer  {
     width: 10em;
 }
 

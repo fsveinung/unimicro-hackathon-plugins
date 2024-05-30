@@ -10,7 +10,7 @@ import { ToolbarComponent } from "../libs/toolbar/toolbar.js";
 class JournalEntryEditor extends HTMLElement {
     
     /** @type {JournalSession} */ #session;
-    /** @type {Table} */ #editable;
+    /** @type {Table} */ #table;
     /** @type {DataService} */ #dataService;
     /** @type {Api} */ #httpApi;
 
@@ -51,16 +51,16 @@ class JournalEntryEditor extends HTMLElement {
     }
 
     #setupTable(fields) {
-        if (this.#editable) return;
-        this.#editable = new Table();
-        this.#editable.setup(fields, true, this.querySelector("#journalentry"));
+        if (this.#table) return;
+        this.#table = new Table();
+        this.#table.setup(fields, true, this.querySelector("#journalentry"));
         //this.appendChild());
-        this.#editable.eventMap.on("change", change => {
+        this.#table.eventMap.on("change", change => {
             this.#session.setValue(change.field.name, change.value, change.rowIndex);
             return true;
         });
-        this.#editable.addRows(10);
-        this.#editable.focus(true);
+        this.#table.addRows(10);
+        this.#table.focus(true);
     }
 
 }

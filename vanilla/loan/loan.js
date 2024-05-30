@@ -2,98 +2,100 @@ import { Utils } from "../libs/utils.js";
 import { template } from "./loan.html";
 import { styles } from "./style.css";
 import { Table } from "../libs/editable/table.js";
+import { Rows } from "../libs/rows.js";
 
 class Loan extends HTMLElement {
 
-  _api = null;
-  _company = null;
-  _wizard = undefined;
-  _steps = [
+  #api = null;
+  #company = null;
+  #wizard = undefined;
+  #steps = [
     { label: "Om finansieringen", value: "page1", ref: undefined },
     { label: "Sikkerhet", value: "page2", ref: undefined },
     { label: "Fremtidige inntekter", value: "page3", ref: undefined}    
   ];
+  #incomes = new Rows(100);
   
   /** Table property reference
    * @type {Table}
    * @private
   */
-  _incomeTable;
+  #incomeTable;
 
   constructor() {
     super();
   }
 
   connectedCallback() {
-    this.updateUserInterface();
+    this.#updateUserInterface();
   }
 
   set api(v) {
-    this._api = v;
-    this.updateUserInterface();
+    this.#api = v;
+    this.#updateUserInterface();
   }
 
-  updateUserInterface() {
+  #updateUserInterface() {
     if (this.ownerDocument.defaultView) {
       if (this.childNodes.length == 0) {
-        this.createContent();
-        setTimeout(() => { this.setupWizard(); }, 0);
+        this.#reateContent();
+        setTimeout(() => { this.#setupWizard(); }, 0);
       } else {
-        this.updateContent();
+        this.#updateContent();
       }
     }
   }
 
-  createContent() {
+  #reateContent() {
     this.appendChild(
       Utils.createFromTemplate(template,
-        "btnHelp:click", () => this.help(),
-        "bntBack:click", () => this.moveBack(),
-        "btnNext:click", () => this.moveNext()
+        "btnHelp:click", () => this.#help(),
+        "bntBack:click", () => this.#moveBack(),
+        "btnNext:click", () => this.#moveNext()
       )
     );
-    this.showPage("page1");
+    this.#showPage("page1");
   }
 
-  setupWizard() {
-    if (!this._api?.factory) { console.log("No factory"); return; }
-    this._wizard = this._api.factory.create("rig-wizard", [undefined, this] );
-    if (this._wizard?.instance) {
-      const wiz = this._wizard.instance;
-      wiz.steps = this._steps;
+  #setupWizard() {
+    if (!this.#api?.factory) { console.log("No factory"); return; }
+    this.#wizard = this.#api.factory.create("rig-wizard", [undefined, this] );
+    if (this.#wizard?.instance) {
+      const wiz = this.#wizard.instance;
+      wiz.steps = this.#steps;
       wiz.activeStepValue = "page1";
       wiz.ngOnChanges();
       wiz.refresh();
     }
   }
 
-  moveNext() {
-    const wiz = this._wizard?.instance;
+  #moveNext() {
+    const wiz = this.#wizard?.instance;
     if (wiz && wiz.activeIndex < wiz.steps.length - 1) {
       wiz.activeStepValue = wiz.steps[wiz.activeIndex + 1].value;
-      this.showPage(wiz.activeStepValue);
+      this.#showPage(wiz.activeStepValue);
       wiz.ngOnChanges();
       wiz.refresh();
     }
   }
 
-  moveBack() {
-    const wiz = this._wizard?.instance;
+  #moveBack() {
+    const wiz = this.#wizard?.instance;
     if (wiz && wiz.activeIndex > 0) {
       wiz.activeStepValue = wiz.steps[wiz.activeIndex - 1].value;
-      this.showPage(wiz.activeStepValue);
+      this.#showPage(wiz.activeStepValue);
       wiz.ngOnChanges();
       wiz.refresh();
     }
   }
 
-  help() {
-    this._api.showAlert("Help is on the way!!");
+  #help() {
+    this.#api.showAlert("Help is on the way!!");
   }
 
-  showPage(stepValue) {
+  #showPage(stepValue) {
     let index = 0;
-    for (let step of this._steps) {
+    for (let step of this.#steps) {
         if (!step.ref) step.ref = this.getElementsByClassName("page")[index++];
         if (step.value == stepValue) {
             step.ref.getElementsByClassName("pagetitle")[0].innerText = step.label;
@@ -107,23 +109,35 @@ class Loan extends HTMLElement {
 
   onShowPage(step) {
     if (step.value === "page3") {
-      if (!this._incomeTable) {
+      if (!this.#incomeTable) {
         const tbl = step.ref.querySelector("#future-incomes");
         if (!tbl) { console.error("Could not find the table!"); return; }
-        this._incomeTable = new Table();
-        const map = new Map();
-        map.set("source", { name: "source", label: "Kilde", type: "account" });
-        map.set("amount", { name: "amount", label: "Beløp", type: "money" });
-        this._incomeTable.setup( map, true, tbl );
-        this._incomeTable.addRows(5);
+        this.#incomeTable = new Table();
+        const fields = [ 
+          { name: "year", label: "Årstall", type: "integer" },
+          { name: "source", label: "Kommentar", type: "string" },
+          { name: "amount", label: "Beløp", type: "money" },
+        ];
+        this.#incomeTable.setup( fields, true, tbl );
+        this.#incomeTable.eventMap.on("change", change => this.#userInput(change));
+        this.#incomeTable.addRows(5);
       }
-      setTimeout(() => { this._incomeTable?.focus(true); }, 100);    
+      setTimeout(() => { this.#incomeTable?.focus(true); }, 100);    
     }
   }
 
-  async updateContent() {
-    if (this._api) {
-        this._company = await this._api.http.get('/api/biz/companysettings/1?select=CompanyName');
+  /**
+   * Handle user-input
+   * @param {{ field: Field, rowIndex: number, value: any, commit: boolean }} change 
+   */
+  #userInput(change) {
+    this.#incomes.setValue(change.field.name, parseFloat(change.value), change.rowIndex);
+    this.querySelector("#sumIncome").innerText = this.#incomes.sum("amount").toString();
+  }
+
+  async #updateContent() {
+    if (this.#api) {
+        this.#company = await this.#api.http.get('/api/biz/companysettings/1?select=CompanyName');
     }
   }
 

@@ -143,8 +143,7 @@ export class Editable {
         let update = true;
         const pos = this.#getCellPosition(cell);
         const fld = this.#getCellDef(cell);
-        if (fld) {
-            
+        if (fld) {            
             const chk = fld.validate(text);
             if (!chk.valid) {
                 return false;
@@ -204,7 +203,11 @@ export class Editable {
      */
     #getCellDef(cell) {
         if (!this.#fields) return undefined;
-        return this.#fields[cell.cellIndex];
+        let fld = this.#fields[cell.cellIndex];
+        if (!fld.validate) { 
+            fld = new Field(fld.name, fld.label, fld.type)
+        };
+        return fld;
     }
 
     #onResize() {
