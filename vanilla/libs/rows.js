@@ -17,6 +17,10 @@ export class Rows {
         }
     }
 
+    addRow() {
+        return this.getRow(this.#rows.length);
+    }
+
     setValue(name, value, rowIndex) {
         if (!this.#isValidRowIndex(rowIndex)) return;
         const row = this.getRow(rowIndex);

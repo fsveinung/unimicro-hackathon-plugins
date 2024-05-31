@@ -1,23 +1,20 @@
 import { DataService } from "../../libs/dataservice.js";
 import { Field, Validation } from "../../libs/editable/field.js";
+import { Rows } from "../../libs/rows.js";
 
 export class JournalSession {
 
-    #dataService;
+    /** @type {DataService} */ #dataService;
     #settings;
     #vatTypes;
-    #rows = [];
-    #fields = [
+    /** @type {Rows} */ #rows = new Rows(10000);
+    /** @type {Field[]} */ #fields = [
         new Field("FinancialDate", "Dato", "date"),
         new Field("DebitAccount", "Debet", "account"),
         new Field("CreditAccount", "Kredit", "account"),
         new Field("Amount", "Beløp", "money"),
         new Field("Description", "Tekst", "string")
     ];
-
-    get rows() {
-        return this.#rows;
-    }
 
     get fields() {
         return this.#fields;
@@ -42,22 +39,11 @@ export class JournalSession {
 
 
     setValue(name, value, rowIndex) {
-        const row = this.#getRowAt(rowIndex);
-        row[name] = value;
+        this.#rows.setValue(name, value, rowIndex);
     }
 
     addRow() {
-        const row = {};
-        this.#rows.push(row);
-        return row;
+        return this.#rows.addRow();
     }
-
-    #getRowAt(rowIndex) {
-        while (rowIndex > this.#rows.length - 1) {
-            this.addRow();
-        }
-        return this.#rows[rowIndex];
-    }
-
 
 }

@@ -22,10 +22,21 @@ export class Field {
         switch (this.type) {
             case "date":
                 return this.#checkDate(res);
+            case "integer":
+            case "account":
+                return this.#checkInteger(res);
+            case "money":
+            case "decimal":
+                return this.#checkDecimal(res);
         }
         return res;
     }
 
+    /**
+     * Validates input as a date
+     * @param {Validation} res - the value being checked
+     * @returns {Validation} updated validation
+     */
     #checkDate(res) {
         const dt = Dates.parseDate(res.value);
         if (dt) {
@@ -34,6 +45,34 @@ export class Field {
         return res.setMessage("Invalid date");
     }
 
+    /**
+     * Validates input as an integer
+     * @param {Validation} res - the value being checked
+     * @returns {Validation} updated validation
+     */
+    #checkInteger(res) {
+        if (Number.isInteger(res.value)) return res.setValue(res.value);
+        const iValue = parseInt(res.value);
+        if (isNaN(res.value)) return res.setMessage("Not a number");
+        return res.setValue(iValue);
+    }
+
+    /**
+     * Validates input as a decimal
+     * @param {Validation} res - the value being checked
+     * @returns {Validation} updated validation
+     */
+    #checkDecimal(res) {
+        if(typeof res.value == 'number' && !isNaN(res.value)){
+            return res.setValue(res.value, res.value.toFixed(2));
+        } else {
+            const dec = parseFloat(("" + res.value).replaceAll(",", "."));
+            if (!isNaN(dec)) {
+                return res.setValue(dec, dec.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+            }
+        }    
+        return res.setMessage("Invalid decimal");    
+    }    
 
 }
 
