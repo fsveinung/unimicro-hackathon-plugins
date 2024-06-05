@@ -7,6 +7,10 @@ export class Rows {
         this.#upperLimit = Number.isInteger(upperLimit) ? upperLimit : this.#upperLimit;
     }
 
+    get length() {
+        return this.#rows.length;
+    }
+
     clear() {
         this.#rows = [];
     }
@@ -28,11 +32,17 @@ export class Rows {
         return row;
     }
 
-    #isValidRowIndex(rowIndex) {
-        if (!Number.isInteger(rowIndex)) return false;
-        if (rowIndex < 0) return false;
-        if (rowIndex > this.#upperLimit ?? 100000) return false;
-        return true;
+    /**
+     * Fetch value from the matrix
+     * @param {string} propertyname 
+     * @param {number} rowIndex 
+     * @param {any} defaultValue - return this if property does not exist
+     * @returns 
+     */
+    getValue(name, rowIndex, defaultValue) {
+        if (!this.#isValidRowIndex(rowIndex)) return defaultValue;
+        const row = this.getRow(rowIndex);
+        return row[name] ?? defaultValue;
     }
 
     getRow(rowIndex) {
@@ -44,4 +54,15 @@ export class Rows {
     sum(fieldName) {
         return this.#rows.reduce( (sum, row) => sum += row[fieldName] ?? 0, 0);
     }
+
+    groupBy(property) {
+        Object.groupBy(this.#rows, row => row[property]);
+    }
+
+    #isValidRowIndex(rowIndex) {
+        if (!Number.isInteger(rowIndex)) return false;
+        if (rowIndex < 0) return false;
+        if (rowIndex > this.#upperLimit ?? 100000) return false;
+        return true;
+    }    
 }

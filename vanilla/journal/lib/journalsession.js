@@ -49,4 +49,26 @@ export class JournalSession {
         return this.#rows.addRow();
     }
 
+    /**
+     * Returns an array of journalentries which all contain an array of DraftLines
+     * @returns { { Journals: [ DraftLines: [], Errors: [] } ] }
+     */
+    getState() {
+        const result = { Journals: [], Errors: [] };
+        let journal = { DraftLines: [] };
+        result.Journals.push(journal);
+        
+        for (let rowIndex = 0; rowIndex < this.#rows.length; rowIndex++) {
+            let rowDate = this.#rows.getValue("FinancialDate", rowIndex, "");
+            let rowAmount = this.#rows.getValue("Amount", rowIndex, 0);
+            let rowDebit = this.#rows.getValue("DebitAccount", rowIndex, 0);
+            let rowCredit = this.#rows.getValue("CreditAccount", rowIndex, 0);
+            const validDate = rowDate instanceof Date;
+            const validRow = validDate && rowAmount !== 0 && (rowDebit > 0 || rowCredit > 0);
+            if (!validRow) {
+
+            }
+        }
+    }
+
 }
