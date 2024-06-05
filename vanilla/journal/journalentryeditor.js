@@ -73,7 +73,8 @@ class JournalEntryEditor extends HTMLElement {
     }
 
     #save() {
-        this.#pluginApi.showAlert("todo: implement saving");
+        const saveState = this.#session.getState();
+        console.log("saveState", saveState);
     }
 
 }
