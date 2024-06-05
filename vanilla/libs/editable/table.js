@@ -67,8 +67,9 @@ export class Table {
     /**
      * Adds a number of empty rows to the table
      * @param {number} count - number of rows to add
+     * @param {boolean | undefined} clear - optional parameter that clears the table rows first
      */
-    addRows(count) {
+    addRows(count, clear) {
         const table = this.#table;
         if (!table) { console.log("No table?");  return; }
         let tBody = table.querySelector("tbody");
@@ -76,8 +77,13 @@ export class Table {
             tBody = Utils.create("tbody");
             table.appendChild(tBody);
         }
+
+        if (!!clear) {
+            this.#editable?.clear();
+            tBody.replaceChildren();
+        }
+
         for (let i = 0; i < (count || 1); i++) {
-            //const row = this._session.addRow();
             const tr = Utils.create("tr");
             for (const col of this.#fields) {
                 const td = Utils.create("td", "", "class", col.type);

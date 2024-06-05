@@ -25,6 +25,10 @@ export class Editable {
         this.#tableNode.addEventListener("resize", evt => this.#onResize(evt));
     }
 
+    clear() {
+        this.#current.cell = undefined;
+    }
+
     focus(startEdit) {
         this.#onCellClick(undefined, startEdit);
     }

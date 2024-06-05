@@ -21,7 +21,7 @@ export class Utils {
      * Creates html from a template and adds eventhandlers
      * for each "ID" found inside the template.
      * example:
-     * createFromTemplate("<button id='mybtn'>clickme</button>", "mybtn:click", () => alert("hi"))
+     * createFromTemplate(html, "mybtn:click", () => alert("hi"))
      * @param {string} html
      * @param  {...any} handlers
      * @returns

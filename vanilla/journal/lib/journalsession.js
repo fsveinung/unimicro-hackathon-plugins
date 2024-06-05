@@ -37,6 +37,9 @@ export class JournalSession {
         //console.table(this._vatTypes);
     }
 
+    clear() {
+        this.#rows.clear();
+    }
 
     setValue(name, value, rowIndex) {
         this.#rows.setValue(name, value, rowIndex);
