@@ -75,21 +75,30 @@ export class JournalSession {
      */
     getState() {
         const result = { journals: [], errors: [] };
-        let journal = { DraftLines: [] };
-        result.journals.push(journal);
+        let journal;
         
+        // Validate and transform
         for (let rowIndex = 0; rowIndex < this.#rows.length; rowIndex++) {
+            // validate
             const validation = this.#validateRow(this.#getRow(rowIndex));
             if (validation.success) {
-                const newJournal = rowIndex > 0 
-                    && journal.DraftLines[journal.DraftLines.length-1].FinancialDate !== validation.row.FinancialDate;
-                if (newJournal) {
+                if (!this.#canAddToJournal(validation.row, journal)) {
                     journal = { DraftLines: [] };
                     result.journals.push(journal);
                 }
+                // Transform
                 journal.DraftLines.push(... this.#transform( validation.row ));
             } else {
                 result.errors.push(... validation.errors);
+            }
+        }
+
+        // Check balance
+        for (const journal of result.journals) {
+            const balance = journal.DraftLines.reduce( (sum, row) => sum += row.Amount ?? 0, 0);
+            const inBalance = balance > -0.001 && balance < 0.001;
+            if (!inBalance) {
+                result.errors.push(`The entry does not balance. Diff: ${balance.toFixed(2)}`);
             }
         }
 
@@ -97,7 +106,20 @@ export class JournalSession {
     }
 
     /**
-     * Fetches a row
+     * 
+     * @param {JournalRow} row 
+     * @param {{ DraftLines: JournalEntryLineDraft[] }} journal
+     * @returns {boolean} true if this row can be added to the existing journal
+     */
+    #canAddToJournal(row, journal) {
+        if (!journal) return false;
+        if (journal.DraftLines.length === 0) return true;
+        if (journal.DraftLines[0].FinancialDate.getTime() === row.FinancialDate.getTime()) return true;
+        return false;
+    }
+
+    /**
+     * Fetches a row (ensuring it has amount, debit and creditaccounts)
      * @param {number} rowIndex 
      * @returns {JournalRow};
      */
