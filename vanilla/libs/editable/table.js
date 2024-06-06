@@ -20,6 +20,10 @@ export class Table {
             this.#editable.focus(startEdit);
         }
     }
+
+    get count() {
+        return (this.#table?.rows?.length ?? 1) - 1; // minus-1 because of header
+    }
     
     /**
      * Sets up the table
@@ -92,5 +96,6 @@ export class Table {
             tBody.append(tr);
         }
     }
+
    
 }

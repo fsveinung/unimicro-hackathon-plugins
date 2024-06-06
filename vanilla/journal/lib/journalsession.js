@@ -35,6 +35,7 @@ export class JournalSession {
         new Field("Amount", "Beløp", "money"),
         new Field("Description", "Tekst", "string")
     ];
+    #accountCache = new Map();
 
     get fields() {
         return this.#fields;
@@ -63,6 +64,9 @@ export class JournalSession {
 
     setValue(name, value, rowIndex) {
         this.#rows.setValue(name, value, rowIndex);
+        if (name === "DebitAccount" || name === "CreditAccount") {
+            this.#lookupAccount(value, name);
+        }
     }
 
     addRow() {
@@ -87,7 +91,11 @@ export class JournalSession {
                     result.journals.push(journal);
                 }
                 // Transform
-                journal.DraftLines.push(... this.#transform( validation.row ));
+                const transform = this.#transform( validation.row );
+                if (transform.success)
+                    journal.DraftLines.push(... transform.lines);
+                else 
+                    result.errors.push(... transform.errors);
             } else {
                 result.errors.push(... validation.errors);
             }
@@ -149,21 +157,43 @@ export class JournalSession {
     /**
      * Converts a debit/credit row into one or more draftlines
      * @param {JournalRow} row 
-     * @returns {JournalEntryLineDraft[]}
+     * @returns { success: boolean, lines: JournalEntryLineDraft[], errors: []}
      */
     #transform(row) {
-        const result = [];
+        const result = { success: true, lines: [], errors: [] };
         if (row.DebitAccount) {
             const draftLine = new JournalEntryLineDraft(row.FinancialDate, row.Amount, row.Description);
-            draftLine.AccountID = row.DebitAccount; // todo: lookup actual accountid
-            result.push(draftLine);
+            draftLine.AccountID = this.#mapAccountNumberToID(row.DebitAccount);
+            if (!draftLine.AccountID) result.errors.push(`Account ${row.DebitAccount} was not found`);
+            result.lines.push(draftLine);
         }
         if (row.CreditAccount) {
             const draftLine = new JournalEntryLineDraft(row.FinancialDate, -row.Amount, row.Description);
-            draftLine.AccountID = row.CreditAccount; // todo: lookup actual accountid
-            result.push(draftLine);
+            draftLine.AccountID = this.#mapAccountNumberToID(row.CreditAccount);
+            if (!draftLine.AccountID) result.errors.push(`Account ${row.CreditAccount} was not found`);
+            result.lines.push(draftLine);
         }
+        result.success = result.errors.length === 0;
         return result;        
+    }
+
+    #mapAccountNumberToID(accountNumber) {
+        if (this.#accountCache.has(accountNumber)) {
+            return this.#accountCache.get(accountNumber).ID;
+        }
+        return undefined;
+    }
+
+    async #lookupAccount(value) {
+        if (!this.#accountCache.has(value)) {
+            const fetch = await this.#dataService.get("accounts", "?filter=accountnumber eq '" + value + "'"
+                + "&select=ID,AccountNumber,AccountName,VatTypeID"
+            );
+            if (fetch?.length) {
+                this.#accountCache.set(value, fetch[0]);
+            } else return undefined;
+        }
+        return this.#accountCache.get(value);
     }
 
 }

@@ -1,0 +1,21 @@
+#messsages {
+    display: flex;
+    gap: 2px;
+}
+
+#messages p {
+    display: inline-block;
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    margin-right: 1rem;
+}
+
+#messages .warn {
+    color: white;
+    background-color: orange;
+}
+
+#messages .good {
+    color: white;
+    background-color: green;
+}

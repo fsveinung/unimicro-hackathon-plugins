@@ -14,6 +14,10 @@ class JournalEntryEditor extends HTMLElement {
     /** @type {Table} */ #table;
     /** @type {DataService} */ #dataService;
     /** @type {Api} */ #httpApi;
+    static #lang = {
+        nothing_to_save: "Ingenting å lagre",
+        saved_as: "Bilag bokført som nr."
+    };
 
     set api(ref) {
         this.#pluginApi = ref;
@@ -61,27 +65,61 @@ class JournalEntryEditor extends HTMLElement {
         this.#table.setup(fields, true, this.querySelector("#journalentry"));
         this.#table.eventMap.on("change", change => {
             this.#session.setValue(change.field.name, change.value, change.rowIndex);
+            if (change.rowIndex + 1 >= this.#table.count) {
+                this.#table.addRows(1);
+            }
             return true;
         });
         this.#clear();
     }
 
     #clear() {
+        this.#clearMessages();
         this.#session.clear();
-        this.#table.addRows(10, true);
+        this.#table.addRows(1, true);
         this.#table.focus(true);
     }
 
     #save() {
+        this.#clearMessages();
         const saveState = this.#session.getState();
         console.log("saveState", saveState);
-        for (const j of saveState.journals)
-            console.table(j.DraftLines);
         if (saveState.errors.length > 0) {
-            for (const err of saveState.errors)
+            for (const err of saveState.errors) {
+                this.#addMessage(err, "warn");
                 console.warn(err);
-            this.#pluginApi.showAlert(saveState.errors.join(", "));
+            }
+        } else {
+
+            if (saveState.journals.length === 0) {
+                this.#addMessage(JournalEntryEditor.#lang.nothing_to_save, "warn", 3000);
+                return;
+            }
+
+            this.#httpApi.post("/api/biz/journalentries?action=book-journal-entries", saveState.journals)
+                .catch( err => { console.log(err); this.#addMessage(err.error?.Message ?? err.message, "warn"); })
+                .then( res => {
+                    this.#clear();
+                    const nrs = res.map( j => j.JournalEntryNumber).join(", ");
+                    this.#addMessage(`${JournalEntryEditor.#lang.saved_as} ${nrs}`, "good", 4000);                    
+                });
         }
+    }
+
+    #addMessage(msg, className, timeout) {
+        const container = this.querySelector("#messages");
+        if (!container) { alert("No container"); return; }
+        const el = Utils.create("p", msg, "class", className);
+        container.appendChild(el);
+        if (timeout && timeout > 0) {
+            setTimeout(() => el.remove(), timeout); //el.parentElement.remove(el), timeout);
+        }
+    }
+
+    #clearMessages() {
+        let container = this.querySelector("#messages");
+        if (!container) return;
+        container.replaceChildren();
     }
 
 }
