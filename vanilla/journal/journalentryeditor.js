@@ -62,11 +62,11 @@ class JournalEntryEditor extends HTMLElement {
     #setupTable(fields) {
         if (this.#table) return;
         this.#table = new Table();
-        this.#table.setup(fields, true, this.querySelector("#journalentry"));
+        this.#table.setup(fields, true, this.querySelector("table"));
         this.#table.eventMap.on("change", change => {
             this.#session.setValue(change.field.name, change.value, change.rowIndex);
-            if (change.rowIndex + 1 >= this.#table.count) {
-                this.#table.addRows(1);
+            if (change.rowIndex + 2 >= this.#table.count) {
+                this.#table.addRows(2);
             }
             return true;
         });
@@ -76,7 +76,7 @@ class JournalEntryEditor extends HTMLElement {
     #clear() {
         this.#clearMessages();
         this.#session.clear();
-        this.#table.addRows(1, true);
+        this.#table.addRows(2, true);
         this.#table.focus(true);
     }
 

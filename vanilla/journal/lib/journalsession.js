@@ -114,7 +114,7 @@ export class JournalSession {
     }
 
     /**
-     * 
+     * Checks if the given row can be added to the journal (checks if dates are equal)
      * @param {JournalRow} row 
      * @param {{ DraftLines: JournalEntryLineDraft[] }} journal
      * @returns {boolean} true if this row can be added to the existing journal

@@ -7,6 +7,7 @@
     display: inline-block;
     border-radius: 10px;
     padding: 0.5rem 1rem;
+    margin: 0;
     margin-right: 1rem;
 }
 
@@ -18,4 +19,15 @@
 #messages .good {
     color: white;
     background-color: green;
+}
+
+.pancake-stack {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100%;
+    grid-gap: 0.5rem;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #efefef;
 }
