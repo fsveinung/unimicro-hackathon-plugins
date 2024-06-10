@@ -30,9 +30,14 @@ table.editable .date {
     width: 10em;
 }
 
-table.editable .account, table.editable .integer  {
+table.editable .account  {
     width: 10em;
 }
+
+table.editable .integer {
+    width: 5em;
+}
+
 
 table.editable .money {
     width: 8em;

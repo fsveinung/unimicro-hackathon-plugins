@@ -6,6 +6,7 @@ import { DataService } from '../libs/dataservice.js';
 import { JournalSession } from "./lib/journalsession.js";
 import { Table } from "../libs/editable/table.js";
 import { ToolbarComponent } from "../libs/toolbar/toolbar.js";
+import { JournalEntryVatFeature } from "./lib/features/vat.js";
 
 class JournalEntryEditor extends HTMLElement {
     
@@ -24,7 +25,7 @@ class JournalEntryEditor extends HTMLElement {
         this.#httpApi = new Api(ref.http, err => this.#errHandler(err));
         this.#dataService = new DataService(ref.http);
         this.#session = new JournalSession(this.#dataService);
-        this.#updateUserInterface();
+        this.#setup();
       }    
     
     constructor() {
@@ -48,13 +49,14 @@ class JournalEntryEditor extends HTMLElement {
                     "save", () => this.#save()
                 ) );
             } else {
-                this.#updateUserInterface();
+                this.#setup();
             }
         }
     }
 
-    async #updateUserInterface() {
-        await this.#session.initialize();
+    async #setup() {
+        const features = [ new JournalEntryVatFeature() ];
+        await this.#session.initialize(features);
         this.#setupTable(this.#session.fields);
 
     }

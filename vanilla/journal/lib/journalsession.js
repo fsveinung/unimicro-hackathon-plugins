@@ -1,6 +1,7 @@
 import { DataService } from "../../libs/dataservice.js";
 import { Field, Validation } from "../../libs/editable/field.js";
 import { Rows } from "../../libs/rows.js";
+import { FeatureTemplate } from "./features/template.js";
 
 export class JournalRow { 
     FinancialDate;
@@ -36,6 +37,7 @@ export class JournalSession {
         new Field("Description", "Tekst", "string")
     ];
     #accountCache = new Map();
+    /** @type { FeatureTemplate[] } */ #features = [];
 
     get fields() {
         return this.#fields;
@@ -48,8 +50,10 @@ export class JournalSession {
     /**
      * Initializes the session
      * Ensures that all dependencies are fetched (settings etc.)
+     * @param { FeatureTemplate } features - holds any extended features
      */
-    async initialize() {
+    async initialize(features) {
+        this.#setupFeatures(features);
         this.#settings = await this.#dataService.first("companysettings");
         console.log(this.#settings);
         // this._accounts = await this._dataService.getAll("accounts?filter=toplevelaccountgroupid gt 0 and isnull(visible,0) eq 1");
@@ -194,6 +198,24 @@ export class JournalSession {
             } else return undefined;
         }
         return this.#accountCache.get(value);
+    }
+
+    /**
+     * Prepares a feature by importing its fields (if any)
+     * @param {FeatureTemplate[]} features 
+     */
+    #setupFeatures(features) {
+        this.#features = features;
+        this.#features.forEach( f => f.fields.forEach( ff => {
+            if (ff.relatesTo) {
+                const index = this.#fields.findIndex( x => x.name === ff.relatesTo);
+                if (index >= 0) {
+                    this.#fields.splice(index + 1, 0, ff);
+                    return;
+                }
+            }
+            this.#fields.push(ff)
+        }));        
     }
 
 }

@@ -5,11 +5,13 @@ export class Field {
     /** @type {string} */ name;
     /** @type {string} */ label;
     /** @type {"string"|"date"|"money"|"integer"|"account"} */ type;
+    /** @type {string} */ relatesTo;
 
-    constructor(name, label, type) {
+    constructor(name, label, type, relatesTo) {
         this.name = name;
         this.label = label;
         this.type = type;
+        if (!!relatesTo) this.relatesTo = relatesTo;
     }
 
     /**

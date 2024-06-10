@@ -28,6 +28,6 @@
     grid-gap: 0.5rem;
 }
 
-tbody tr:nth-child(odd) {
+.alternate-rows tbody:nth-child(odd) {
     background-color: #efefef;
 }
