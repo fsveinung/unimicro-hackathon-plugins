@@ -27,7 +27,6 @@ export class JournalSession {
 
     /** @type {DataService} */ #dataService;
     #settings;
-    #vatTypes;
     /** @type {Rows} */ #rows = new Rows(10000);
     /** @type {Field[]} */ #fields = [
         new Field("FinancialDate", "Dato", "date"),
@@ -53,12 +52,12 @@ export class JournalSession {
      * @param { FeatureTemplate } features - holds any extended features
      */
     async initialize(features) {
-        this.#setupFeatures(features);
         this.#settings = await this.#dataService.first("companysettings");
-        console.log(this.#settings);
+        await this.#setupFeatures(features);
+        //console.log(this.#settings);
         // this._accounts = await this._dataService.getAll("accounts?filter=toplevelaccountgroupid gt 0 and isnull(visible,0) eq 1");
         // console.table(this._accounts);
-        this.#vatTypes = await this.#dataService.getAll("vattypes");
+        // this.#vatTypes = await this.#dataService.getAll("vattypes");
         //console.table(this._vatTypes);
     }
 
@@ -204,18 +203,23 @@ export class JournalSession {
      * Prepares a feature by importing its fields (if any)
      * @param {FeatureTemplate[]} features 
      */
-    #setupFeatures(features) {
+    async #setupFeatures(features) {
         this.#features = features;
-        this.#features.forEach( f => f.fields.forEach( ff => {
-            if (ff.relatesTo) {
-                const index = this.#fields.findIndex( x => x.name === ff.relatesTo);
-                if (index >= 0) {
-                    this.#fields.splice(index + 1, 0, ff);
-                    return;
+        for (const feature of features) {
+            // initialize
+            await feature.initialize(this.#dataService);
+            // Inject fields at correct position
+            feature.fields.forEach( ff => {
+                if (ff.relatesTo) {
+                    const index = this.#fields.findIndex( x => x.name === ff.relatesTo);
+                    if (index >= 0) {
+                        this.#fields.splice(index + 1, 0, ff);
+                        return;
+                    }
                 }
-            }
-            this.#fields.push(ff)
-        }));        
+                this.#fields.push(ff)
+            });
+        }
     }
 
 }

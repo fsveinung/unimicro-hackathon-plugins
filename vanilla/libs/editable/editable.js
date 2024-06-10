@@ -100,6 +100,7 @@ export class Editable {
         if (evt.key === "Tab" || evt.key === "Shift" || evt.key === "Control") 
             return false;
         // todo: check for virtual keys to ignore
+        if (evt.key === "Delete") return false;
         return true; 
     }
 

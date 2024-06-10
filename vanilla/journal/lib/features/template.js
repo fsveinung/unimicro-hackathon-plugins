@@ -1,7 +1,8 @@
 export class FeatureTemplate {
     
-    /** @type { Field[] } */
-    get fields() {
-        
+    /** @type { Field[] } */ fields;
+
+    async initialize(dataService) {
+
     }
 }
