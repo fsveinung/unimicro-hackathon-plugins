@@ -46,7 +46,7 @@ export class JournalCoreFeature {
         switch (change.fieldName) {
             case "DebitAccount":
             case "CreditAccount":
-                this.#lookupAccount(change.value, change.fieldName);
+                this.#fetchAccountByNumber(change.value, change.fieldName);
                 break;
         }
     }
@@ -66,7 +66,7 @@ export class JournalCoreFeature {
     }
 
     /**
-     * 
+     * Perform any transformation of rows (if needed)
      * @param {JournalRow} row
      * @returns { { lines: JournalEntryLineDraft[], errors: [] } | undefined } 
      */
@@ -95,9 +95,10 @@ export class JournalCoreFeature {
         return undefined;
     }
 
-    async #lookupAccount(value) {
+    async #fetchAccountByNumber(value) {
         if (!this.#accountCache.has(value)) {
-            const fetch = await this.#dataService.get("accounts", "?filter=accountnumber eq '" + value + "'"
+            const fetch = await this.#dataService.get("accounts", 
+                "?filter=accountnumber eq '" + value + "'"
                 + "&select=ID,AccountNumber,AccountName,VatTypeID"
             );
             if (fetch?.length) {

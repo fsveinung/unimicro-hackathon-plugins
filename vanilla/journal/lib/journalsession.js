@@ -54,8 +54,8 @@ export class JournalSession {
         // Validate and transform
         for (let rowIndex = 0; rowIndex < this.#rows.length; rowIndex++) {
             // validate
-            //const row = this.#rows.getRow(rowIndex); 
-            const row = this.#getRow(rowIndex);
+            const row = this.#rows.getRow(rowIndex); 
+            //const row = this.#getRow(rowIndex);
             const validation = this.#validateRow(row);
             if (validation.errors.length === 0) {
                 if (!this.#canAddToJournal(row, journal)) {
@@ -96,20 +96,6 @@ export class JournalSession {
         if (journal.DraftLines.length === 0) return true;
         if (journal.DraftLines[0].FinancialDate.getTime() === row.FinancialDate.getTime()) return true;
         return false;
-    }
-
-    /**
-     * Fetches a row (ensuring it has amount, debit and creditaccounts)
-     * @param {number} rowIndex 
-     * @returns {JournalRow};
-     */
-    #getRow(rowIndex) {
-        const row = this.#rows.getRow(rowIndex);
-        row.Amount = row.Amount ?? 0;
-        row.DebetAccount = row.DebetAccount ?? 0;
-        row.CreditAccount = row.CreditAccount ?? 0;
-        row.Description = row.Description ?? "";
-        return row;
     }
 
     /**

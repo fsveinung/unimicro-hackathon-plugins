@@ -19,7 +19,7 @@ export class JournalEntryVatFeature {
      * @param { { fieldName: string, value: any, rowIndex: number, rows: Rows} } details 
      */
     onChange(details) {
-
+        // todo: react on account-change and fetch/set its vattype
     }
 
     /**
