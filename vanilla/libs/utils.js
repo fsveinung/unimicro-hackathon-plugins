@@ -36,9 +36,11 @@ export class Utils {
                 if (typeof handlers[i+1] === "function") {
                     var parts = handlers[i].split(":");
                     let event = parts.length > 1 ? parts[1] : "click";
-                    const target = element.getElementById(parts[0]);
+                    const target = element.querySelector("#" + parts[0]);
                     if (target) {
                         target.addEventListener(event, handlers[i+1]);
+                    } else {
+                        console.warn(parts[0] + " not found!");
                     }
                 }
             }
