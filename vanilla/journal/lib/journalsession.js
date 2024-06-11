@@ -3,40 +3,13 @@ import { Field, Validation } from "../../libs/editable/field.js";
 import { Rows } from "../../libs/rows.js";
 import { FeatureTemplate } from "./features/template.js";
 
-export class JournalRow { 
-    FinancialDate;
-    Amount;
-    DebitAccount;
-    CreditAccount;
-    Description;
-}
-
-export class JournalEntryLineDraft {
-    FinancialDate;
-    Amount;
-    AccountID;
-    Description;
-    constructor(date, amount, description) {
-        this.FinancialDate = date;
-        this.Amount = amount;
-        this.Description = description;
-    }
-}
-
 export class JournalSession {
 
-    /** @type {DataService} */ #dataService;
     #settings;
+    /** @type {DataService} */ #dataService;
     /** @type {Rows} */ #rows = new Rows(10000);
-    /** @type {Field[]} */ #fields = [
-        new Field("FinancialDate", "Dato", "date"),
-        new Field("DebitAccount", "Debet", "account"),
-        new Field("CreditAccount", "Kredit", "account"),
-        new Field("Amount", "Beløp", "money"),
-        new Field("Description", "Tekst", "string")
-    ];
-    #accountCache = new Map();
-    /** @type { FeatureTemplate[] } */ #features = [];
+    /** @type {Field[]} */ #fields = [];
+    /** @type {FeatureTemplate[]} */ #features = [];
 
     get fields() {
         return this.#fields;
@@ -54,11 +27,6 @@ export class JournalSession {
     async initialize(features) {
         this.#settings = await this.#dataService.first("companysettings");
         await this.#setupFeatures(features);
-        //console.log(this.#settings);
-        // this._accounts = await this._dataService.getAll("accounts?filter=toplevelaccountgroupid gt 0 and isnull(visible,0) eq 1");
-        // console.table(this._accounts);
-        // this.#vatTypes = await this.#dataService.getAll("vattypes");
-        //console.table(this._vatTypes);
     }
 
     clear() {
@@ -67,9 +35,8 @@ export class JournalSession {
 
     setValue(name, value, rowIndex) {
         this.#rows.setValue(name, value, rowIndex);
-        if (name === "DebitAccount" || name === "CreditAccount") {
-            this.#lookupAccount(value, name);
-        }
+        const details = { fieldName: name, value: value, rowIndex: rowIndex, rows: this.#rows };
+        this.#features.forEach( f => f.onChange(details));
     }
 
     addRow() {
@@ -87,15 +54,17 @@ export class JournalSession {
         // Validate and transform
         for (let rowIndex = 0; rowIndex < this.#rows.length; rowIndex++) {
             // validate
-            const validation = this.#validateRow(this.#getRow(rowIndex));
-            if (validation.success) {
-                if (!this.#canAddToJournal(validation.row, journal)) {
+            //const row = this.#rows.getRow(rowIndex); 
+            const row = this.#getRow(rowIndex);
+            const validation = this.#validateRow(row);
+            if (validation.errors.length === 0) {
+                if (!this.#canAddToJournal(row, journal)) {
                     journal = { DraftLines: [] };
                     result.journals.push(journal);
                 }
                 // Transform
-                const transform = this.#transform( validation.row );
-                if (transform.success)
+                const transform = this.#transform( row );
+                if (transform.errors.length === 0)
                     journal.DraftLines.push(... transform.lines);
                 else 
                     result.errors.push(... transform.errors);
@@ -146,58 +115,38 @@ export class JournalSession {
     /**
      * Validates a row
      * @param {JournalRow} row 
-     * @returns { { success: boolean, row: JournalRow, errors: [] }}
+     * @returns { { errors: [] }}
      */
     #validateRow(row) {
-        const res = { success: false, row: row, errors: [] };
-        if (!row.FinancialDate instanceof Date) res.errors.push("Invalid FinancialDate");
-        if (row.Amount === 0) res.errors.push("Invalid Amount");
-        if (!(row.DebitAccount > 0 || row.CreditAccount > 0)) res.errors.push("Missing DebitAccount or CreditAccount");
-        res.success = res.errors.length === 0;
-        return res;
+        const result = { errors: [] };
+        this.#features.forEach( f => {
+            const validate = f.validate(row);
+            if (!validate) return;
+            result.errors.push(... validate.errors);
+        });
+        return result;
     }
 
     /**
      * Converts a debit/credit row into one or more draftlines
      * @param {JournalRow} row 
-     * @returns { success: boolean, lines: JournalEntryLineDraft[], errors: []}
+     * @returns { lines: JournalEntryLineDraft[], errors: []}
      */
     #transform(row) {
-        const result = { success: true, lines: [], errors: [] };
-        if (row.DebitAccount) {
-            const draftLine = new JournalEntryLineDraft(row.FinancialDate, row.Amount, row.Description);
-            draftLine.AccountID = this.#mapAccountNumberToID(row.DebitAccount);
-            if (!draftLine.AccountID) result.errors.push(`Account ${row.DebitAccount} was not found`);
-            result.lines.push(draftLine);
-        }
-        if (row.CreditAccount) {
-            const draftLine = new JournalEntryLineDraft(row.FinancialDate, -row.Amount, row.Description);
-            draftLine.AccountID = this.#mapAccountNumberToID(row.CreditAccount);
-            if (!draftLine.AccountID) result.errors.push(`Account ${row.CreditAccount} was not found`);
-            result.lines.push(draftLine);
-        }
-        result.success = result.errors.length === 0;
+        const result = { lines: [], errors: [] };
+        this.#features.forEach( 
+            f => {
+                const transform = f.transform(row);
+                if (!transform) return;
+                if (transform.errors?.length > 0)
+                    result.errors.push(... transform.errors);
+                else
+                    result.lines.push(... transform.lines);
+            }
+        );
         return result;        
     }
 
-    #mapAccountNumberToID(accountNumber) {
-        if (this.#accountCache.has(accountNumber)) {
-            return this.#accountCache.get(accountNumber).ID;
-        }
-        return undefined;
-    }
-
-    async #lookupAccount(value) {
-        if (!this.#accountCache.has(value)) {
-            const fetch = await this.#dataService.get("accounts", "?filter=accountnumber eq '" + value + "'"
-                + "&select=ID,AccountNumber,AccountName,VatTypeID"
-            );
-            if (fetch?.length) {
-                this.#accountCache.set(value, fetch[0]);
-            } else return undefined;
-        }
-        return this.#accountCache.get(value);
-    }
 
     /**
      * Prepares a feature by importing its fields (if any)

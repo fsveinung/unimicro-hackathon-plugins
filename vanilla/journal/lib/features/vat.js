@@ -1,4 +1,4 @@
-import { Field } from "../../../libs/editable/field";
+import { Field } from "../../../libs/editable/field.js";
 
 export class JournalEntryVatFeature {
 
@@ -11,7 +11,33 @@ export class JournalEntryVatFeature {
 
     async initialize(dataService) {
         this.#vatTypes = await dataService.getAll("vattypes");
-        console.table(this.#vatTypes);
-    }    
+        //console.table(this.#vatTypes);
+    }
+
+    /**
+     * Event received when any field in the dataset changes
+     * @param { { fieldName: string, value: any, rowIndex: number, rows: Rows} } details 
+     */
+    onChange(details) {
+
+    }
+
+    /**
+     * Validates a row
+     * @param {JournalRow} row 
+     * @returns { { errors: [] } | undefined }
+     */
+    validate(row) {    
+
+    }
+
+    /**
+     * Perform any transformation of rows (if needed)
+     * @param {JournalRow} row
+     * @returns { { lines: JournalEntryLineDraft[], errors: [] } | undefined } 
+     */
+    transform(row) {
+
+    }  
 
 }
