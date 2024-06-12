@@ -21,13 +21,6 @@
     background-color: green;
 }
 
-.pancake-stack {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    height: 100%;
-    grid-gap: 0.5rem;
-}
-
-.alternate-rows tbody:nth-child(odd) {
-    background-color: #efefef;
+.alternate-rows tbody tr:nth-child(even) td {
+    background-color: #fafafa;
 }

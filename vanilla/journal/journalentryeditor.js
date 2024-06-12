@@ -81,7 +81,7 @@ class JournalEntryEditor extends HTMLElement {
     #clear() {
         this.#clearMessages();
         this.#session.clear();
-        this.#table.addRows(2, true);
+        this.#table.addRows(6, true);
         this.#table.focus(true);
     }
 

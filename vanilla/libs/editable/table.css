@@ -18,9 +18,9 @@ table.editable tr:first-of-type td {
 }
 
 table.editable td {
-    padding: 0.5rem;
+    padding: 0 0.5rem;
     background-color: #fff;
-    height: 2rem;
+    height: 2.4rem;
     border-bottom: 1px solid #ccc;
     border-right: 1px solid #ccc;
 }
@@ -37,7 +37,6 @@ table.editable .account  {
 table.editable .integer {
     width: 5em;
 }
-
 
 table.editable .money {
     width: 8em;
