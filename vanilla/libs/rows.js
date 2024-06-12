@@ -1,7 +1,10 @@
+import { EventMap } from "./editable/eventmap.js";
+
 export class Rows {
 
     #upperLimit = 100;
     #rows = [];
+    eventMap = new EventMap();
 
     constructor(upperLimit) {
         this.#upperLimit = Number.isInteger(upperLimit) ? upperLimit : this.#upperLimit;
@@ -13,10 +16,12 @@ export class Rows {
 
     clear() {
         this.#rows = [];
+        this.eventMap.raiseEvent("clear");
     }
 
     removeRow(rowIndex) {
         if (rowIndex < this.#rows.length) {
+            this.eventMap.raiseEvent("removeRow");
             this.#rows.splice(rowIndex, 1);
         }
     }
@@ -25,10 +30,21 @@ export class Rows {
         return this.getRow(this.#rows.length);
     }
 
-    setValue(name, value, rowIndex) {
+    /**
+     * Sets a value in the matrix based on fieldName and rowindex
+     * @param {string} name 
+     * @param {any} value 
+     * @param {number} rowIndex 
+     * @param {bool | undefined} cascade - should this cascade new events
+     * @returns { any | undefined } - the row where the value is stored
+     */
+    setValue(name, value, rowIndex, cascade) {
         if (!this.#isValidRowIndex(rowIndex)) return;
         const row = this.getRow(rowIndex);
         row[name] = value;
+        if (cascade === undefined || !!cascade) {
+            this.eventMap.raiseEvent("change", { name: name, value: value, rowIndex: rowIndex });
+        }
         return row;
     }
 

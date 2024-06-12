@@ -8,7 +8,9 @@ export class EventMap {
      * @param {function} callBack 
      */
     on(name, callBack) {
-        this.#eventMap.set(name, callBack);
+        const list = this.#eventMap.get(name) ?? [];
+        list.push(callBack);
+        this.#eventMap.set(name, list);
     }
     
     /**
@@ -19,8 +21,11 @@ export class EventMap {
      */
     raiseEvent(name, cargo) {
         if (this.#eventMap.has(name)) {
-            const handler = this.#eventMap.get(name);
-            return handler(cargo);
+            const list = this.#eventMap.get(name);
+            let result;
+            for (const handler of list)
+                result = handler(cargo);
+            return result;
         }
         return true;
     }

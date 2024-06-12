@@ -35,7 +35,12 @@ export class JournalCoreFeature {
         new Field("Description", "Tekst", "string")
     ];
 
-    async initialize(dataService) {
+    /**
+     * Initializes the feature with dataservice and dataset
+     * @param {DataService} dataService 
+     * @param {Rows} rows 
+     */
+    async initialize(dataService, rows) {
         this.#dataService = dataService;
     }
 

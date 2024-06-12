@@ -1,3 +1,4 @@
+import { DataService } from "../../../libs/dataservice.js";
 import { Rows } from "../../../libs/rows.js";
 import { JournalRow } from "../journalsession.js";
 
@@ -5,7 +6,12 @@ export class FeatureTemplate {
     
     /** @type { Field[] } */ fields;
 
-    async initialize(dataService) {
+    /**
+     * Initializes the feature with dataservice and dataset
+     * @param {DataService} dataService 
+     * @param {Rows} rows 
+     */
+    async initialize(dataService, rows) {
 
     }
 

@@ -1,4 +1,5 @@
 import { Field } from "../../../libs/editable/field.js";
+import { Rows } from "../../../libs/rows.js";
 
 export class JournalEntryVatFeature {
 
@@ -9,8 +10,14 @@ export class JournalEntryVatFeature {
         new Field("CreditVatType", "Mva", "integer", "CreditAccount"),
     ]
 
-    async initialize(dataService) {
+    /**
+     * Initializes the feature with dataservice and dataset
+     * @param {DataService} dataService 
+     * @param {Rows} rows 
+     */
+    async initialize(dataService, rows) {
         this.#vatTypes = await dataService.getAll("vattypes");
+        rows.eventMap.on("change", change => console.log("change", change));
         //console.table(this.#vatTypes);
     }
 

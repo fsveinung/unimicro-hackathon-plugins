@@ -142,7 +142,7 @@ export class JournalSession {
         this.#features = features;
         for (const feature of features) {
             // initialize
-            await feature.initialize(this.#dataService);
+            await feature.initialize(this.#dataService, this.#rows);
             // Inject fields at correct position
             feature.fields.forEach( ff => {
                 if (ff.relatesTo) {
