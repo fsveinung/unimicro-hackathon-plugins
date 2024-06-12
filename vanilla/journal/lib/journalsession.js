@@ -13,7 +13,11 @@ export class JournalSession {
 
     get fields() {
         return this.#fields;
-    }    
+    }
+
+    get rows() {
+        return this.#rows;
+    }
 
     constructor(dataService) {
         this.#dataService = dataService;
@@ -35,7 +39,7 @@ export class JournalSession {
 
     setValue(name, value, rowIndex) {
         this.#rows.setValue(name, value, rowIndex);
-        const details = { fieldName: name, value: value, rowIndex: rowIndex, rows: this.#rows };
+        const details = { name: name, value: value, rowIndex: rowIndex, rows: this.#rows };
         this.#features.forEach( f => f.onChange(details));
     }
 

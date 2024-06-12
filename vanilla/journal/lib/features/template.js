@@ -17,7 +17,7 @@ export class FeatureTemplate {
 
     /**
      * Event received when any field in the dataset changes
-     * @param { { fieldName: string, value: any, rowIndex: number, rows: Rows} } details 
+     * @param { { name: string, value: any, rowIndex: number, rows: Rows} } details 
      */
     onChange(details) {
 

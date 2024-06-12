@@ -67,7 +67,7 @@ class JournalEntryEditor extends HTMLElement {
     #setupTable(fields) {
         if (this.#table) return;
         this.#table = new Table();
-        this.#table.setup(fields, true, this.querySelector("table"));
+        this.#table.setup(fields, true, this.querySelector("table"), this.#session.rows);
         this.#table.eventMap.on("change", change => {
             this.#session.setValue(change.field.name, change.value, change.rowIndex);
             if (change.rowIndex + 2 >= this.#table.count) {

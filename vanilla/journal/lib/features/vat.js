@@ -3,6 +3,7 @@ import { Rows } from "../../../libs/rows.js";
 
 export class JournalEntryVatFeature {
 
+    /** @type { any[] } */
     #vatTypes;
 
     fields = [
@@ -17,16 +18,27 @@ export class JournalEntryVatFeature {
      */
     async initialize(dataService, rows) {
         this.#vatTypes = await dataService.getAll("vattypes");
-        rows.eventMap.on("change", change => console.log("change", change));
-        //console.table(this.#vatTypes);
+        rows.eventMap.on("change", 
+            change => this.onChange({ name: change.name, value: change.value, rowIndex: change.rowIndex, rows: rows })
+        );
     }
 
     /**
      * Event received when any field in the dataset changes
-     * @param { { fieldName: string, value: any, rowIndex: number, rows: Rows} } details 
+     * @param { { name: string, value: any, rowIndex: number, rows: Rows} } change 
      */
-    onChange(details) {
-        // todo: react on account-change and fetch/set its vattype
+    onChange(change) {
+        switch (change.name) {
+            case "_DebitAccount":
+                const dt = this.#vatTypes.find( t => t.ID == change.value.VatTypeID );
+                if (dt) change.rows.setValue("DebitVatType", dt.VatCode, change.rowIndex);
+                break;
+            case "_CreditAccount":
+                const ct = this.#vatTypes.find( t => t.ID == change.value.VatTypeID );
+                if (ct) change.rows.setValue("CreditVatType", ct.VatCode, change.rowIndex);
+                break;                
+        }
+        
     }
 
     /**

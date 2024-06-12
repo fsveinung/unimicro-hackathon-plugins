@@ -31,7 +31,7 @@ export class Rows {
     }
 
     /**
-     * Sets a value in the matrix based on fieldName and rowindex
+     * Sets a value in the matrix based on name and rowindex
      * @param {string} name 
      * @param {any} value 
      * @param {number} rowIndex 
@@ -67,8 +67,8 @@ export class Rows {
         return this.#rows[rowIndex];
     }
 
-    sum(fieldName) {
-        return this.#rows.reduce( (sum, row) => sum += row[fieldName] ?? 0, 0);
+    sum(name) {
+        return this.#rows.reduce( (sum, row) => sum += row[name] ?? 0, 0);
     }
 
     groupBy(property) {

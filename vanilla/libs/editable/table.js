@@ -3,6 +3,7 @@ import { Field } from "./field.js";
 import { Utils } from "../utils.js";
 import { css } from "./table.css";
 import { EventMap } from "./eventmap.js";
+import { Rows } from "../rows.js";
 
 export class Table {
 
@@ -29,10 +30,11 @@ export class Table {
      * Sets up the table
      * @param {Field[]} fields - map of fields in the layout of the table
      * @param {bool} editable - true if the table should be editable
-     * @param {HTMLTableElement | undefined} table - optioanl existing Htmltable dom-element
+     * @param {HTMLTableElement | undefined} table - optional existing Htmltable dom-element
+     * @param {Rows | undefined} rows - relation to actual rows dataset for listening to changes
      * @returns {HTMLTableElement} - the html-table element (optional)
      */
-    setup(fields, editable, table) {
+    setup(fields, editable, table, rows) {
 
         if (!table) {
             table = document.createElement("table");
@@ -65,6 +67,9 @@ export class Table {
         }
         thead.appendChild(tr);
 
+        // Listen for changes updated by features or other handlers
+        rows?.eventMap.on("change", change => this.#handleExternalUpdates(change) );
+
         return table;
     }
 
@@ -94,6 +99,34 @@ export class Table {
                 tr.appendChild(td);
             }        
             tBody.append(tr);
+        }
+    }
+
+    /**
+     * Tries to fetch a specific table cell
+     * @param {string} name 
+     * @param {number} rowIndex 
+     * @returns { HTMLTableCellElement | undefined}
+     */
+    #getCell(name, rowIndex) {
+        const fld = this.#fields.find( f => f.name === name);
+        if (!fld) return;
+        const cellIndex = this.#fields.indexOf(fld);
+        if (this.#table.rows.length > rowIndex + 2) {
+            const row = this.#table.rows[rowIndex+1];
+            return row.cells[cellIndex];
+        }        
+    }
+
+    /**
+     * Handle external value-changes
+     * @param {{name: string, value: any, rowIndex: number}} change 
+     */
+    #handleExternalUpdates(change) {
+        console.log("table changes: " + change.name, change);
+        const cell = this.#getCell(change.name, change.rowIndex);
+        if (cell) {
+            cell.innerText = change.value;
         }
     }
 

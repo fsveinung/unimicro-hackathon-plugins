@@ -46,15 +46,15 @@ export class JournalCoreFeature {
 
     /**
      * Event received when any field in the dataset changes
-     * @param { { fieldName: string, value: any, rowIndex: number, rows: Rows} } change 
+     * @param { { name: string, value: any, rowIndex: number, rows: Rows} } change 
      */
     async onChange(change) {
-        switch (change.fieldName) {
+        switch (change.name) {
             case "DebitAccount":
             case "CreditAccount":
-                const acc = await this.#fetchAccountByNumber(change.value, change.fieldName);
+                const acc = await this.#fetchAccountByNumber(change.value, change.name);
                 if (acc) {
-                    change.rows.setValue("_" + change.fieldName, acc, change.rowIndex);
+                    change.rows.setValue("_" + change.name, acc, change.rowIndex);
                 }
                 break;
         }
@@ -105,7 +105,6 @@ export class JournalCoreFeature {
     }
 
     async #fetchAccountByNumber(value) {
-        // todo: share this value with other features
         if (!this.#accountCache.has(value)) {
             const fetch = await this.#dataService.get("accounts", 
                 "?filter=accountnumber eq '" + value + "'"
