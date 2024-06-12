@@ -44,5 +44,5 @@ table.editable .money {
 }
 
 table.editable td:focus {
-    background-color: #cef;
+    background-color: #cef !important;
 }

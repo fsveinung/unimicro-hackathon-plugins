@@ -1,4 +1,15 @@
+.heading {
+    font-size: 17pt;
+    font-weight: 450;
+    margin-right: 3rem;
+}
+
+header {
+    margin: 1.2rem 0;
+}
+
 #messsages {
+    margin-left: 2rem;
     display: flex;
     gap: 2px;
 }
