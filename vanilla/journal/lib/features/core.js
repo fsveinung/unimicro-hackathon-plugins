@@ -37,8 +37,8 @@ export class JournalCoreFeature {
 
     /**
      * Initializes the feature with dataservice and dataset
-     * @param {DataService} dataService 
-     * @param {Rows} rows 
+     * @param {DataService} dataService - apiservice
+     * @param {Rows} rows - entire journalentry dataset
      */
     async initialize(dataService, rows) {
         this.#dataService = dataService;

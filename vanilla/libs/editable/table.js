@@ -123,7 +123,7 @@ export class Table {
      * @param {{name: string, value: any, rowIndex: number}} change 
      */
     #handleExternalUpdates(change) {
-        console.log("table changes: " + change.name, change);
+        // console.log("table changes: " + change.name, change);
         const cell = this.#getCell(change.name, change.rowIndex);
         if (cell) {
             cell.innerText = change.value;

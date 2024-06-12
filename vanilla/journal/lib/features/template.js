@@ -8,15 +8,15 @@ export class FeatureTemplate {
 
     /**
      * Initializes the feature with dataservice and dataset
-     * @param {DataService} dataService 
-     * @param {Rows} rows 
+     * @param {DataService} dataService - apiservice
+     * @param {Rows} rows - entire journalentry dataset
      */
     async initialize(dataService, rows) {
 
     }
 
     /**
-     * Event received when any field in the dataset changes
+     * Direct feature-field changes
      * @param { { name: string, value: any, rowIndex: number, rows: Rows} } details 
      */
     onChange(details) {
@@ -33,7 +33,7 @@ export class FeatureTemplate {
     }
 
     /**
-     * 
+     * Perform any transformation of rows (if needed)
      * @param {JournalRow} row
      * @returns { { lines: JournalEntryLineDraft[], errors: [] } | undefined } 
      */

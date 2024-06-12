@@ -19,15 +19,24 @@ export class JournalEntryVatFeature {
     async initialize(dataService, rows) {
         this.#vatTypes = await dataService.getAll("vattypes");
         rows.eventMap.on("change", 
-            change => this.onChange({ name: change.name, value: change.value, rowIndex: change.rowIndex, rows: rows })
+            change => this.#onDataSetChange({ name: change.name, value: change.value, rowIndex: change.rowIndex, rows: rows })
         );
     }
 
     /**
-     * Event received when any field in the dataset changes
+     * Direct feature-field changes
      * @param { { name: string, value: any, rowIndex: number, rows: Rows} } change 
      */
     onChange(change) {
+
+        
+    }
+
+    /**
+     * Secondary dataset-changes
+     * @param { { name: string, value: any, rowIndex: number, rows: Rows} } change 
+     */    
+    #onDataSetChange(change) {
         switch (change.name) {
             case "_DebitAccount":
                 const dt = this.#vatTypes.find( t => t.ID == change.value.VatTypeID );
@@ -38,7 +47,6 @@ export class JournalEntryVatFeature {
                 if (ct) change.rows.setValue("CreditVatType", ct.VatCode, change.rowIndex);
                 break;                
         }
-        
     }
 
     /**
