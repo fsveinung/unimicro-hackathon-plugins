@@ -8,6 +8,10 @@ header {
     margin: 1.2rem 0;
 }
 
+header button {
+    min-width: 7rem;    
+}
+
 #messsages {
     margin-left: 2rem;
     display: flex;
