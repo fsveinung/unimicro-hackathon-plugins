@@ -81,6 +81,9 @@ export class JournalSession {
 
         // Check balance
         for (const journal of result.journals) {
+            if (journal.DraftLines.length === 0) {
+                result.errors.push(`Please add two accounts and a value`);
+            }
             const balance = journal.DraftLines.reduce( (sum, row) => sum += row.Amount ?? 0, 0);
             const inBalance = balance > -0.001 && balance < 0.001;
             if (!inBalance) {
