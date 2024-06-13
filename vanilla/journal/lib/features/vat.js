@@ -1,5 +1,6 @@
 import { Field } from "../../../libs/editable/field.js";
 import { Rows } from "../../../libs/rows.js";
+import { journalRow } from "./core.js";
 
 export class JournalEntryVatFeature {
 
@@ -7,8 +8,8 @@ export class JournalEntryVatFeature {
     #vatTypes;
 
     fields = [
-        new Field("DebitVatType", "Mva", "integer", "DebitAccount"),
-        new Field("CreditVatType", "Mva", "integer", "CreditAccount"),
+        new Field("debitVatType", "Mva", "integer", "debitAccount"),
+        new Field("creditVatType", "Mva", "integer", "creditAccount"),
     ]
 
     /**
@@ -38,17 +39,17 @@ export class JournalEntryVatFeature {
      */    
     #onDataSetChange(change) {
         switch (change.name) {
-            case "_DebitAccount":
+            case "_debitAccount":
                 const dt = this.#vatTypes.find( t => t.ID == change.value.VatTypeID );
                 if (!dt) break;
-                change.rows.setValue("DebitVatType", dt.VatCode, change.rowIndex);
-                change.rows.setValue("_DebitVatType", dt, change.rowIndex);
+                change.rows.setValue("debitVatType", dt.VatCode, change.rowIndex);
+                change.rows.setValue("_debitVatType", dt, change.rowIndex);
                 break;
-            case "_CreditAccount":
+            case "_creditAccount":
                 const ct = this.#vatTypes.find( t => t.ID == change.value.VatTypeID );
                 if (!ct) break;
-                change.rows.setValue("CreditVatType", ct.VatCode, change.rowIndex);
-                change.rows.setValue("_CreditVatType", ct, change.rowIndex);
+                change.rows.setValue("creditVatType", ct.VatCode, change.rowIndex);
+                change.rows.setValue("_creditVatType", ct, change.rowIndex);
                 break;                
         }
     }
@@ -56,7 +57,7 @@ export class JournalEntryVatFeature {
 
     /**
      * Validates a row
-     * @param {JournalRow} row 
+     * @param {journalRow} row 
      * @returns { { errors: [] } | undefined }
      */
     validate(row) {    
@@ -65,15 +66,15 @@ export class JournalEntryVatFeature {
 
     /**
      * Perform any transformation of rows (if needed)
-     * @param {JournalRow} row
+     * @param {journalRow} row
      * @param { { debitLines: [], creditLines: [], errors: [] } } result - lines and errors for this row
      */
     transform(row, result) {       
-        if (row._DebitVatType) {
-            result.debitLines.forEach( l => l.VatTypeID = row._DebitVatType.ID);
+        if (row._debitVatType) {
+            result.debitLines.forEach( l => l.VatTypeID = row._debitVatType.ID);
         }
-        if (row._CreditVatType) {
-            result.creditLines.forEach( l => l.VatTypeID = row._CreditVatType.ID);
+        if (row._creditVatType) {
+            result.creditLines.forEach( l => l.VatTypeID = row._creditVatType.ID);
         }
     }  
 

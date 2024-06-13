@@ -98,7 +98,7 @@ export class JournalSession {
     #canAddToJournal(row, journal) {
         if (!journal) return false;
         if (journal.DraftLines.length === 0) return true;
-        if (journal.DraftLines[0].FinancialDate.getTime() === row.FinancialDate.getTime()) return true;
+        if (journal.DraftLines[0].FinancialDate.getTime() === row.financialDate.getTime()) return true;
         return false;
     }
 

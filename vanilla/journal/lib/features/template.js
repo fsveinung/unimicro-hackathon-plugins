@@ -1,6 +1,6 @@
 import { DataService } from "../../../libs/dataservice.js";
 import { Rows } from "../../../libs/rows.js";
-import { JournalRow } from "../journalsession.js";
+import { JournalRow as journalRow } from "../journalsession.js";
 
 export class FeatureTemplate {
     
@@ -16,8 +16,8 @@ export class FeatureTemplate {
     }
 
     /**
-     * Direct feature-field changes
-     * @param { { name: string, value: any, rowIndex: number, rows: Rows} } details 
+     * Primary feature-field changes
+     * @param { { name: string, value: any, rowIndex: number, rows: Rows} } change 
      */
     onChange(details) {
 
@@ -25,7 +25,7 @@ export class FeatureTemplate {
 
     /**
      * Validates a row
-     * @param {JournalRow} row 
+     * @param {journalRow} row 
      * @returns { { errors: [] } | undefined }
      */
     validate(row) {    
@@ -34,7 +34,7 @@ export class FeatureTemplate {
 
     /**
      * Perform any transformation of rows (if needed)
-     * @param {JournalRow} row
+     * @param {journalRow} row
      * @param { { debitLines: [], creditLines: [], errors: [] } } result - lines and errors for this row
      */
     transform(row, result) {

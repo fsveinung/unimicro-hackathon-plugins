@@ -2,12 +2,12 @@ import { DataService } from "../../../libs/dataservice.js";
 import { Field } from "../../../libs/editable/field.js";
 import { Rows } from "../../../libs/rows.js";
 
-export class JournalRow { 
-    FinancialDate;
-    Amount;
-    DebitAccount;
-    CreditAccount;
-    Description;
+export class journalRow { 
+    financialDate;
+    amount;
+    debitAccount;
+    creditAccount;
+    description;
 }
 
 export class JournalEntryLineDraft {
@@ -28,11 +28,11 @@ export class JournalCoreFeature {
     #accountCache = new Map();
 
     fields = [
-        new Field("FinancialDate", "Dato", "date"),
-        new Field("DebitAccount", "Debet", "account"),
-        new Field("CreditAccount", "Kredit", "account"),
-        new Field("Amount", "Beløp", "money"),
-        new Field("Description", "Tekst", "string")
+        new Field("financialDate", "Dato", "date"),
+        new Field("debitAccount", "Debet", "account"),
+        new Field("creditAccount", "Kredit", "account"),
+        new Field("amount", "Beløp", "money"),
+        new Field("description", "Tekst", "string")
     ];
 
     /**
@@ -45,51 +45,60 @@ export class JournalCoreFeature {
     }
 
     /**
-     * Event received when any field in the dataset changes
+     * Primary feature-field changes
      * @param { { name: string, value: any, rowIndex: number, rows: Rows} } change 
      */
     async onChange(change) {
         switch (change.name) {
-            case "DebitAccount":
-            case "CreditAccount":
-                const acc = await this.#fetchAccountByNumber(change.value, change.name);
-                if (acc) {
-                    change.rows.setValue("_" + change.name, acc, change.rowIndex);
+            case "debitAccount":
+            case "creditAccount":
+                // Lookup account by number
+                if (change.value > 0) {
+                    const acc = await this.#fetchAccountByNumber(change.value, change.name);
+                    if (acc) {
+                        change.rows.setValue("_" + change.name, acc, change.rowIndex);
+                    } else {
+                        // todo: raise some error that we did not find the account
+                        
+                    }
+                    return;
                 }
+                // Reset (clear the value)
+                change.rows.setValue("_" + change.name, undefined, change.rowIndex);
                 break;
         }
     }
 
     /**
      * Validates a row
-     * @param {JournalRow} row 
+     * @param {journalRow} row 
      * @returns { { errors: [] } | undefined }
      */
     validate(row) {
         const res = { success: false, errors: [] };
-        if (row.FinancialDate === undefined || !(row.FinancialDate instanceof Date)) res.errors.push("Invalid FinancialDate");
-        if (row.Amount === 0) res.errors.push("Invalid Amount");
-        if (!(row.DebitAccount > 0 || row.CreditAccount > 0)) res.errors.push("Missing DebitAccount or CreditAccount");
+        if (row.financialDate === undefined || !(row.financialDate instanceof Date)) res.errors.push("Invalid FinancialDate");
+        if (row.amount === 0) res.errors.push("Invalid Amount");
+        if (!(row.debitAccount > 0 || row.creditAccount > 0)) res.errors.push("Missing DebitAccount or CreditAccount");
         res.success = res.errors.length === 0;
         return res;
     }
 
     /**
      * Perform any transformation of rows (if needed)
-     * @param {JournalRow} row
+     * @param {journalRow} row
      * @param { { debitLines: [], creditLines: [], errors: [] } } result - lines and errors for this row
      */
     transform(row, result) {
-        if (row.DebitAccount) {
-            const draftLine = new JournalEntryLineDraft(row.FinancialDate, row.Amount, row.Description);
-            draftLine.AccountID = this.#mapAccountNumberToID(row.DebitAccount);
-            if (!draftLine.AccountID) result.errors.push(`Account ${row.DebitAccount} was not found`);
+        if (row.debitAccount) {
+            const draftLine = new JournalEntryLineDraft(row.financialDate, row.amount, row.description);
+            draftLine.AccountID = this.#mapAccountNumberToID(row.debitAccount);
+            if (!draftLine.AccountID) result.errors.push(`Account ${row.debitAccount} was not found`);
             result.debitLines.push(draftLine);
         }
-        if (row.CreditAccount) {
-            const draftLine = new JournalEntryLineDraft(row.FinancialDate, -row.Amount, row.Description);
-            draftLine.AccountID = this.#mapAccountNumberToID(row.CreditAccount);
-            if (!draftLine.AccountID) result.errors.push(`Account ${row.CreditAccount} was not found`);
+        if (row.creditAccount) {
+            const draftLine = new JournalEntryLineDraft(row.financialDate, -row.amount, row.description);
+            draftLine.AccountID = this.#mapAccountNumberToID(row.creditAccount);
+            if (!draftLine.AccountID) result.errors.push(`Account ${row.creditAccount} was not found`);
             result.creditLines.push(draftLine);
         }
     }    
