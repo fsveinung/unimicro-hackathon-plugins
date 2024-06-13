@@ -103,6 +103,28 @@ export class Table {
     }
 
     /**
+     * Highlights a cell by setting av class on it
+     * @param {string} name - name of field
+     * @param {number} rowIndex - which row
+     * @param {string} className - classname to set to the cell
+     * @param {boolean} add - set to true if class should be added
+     * @param {number | undefined} tiemout - timeout for when class should be removed
+     */
+    cellClass(name, rowIndex, className, add, timeout) {  
+        const cell = this.#getCell(name, rowIndex);
+        if (cell) {
+            if (add) {
+                cell.classList.add(className);
+                if (timeout && timeout > 0) {
+                    setTimeout(() => { cell.classList.remove(className); }, timeout);
+                }
+            } else {
+                cell.classList.remove(className);
+            }
+        }
+    }
+
+    /**
      * Tries to fetch a specific table cell
      * @param {string} name 
      * @param {number} rowIndex 

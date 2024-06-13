@@ -46,6 +46,12 @@ table.editable .money {
     text-align: right;
 }
 
+table.editable td.warn {
+    color: white;
+    background-color: var(--color-warn) !important;
+}
+
 table.editable td:focus {
     background-color: #cef !important;
 }
+

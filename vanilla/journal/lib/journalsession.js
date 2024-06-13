@@ -1,4 +1,5 @@
 import { DataService } from "../../libs/dataservice.js";
+import { EventMap } from "../../libs/editable/eventmap.js";
 import { Field, Validation } from "../../libs/editable/field.js";
 import { Rows } from "../../libs/rows.js";
 import { FeatureTemplate } from "./features/template.js";
@@ -10,6 +11,7 @@ export class JournalSession {
     /** @type {Rows} */ #rows = new Rows(10000);
     /** @type {Field[]} */ #fields = [];
     /** @type {FeatureTemplate[]} */ #features = [];
+    /** @type {EventMap} */ eventMap = new EventMap();
 
     get fields() {
         return this.#fields;
@@ -147,7 +149,7 @@ export class JournalSession {
         this.#features = features;
         for (const feature of features) {
             // initialize
-            await feature.initialize(this.#dataService, this.#rows);
+            await feature.initialize(this.#dataService, this.#rows, this.eventMap);
             // Inject fields at correct position
             feature.fields.forEach( ff => {
                 if (ff.relatesTo) {

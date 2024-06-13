@@ -1,4 +1,5 @@
 import { DataService } from "../../../libs/dataservice.js";
+import { EventMap } from "../../../libs/editable/eventmap.js";
 import { Field } from "../../../libs/editable/field.js";
 import { Rows } from "../../../libs/rows.js";
 
@@ -25,6 +26,7 @@ export class JournalEntryLineDraft {
 export class JournalCoreFeature {
 
     /** @type { DataService} */ #dataService
+    /** @type { EventMap } */ #sessionEventMap;
     #accountCache = new Map();
 
     fields = [
@@ -39,9 +41,11 @@ export class JournalCoreFeature {
      * Initializes the feature with dataservice and dataset
      * @param {DataService} dataService - apiservice
      * @param {Rows} rows - entire journalentry dataset
+     * @param {EventMap} eventMap - the sessions own eventmap
      */
-    async initialize(dataService, rows) {
+    async initialize(dataService, rows, eventMap) {
         this.#dataService = dataService;
+        this.#sessionEventMap = eventMap;
     }
 
     /**
@@ -58,8 +62,7 @@ export class JournalCoreFeature {
                     if (acc) {
                         change.rows.setValue("_" + change.name, acc, change.rowIndex);
                     } else {
-                        // todo: raise some error that we did not find the account
-                        
+                        this.#sessionEventMap?.raiseEvent("error", { msg: `${change.value} not found!`, name: change.name, rowIndex: change.rowIndex });
                     }
                     return;
                 }

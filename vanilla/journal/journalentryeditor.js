@@ -61,6 +61,9 @@ class JournalEntryEditor extends HTMLElement {
             new JournalEntryVatFeature()
         ];
         await this.#session.initialize(features);
+        this.#session.eventMap.on("error", err => {
+            this.#table?.cellClass(err.name, err.rowIndex, "warn", true);
+        });
         this.#setupTable(this.#session.fields);
     }
 
@@ -69,12 +72,13 @@ class JournalEntryEditor extends HTMLElement {
         this.#table = new Table();
         this.#table.setup(fields, true, this.querySelector("table"), this.#session.rows);
         this.#table.eventMap.on("change", change => {
+            this.#table?.cellClass(change.field.name, change.rowIndex, "warn", false);
             this.#session.setValue(change.field.name, change.value, change.rowIndex);
             if (change.rowIndex + 2 >= this.#table.count) {
                 this.#table.addRows(2);
             }
             return true;
-        });
+        });        
         this.#clear();
     }
 
