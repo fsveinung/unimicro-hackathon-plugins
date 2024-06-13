@@ -23,6 +23,9 @@ table.editable td {
     height: 2.4rem;
     border-bottom: 1px solid #ccc;
     border-right: 1px solid #ccc;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 table.editable .date {

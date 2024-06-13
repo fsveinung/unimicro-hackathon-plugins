@@ -124,16 +124,15 @@ export class JournalSession {
      */
     #transform(row) {
         const result = { lines: [], errors: [] };
-        this.#features.forEach( 
-            f => {
-                const transform = f.transform(row);
-                if (!transform) return;
-                if (transform.errors?.length > 0)
-                    result.errors.push(... transform.errors);
-                else
-                    result.lines.push(... transform.lines);
+        for (const f of this.#features) 
+        {
+            const queue = { lines: [], errors: [] };
+            f.transform(row, queue);
+            if (queue.errors?.length > 0) {
+                return result;
             }
-        );
+            result.lines.push(...queue.lines);
+        }
         return result;        
     }
 

@@ -24,7 +24,7 @@ export class JournalEntryVatFeature {
     }
 
     /**
-     * Direct feature-field changes
+     * Primary feature-field changes
      * @param { { name: string, value: any, rowIndex: number, rows: Rows} } change 
      */
     onChange(change) {
@@ -40,14 +40,19 @@ export class JournalEntryVatFeature {
         switch (change.name) {
             case "_DebitAccount":
                 const dt = this.#vatTypes.find( t => t.ID == change.value.VatTypeID );
-                if (dt) change.rows.setValue("DebitVatType", dt.VatCode, change.rowIndex);
+                if (!dt) break;
+                change.rows.setValue("DebitVatType", dt.VatCode, change.rowIndex);
+                change.rows.setValue("_DebitVatType", dt, change.rowIndex);
                 break;
             case "_CreditAccount":
                 const ct = this.#vatTypes.find( t => t.ID == change.value.VatTypeID );
-                if (ct) change.rows.setValue("CreditVatType", ct.VatCode, change.rowIndex);
+                if (!ct) break;
+                change.rows.setValue("CreditVatType", ct.VatCode, change.rowIndex);
+                change.rows.setValue("_CreditVatType", ct, change.rowIndex);
                 break;                
         }
     }
+
 
     /**
      * Validates a row
@@ -61,9 +66,9 @@ export class JournalEntryVatFeature {
     /**
      * Perform any transformation of rows (if needed)
      * @param {JournalRow} row
-     * @returns { { lines: JournalEntryLineDraft[], errors: [] } | undefined } 
+     * @param { { lines: JournalEntryLineDraft[], errors: []} } queuee - current queuee of lines and errors
      */
-    transform(row) {
+    transform(row, queuee) {
 
     }  
 
