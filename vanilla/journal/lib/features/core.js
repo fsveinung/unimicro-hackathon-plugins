@@ -77,20 +77,20 @@ export class JournalCoreFeature {
     /**
      * Perform any transformation of rows (if needed)
      * @param {JournalRow} row
-     * @param { { lines: JournalEntryLineDraft[], errors: []} } queuee - current queuee of lines and errors
+     * @param { { lines: JournalEntryLineDraft[], errors: []} } result - lines and errors for this row
      */
-    transform(row, queuee) {
+    transform(row, result) {
         if (row.DebitAccount) {
             const draftLine = new JournalEntryLineDraft(row.FinancialDate, row.Amount, row.Description);
             draftLine.AccountID = this.#mapAccountNumberToID(row.DebitAccount);
-            if (!draftLine.AccountID) queuee.errors.push(`Account ${row.DebitAccount} was not found`);
-            queuee.lines.push(draftLine);
+            if (!draftLine.AccountID) result.errors.push(`Account ${row.DebitAccount} was not found`);
+            result.lines.push(draftLine);
         }
         if (row.CreditAccount) {
             const draftLine = new JournalEntryLineDraft(row.FinancialDate, -row.Amount, row.Description);
             draftLine.AccountID = this.#mapAccountNumberToID(row.CreditAccount);
-            if (!draftLine.AccountID) queuee.errors.push(`Account ${row.CreditAccount} was not found`);
-            queuee.lines.push(draftLine);
+            if (!draftLine.AccountID) result.errors.push(`Account ${row.CreditAccount} was not found`);
+            result.lines.push(draftLine);
         }
     }    
 

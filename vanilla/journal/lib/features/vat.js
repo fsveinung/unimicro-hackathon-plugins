@@ -66,10 +66,13 @@ export class JournalEntryVatFeature {
     /**
      * Perform any transformation of rows (if needed)
      * @param {JournalRow} row
-     * @param { { lines: JournalEntryLineDraft[], errors: []} } queuee - current queuee of lines and errors
+     * @param { { lines: JournalEntryLineDraft[], errors: []} } result - current queuee of lines and errors
      */
-    transform(row, queuee) {
-
+    transform(row, result) {        
+        if (row._DebitVatType) {
+            console.log("VatTransform-row", row);
+            console.log("VatTransform-queuee", result);
+        }
     }  
 
 }

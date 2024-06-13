@@ -35,9 +35,9 @@ export class FeatureTemplate {
     /**
      * Perform any transformation of rows (if needed)
      * @param {JournalRow} row
-     * @param { { lines: JournalEntryLineDraft[], errors: []} } queuee - current queuee of lines and errors
+     * @param { { lines: JournalEntryLineDraft[], errors: []} } result - lines and errors for this row
      */
-    transform(row, queuee) {
+    transform(row, result) {
 
     }
 

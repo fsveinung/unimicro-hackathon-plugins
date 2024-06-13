@@ -126,12 +126,10 @@ export class JournalSession {
         const result = { lines: [], errors: [] };
         for (const f of this.#features) 
         {
-            const queue = { lines: [], errors: [] };
-            f.transform(row, queue);
-            if (queue.errors?.length > 0) {
+            f.transform(row, result);
+            if (result.errors?.length > 0) {
                 return result;
             }
-            result.lines.push(...queue.lines);
         }
         return result;        
     }
