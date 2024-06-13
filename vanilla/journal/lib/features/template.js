@@ -35,7 +35,7 @@ export class FeatureTemplate {
     /**
      * Perform any transformation of rows (if needed)
      * @param {JournalRow} row
-     * @param { { lines: JournalEntryLineDraft[], errors: []} } result - lines and errors for this row
+     * @param { { debitLines: [], creditLines: [], errors: [] } } result - lines and errors for this row
      */
     transform(row, result) {
 

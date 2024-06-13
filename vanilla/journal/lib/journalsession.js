@@ -124,13 +124,17 @@ export class JournalSession {
      */
     #transform(row) {
         const result = { lines: [], errors: [] };
+        const split = { debitLines: [], creditLines: [], errors: [] };
         for (const f of this.#features) 
         {
-            f.transform(row, result);
-            if (result.errors?.length > 0) {
+            f.transform(row, split);
+            if (split.errors?.length > 0) {
                 return result;
-            }
+            }            
         }
+        result.lines.push(...split.debitLines);
+        result.lines.push(...split.creditLines);
+        result.errors.push(...split.errors);
         return result;        
     }
 
