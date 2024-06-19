@@ -21,7 +21,7 @@ export class Rows {
 
     removeRow(rowIndex) {
         if (rowIndex < this.#rows.length) {
-            this.eventMap.raiseEvent("removeRow");
+            this.eventMap.raiseEvent("removeRow", rowIndex);
             this.#rows.splice(rowIndex, 1);
         }
     }

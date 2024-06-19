@@ -24,7 +24,6 @@ export class Dates {
             if (value.indexOf(d) > 0) {
                 const parts = value.split(d);
                 if (parts.length < 2) continue;
-                debugger;
                 const dParts = parts.map( txt => parseInt(txt) );
                 switch (parts.length) {
                     case 2:

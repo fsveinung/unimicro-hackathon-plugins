@@ -12,7 +12,6 @@ export class ToolbarComponent extends HTMLElement {
     }
 
     constructor() {
-        console.log("constructed");
         super();
         this.attachShadow({mode: "open"});
         this.shadowRoot.adoptedStyleSheets.push(cssCache(tbStyles));        
@@ -23,7 +22,6 @@ export class ToolbarComponent extends HTMLElement {
     }
 
     #checkView() {
-        console.log("toolbar.#checkView");
         if (this.ownerDocument.defaultView) {
             if (this.#view === null) {
                 this.#view = Utils.createFromTemplate(tbTemplate);        

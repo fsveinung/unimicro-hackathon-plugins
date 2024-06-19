@@ -61,7 +61,6 @@ export class JournalSession {
         for (let rowIndex = 0; rowIndex < this.#rows.length; rowIndex++) {
             // validate
             const row = this.#rows.getRow(rowIndex); 
-            //const row = this.#getRow(rowIndex);
             const validation = this.#validateRow(row);
             if (validation.errors.length === 0) {
                 if (!this.#canAddToJournal(row, journal)) {
