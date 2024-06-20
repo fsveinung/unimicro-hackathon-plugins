@@ -6,7 +6,10 @@ export class SpeechApi {
     
     constructor() {
 
-        const api = window.SpeechRecognition || webkitSpeechRecognition;
+        let api;
+        try {
+            api = window.SpeechRecognition || webkitSpeechRecognition;
+        } catch { }
         if (api) {
             console.log("SpeechRecognition is available :)");
             const recorder = new api();
