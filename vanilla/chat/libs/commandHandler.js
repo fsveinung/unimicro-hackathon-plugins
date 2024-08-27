@@ -72,6 +72,7 @@ export class CommandHandler {
                 case "banksaldo":
                 case "balancestatement":
                 case "accountbalance":
+                case "accountstatement":
                 case "fetchbalance":
                     this.tryGetBankStatement();
                     return;
@@ -112,6 +113,10 @@ export class CommandHandler {
                 case "acknowledge":
                 case "cool":
                     this.addError("Bare hyggelig!", "praise")
+                    return;
+
+                case "error":
+                    this.addError(entity.message);
                     return;
 
                 default:
@@ -187,19 +192,19 @@ export class CommandHandler {
 
         // Make a second call for a comment:
         const prompt = `Du er regnskapsfører.`
-        + ` Lag en kort kommentar til følgende fakta`
+        + ` Lag en kort kommentar på 2 linjer fra følgende fakta`
         + ` ${periodInfo}`
         + `: ${KpiService.buildKpiText(kpi, false)}`;
 
         const finalComment = await this.prompt(prompt, 75);
-        this.addMsg(finalComment?.Text);
+        this.addMsg(finalComment?.choices[0]?.message?.content);
 
         // get last transaction ?
     }
     
 
     async prompt(prompt, temperature) {
-        return await this.api.post("/api/biz/comments?action=generate", {
+        return await this.api.post("/api/biz/ai-generate?action=generate-text", {
             "Temperature": temperature || 0,
             "Prompt": prompt,
             "TopPercentage": 50
@@ -510,8 +515,8 @@ export class CommandHandler {
 
     parseWork(input, rel, types) {
         if (typeof input === 'number') return undefined;
-        const tFrom = ChatUtils.getFuzzy(input, "from", "start");
-        let tTo = ChatUtils.getFuzzy(input, "to", "end");
+        const tFrom = ChatUtils.parseTime( ChatUtils.getFuzzy(input, "from", "start") );
+        let tTo = ChatUtils.parseTime( ChatUtils.getFuzzy(input, "to", "end") );
         tTo = tTo < tFrom ? tTo + 12 : tTo;
         if (tTo == tFrom) tTo = tFrom + 1;
         const workitem = {

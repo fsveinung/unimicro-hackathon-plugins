@@ -26,6 +26,22 @@ export class ChatUtils {
         }
     }
 
+    /**
+     * Tries to parse hours and minutes into a decimal value: 08:30 -> 8.5
+     * @param {string} textValue 
+     * @returns {number}
+     */
+    static parseTime(textValue) {
+        if (!(textValue && textValue.length > 0)) return 0;
+        const parts = textValue.split(":");
+        if (parts.length === 2) {
+            return parseInt(parts[0]) + parseInt(parts[1]) / 60;
+        }
+        if (parts.length === 1) {
+            return parseInt(parts[0]);
+        }
+    }
+
     static textEquals(v1, v2) {
         if (typeof v1 === "string" && typeof v2 === "string") {
             return v1.trim().toLowerCase() === v2.trim().toLowerCase();
@@ -48,7 +64,11 @@ export class ChatUtils {
     }
 
     static formatTime(date, hour) {
-        date.setMinutes(0);
+        let minutes = 0;
+        if (hour % 1 !== 0) {
+            minutes = (hour % 1) * 60;
+        }
+        date.setMinutes(minutes);
         date.setSeconds(0);
         date.setHours(hour);
         try {
