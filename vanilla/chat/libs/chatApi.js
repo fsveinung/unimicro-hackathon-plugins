@@ -57,6 +57,7 @@ export class ChatApi {
             + `"Hvor mye skylder jeg?" gir { "action": "accountspayable", "input": { "subaction": "profit" } }`
             + `"Ny ordre til Ole Olsen?" gir { "action": "order", "input": { "subaction": "create", "Customer": "Ole Olsen" } }`
             + `"Hent ordrene mine" gir { "action": "order", "input": { "subaction": "fetch" } }`
+            + `"Hent bilag nr 8" gir { "action": "journal", "input": { "subaction": "fetch", "id": 8 } }`
             + `"Working 9 to 5" gir { "action": "timetracking", "input": { "subaction": "create", "from": 9, "to": 5 } }`
             + ` basert på følgende kategorier ` + JSON.stringify(jsonSpec) + ' ?'
             + ` Legg også alltid med en subaction fra følgende liste` + JSON.stringify(this.subactions) + '.'
@@ -82,7 +83,8 @@ export class ChatApi {
 
     async chatx(message) {
         var data = {
-            action: "timetracking", input: { subaction: "create", from: "07:30", to: "15:45", lunch: "20 minutes" } 
+            //action: "timetracking", input: { subaction: "create", from: "07:30", to: "15:45", lunch: "20 minutes" } 
+            action: "journal", input: { subaction: "fetch", id: "8" } 
         };
         data = { id:null, choices:null };
         return new Promise((resolve, reject)=> {

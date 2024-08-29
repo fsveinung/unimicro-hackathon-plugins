@@ -108,6 +108,10 @@ export class CommandHandler {
                     this.handleCreates(entity);
                     return;
 
+                case "journal":
+                    this.tryGetJournals(entity);
+                    return;
+
                 case "thankyou":
                 case "praise":
                 case "acknowledge":
@@ -251,6 +255,25 @@ export class CommandHandler {
             );
         } else {
             this.addMsg("Fant ingen ordrer, kanskje du kan lage en?");
+        }
+    }
+
+    async tryGetJournals(chatData) {
+        //this.addMsg(JSON.stringify(chatData));
+        const nr = ChatUtils.getFuzzy(chatData.input, "id", "nr", "entryid", "number");
+        if (nr && Number(nr)) {
+            const list = await this.api.get('/api/statistics?model=journalentryline'
+                + '&select=ID,JournalEntryNumber as JournalEntryNumber,Amount as Amount,Description as Description,FinancialDate as FincancialDAte,Account.AccountNumber as AccountNumber'
+                + `&filter=JournalEntryNumberNumeric eq ${nr}&orderby=id desc`
+                + '&expand=account&wrap=false');
+            if (list && list.length > 0) {
+                list.reverse().forEach( item => {
+                        this.addMsg(`${item.JournalEntryNumber} ${item.AccountNumber} (${item.Description}) Beløp ${ChatUtils.formatMoney(item.Amount)}`);
+                    }
+                );
+            }
+        } else {
+            this.addMsg("Fant ikke bilaget, kanskje du kan lage det ?");
         }
     }
 
