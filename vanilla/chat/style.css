@@ -86,3 +86,7 @@
   .chat-recording {
     background-color: var(--alert-warn) !important;
   }
+
+  table.inline td, table.inline th {
+    padding-right: 1rem;
+  }

@@ -230,11 +230,13 @@ export class CommandHandler {
     }
 
     async tryGetProducts() {
-        const list = await this.api.get('/api/biz/products?top=10&select=ID,Name,PartName,PriceExVat&orderby=id desc');
+        const list = await this.api.get('/api/statistics?model=product&select=ID as _id,PartName as Nr,Name as Navn,PriceExVat as Pris'
+            + '&orderby=id desc&wrap=false&top=10');
         if (list && list.length > 0) {
-            list.reverse().forEach( p =>
-                this.addMsg(`${p.PartName} - ${p.Name} med pris ${ChatUtils.formatMoney(p.PriceExVat)}`)
-            );
+            list.forEach( item => {
+                item.Pris = ChatUtils.formatMoney(item.Pris);
+            });
+            this.addMsg(list);
         }
     }
 
@@ -245,32 +247,31 @@ export class CommandHandler {
             return;
         }
         const statusList = { 41001: "Kladd", 41002: "Åpen", 41003: "Delfakturert", 41004: "Fakturert", 41005: "Avsluttet" };
-        const list = await this.api.get('/api/biz/orders?top=10&select=OrderNumber,CustomerName,TaxInclusiveAmount,StatusCode'
-            + '&filter=StatusCode lt 41005&orderby=id desc');
+        const list = await this.api.get('/api/statistics?model=customerorder&select=id as _id,OrderNumber as Nr,CustomerName as Kunde,TaxInclusiveAmount as Sum,StatusCode as Status'
+            + '&filter=StatusCode lt 41005&orderby=id desc&top=10&wrap=false');
         if (list && list.length > 0) {
-            list.reverse().forEach( item => {
-                    item.Status = statusList[item.StatusCode] ?? item.StatusCode;
-                    this.addMsg(`${item.OrderNumber} ${item.CustomerName} (${item.Status}) totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`);
-                }
-            );
+            list.forEach( item => item.Status = statusList[item.Status] ?? item.Status);
+            this.addMsg(list);
         } else {
             this.addMsg("Fant ingen ordrer, kanskje du kan lage en?");
         }
     }
 
     async tryGetJournals(chatData) {
-        //this.addMsg(JSON.stringify(chatData));
         const nr = ChatUtils.getFuzzy(chatData.input, "id", "nr", "entryid", "number");
         if (nr && Number(nr)) {
             const list = await this.api.get('/api/statistics?model=journalentryline'
-                + '&select=ID,JournalEntryNumber as JournalEntryNumber,Amount as Amount,Description as Description,FinancialDate as FincancialDAte,Account.AccountNumber as AccountNumber'
-                + `&filter=JournalEntryNumberNumeric eq ${nr}&orderby=id desc`
+                + '&select=ID as _id,JournalEntryNumber as Bilag,Amount as Sum,Description as Tekst,FinancialDate as Dato,Account.AccountNumber as Konto'
+                + `&filter=JournalEntryNumber eq '${nr}-2024'&orderby=id desc`
                 + '&expand=account&wrap=false');
             if (list && list.length > 0) {
-                list.reverse().forEach( item => {
-                        this.addMsg(`${item.JournalEntryNumber} ${item.AccountNumber} (${item.Description}) Beløp ${ChatUtils.formatMoney(item.Amount)}`);
-                    }
-                );
+                list.forEach( item => {
+                    item.Sum = ChatUtils.formatMoney(item.Sum);
+                    item.Dato = ChatUtils.formatDate(item.Dato);
+                });
+                this.addMsg(list);
+            } else {
+                this.addError("Fant ikke det bilaget. Beklager...")
             }
         } else {
             this.addMsg("Fant ikke bilaget, kanskje du kan lage det ?");

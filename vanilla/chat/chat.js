@@ -246,11 +246,20 @@ class MicroPlugin extends HTMLElement {
     this.ownerDocument.getElementById("spinner")?.remove();
   }
 
-  outputMessage(text, isBot, isError, isPraise, noSave, context) {
+  /**
+   * Outputs a message to either the bot-side or the user-side
+   * @param {string | object[]} msg 
+   * @param {boolean} isBot 
+   * @param {boolean} isError 
+   * @param {boolean} isPraise 
+   * @param {boolean} noSave 
+   * @param {*} context 
+   */
+  outputMessage(msg, isBot, isError, isPraise, noSave, context) {
 
     const prevItem = this._logg.getLastElement();
 
-    this._logg.add({ text: text, isBot: isBot, isError: isError, isPraise: isPraise, context: context});
+    this._logg.add({ text: msg, isBot: isBot, isError: isError, isPraise: isPraise, context: context});
     if (!noSave) this._logg.save("chatlog");
 
     if (this._logg.getLength() === 2) {
@@ -263,11 +272,13 @@ class MicroPlugin extends HTMLElement {
     if (outlet) {
       const pfx = isError ? this.randomSmiley(isError) : isPraise ? this.randomSmiley(false) : "";
       const route = this.mapContextToRoute(context);
-      if (intoSameBubble) {
+      const cls = "chat-message " + (isBot ? "msg-left" : "msg-right") + (isError ? " msg-err" : "");
+      const msgNode = this.msgToNode(msg, pfx, intoSameBubble, cls);
+    if (intoSameBubble) {
         const bubble = this.getLastChatBubble();
-        if (bubble) {
+        if (bubble) {          
           bubble.appendChild(Utils.create("br", undefined));
-          bubble.appendChild(this.ownerDocument.createTextNode(pfx + text));
+          bubble.appendChild(msgNode); 
           if (route) {        
             if (!bubble.parentNode.getAttribute("data-link")) {
               bubble.parentNode.appendChild(Utils.create("a", "⤴", "href", route, "class", "arrow-link", "title", "Naviger til"));
@@ -277,10 +288,8 @@ class MicroPlugin extends HTMLElement {
           bubble.scrollIntoView();
         }
       } else {
-        const cls = "chat-message " + (isBot ? "msg-left" : "msg-right") + (isError ? " msg-err" : "");
-        const msg = Utils.create("p", pfx + text, "class", cls);
         const row = Utils.create("div", undefined, "class", "chat-row");
-        row.appendChild(msg);
+        row.appendChild(msgNode);
         if (route) {        
           row.appendChild(Utils.create("a", "⤴", "href", route, "class", "arrow-link", "title", "Naviger til"));
         }
@@ -288,6 +297,47 @@ class MicroPlugin extends HTMLElement {
         row.scrollIntoView();
       }
     }
+  }
+
+  /**
+   * Converts the message to an actual html-node
+   * @param {string | object[]} msg - the actual message (could be an array for table)
+   * @param {string} pfx - prefix (if any)
+   * @param {boolean} textOnly - create simple text node
+   * @param {string} cls - css classes
+   * @returns HtmlElement
+   */
+  msgToNode(msg, pfx, textOnly, cls) {
+    if (textOnly) {
+      return this.ownerDocument.createTextNode(pfx + msg);
+    }
+
+    // create table?
+    if (Array.isArray(msg)) {
+      const tbl = Utils.create("table", undefined, "class", "chat-message msg-left inline");
+      let isFirst = true;
+      for (const row of msg) {
+        if (isFirst) {
+          const hr = Utils.create("tr");
+          for (const key of Object.keys(row)) {
+            if (key.startsWith("_")) continue;
+            hr.appendChild(Utils.create("th", key));
+          }
+          tbl.appendChild(hr);
+          isFirst = false;
+        }
+        const tr = Utils.create("tr");
+        for (const key of Object.keys(row)) {
+          if (key.startsWith("_")) continue;
+          tr.appendChild(Utils.create("td", row[key]));
+        }
+        tbl.appendChild(tr);
+      }
+      return tbl;
+    }
+
+
+    return Utils.create("p", pfx + msg, "class", cls);
   }
 
   mapContextToRoute(context) {
