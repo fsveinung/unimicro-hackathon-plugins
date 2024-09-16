@@ -59,7 +59,7 @@ class Loan extends HTMLElement {
 
   #setupWizard() {
     if (!this.#api?.factory) { console.log("No factory"); return; }
-    this.#wizard = this.#api.factory.create("rig-wizard", [undefined, this] );
+    this.#wizard = this.#api.factory.create("rig-wizard", this );
     if (this.#wizard?.instance) {
       const wiz = this.#wizard.instance;
       wiz.steps = this.#steps;
