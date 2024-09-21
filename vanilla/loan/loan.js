@@ -3,6 +3,7 @@ import { template } from "./loan.html";
 import { styles } from "./style.css";
 import { Table } from "../libs/editable/table.js";
 import { Rows } from "../libs/rows.js";
+import { LoanPage1 } from "./pages/page1.js";
 
 class Loan extends HTMLElement {
 
@@ -54,7 +55,14 @@ class Loan extends HTMLElement {
         "btnNext:click", () => this.#moveNext()
       )
     );
+    this.#loadPages();
     this.#showPage("page1");
+  }
+
+  #loadPages() {
+    const pages = this.querySelectorAll(".page");
+    const page1 = new LoanPage1();
+    page1.appendTo(pages[0]);    
   }
 
   #setupWizard() {
