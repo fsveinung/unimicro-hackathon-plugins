@@ -28,3 +28,27 @@ footer {
 .page table td:focus {
     background-color: #cef;
 }
+
+.size1 {
+    width: 5rem;
+}
+
+.size2 {
+    width: 10rem;
+}
+
+.size3 {
+    width: 20rem;
+}
+
+.size4 {
+    width: 40rem;
+}
+
+.money {
+    text-align: right;
+}
+
+.page input {
+    display: inline-block;
+}
