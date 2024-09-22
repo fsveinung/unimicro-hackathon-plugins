@@ -7,6 +7,7 @@ import { LoanPage1 } from "./pages/page1.js";
 
 /**
  * @typedef { import("./models").IPage } IPage
+ * @typedef { import("./models").IState } IState
  */
 
 class Loan extends HTMLElement {
@@ -21,6 +22,13 @@ class Loan extends HTMLElement {
   ];
   #incomes = new Rows(100);
   #pageIndex = 0;
+
+  /** Current wizard state
+   * @type {IState}
+   */
+  #state = {
+    amount: 0
+  }
 
   /** List of page-instances
    * @type {IPage[]}
@@ -95,16 +103,17 @@ class Loan extends HTMLElement {
     }
   }
 
-  #canMoveNext() {
+  #validateCurrentPage() {
     if (this.#pageIndex >= this.#pages.length) return false;
     const page = this.#pages[this.#pageIndex];
-    const result = page.validate();
+    const result = page.validate(this.#state);
+    console.log("Updated state:", this.#state);
     if (result.success) return true;
-    this.#api.showAlert(result.message);
+    this.#api.showAlert(result.message, 3, 3);
   }
 
   #moveNext() {
-    if (!this.#canMoveNext()) return;
+    if (!this.#validateCurrentPage()) return;
     const wiz = this.#wizard?.instance;
     if (wiz && wiz.activeIndex < wiz.steps.length - 1) {
       wiz.activeStepValue = wiz.steps[wiz.activeIndex + 1].value;
@@ -125,7 +134,7 @@ class Loan extends HTMLElement {
   }
 
   #help() {
-    this.#api.showAlert("Help is on the way!!");
+    this.#api.showAlert("Bare følg instruksjonene så bør det gå fint :)", 2);
   }
 
   #showPage(stepValue) {
@@ -162,7 +171,7 @@ class Loan extends HTMLElement {
   }
 
   /**
-   * Handle user-input
+   * Handle table-user-input
    * @param {{ field: Field, rowIndex: number, value: any, commit: boolean }} change 
    */
   #userInput(change) {
