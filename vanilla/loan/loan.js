@@ -2,6 +2,7 @@ import { Utils } from "../libs/utils.js";
 import { template } from "./loan.html";
 import { styles } from "./style.css";
 import { LoanPage1 } from "./pages/page1.js";
+import { EquityPage } from "./pages/equity.js";
 import { LoanPage2 } from "./pages/page2.js";
 import { LoanPage3 } from "./pages/page3.js";
 
@@ -20,13 +21,14 @@ class Loan extends HTMLElement {
   /** @type {Step[]} */
   #steps = [
     { label: "Om finansieringen", value: "page1", el: undefined, page: undefined },
+    { label: "Egenkapital", value: "page1_1", el: undefined, page: undefined },
     { label: "Sikkerhet", value: "page2", el: undefined, page: undefined },
     { label: "Fremtidige inntekter", value: "page3", el: undefined, page: undefined}    
   ];
 
   get #currentStepIndex() {
     const wiz = this.#wizard?.instance;
-    return !!wiz ? wiz.activeIndex : -1;
+    return !!wiz ? wiz.activeIndex : 0;
   }  
 
   /** Current wizard state 
@@ -74,6 +76,7 @@ class Loan extends HTMLElement {
 
   #setupPages() {
     this.#addPage(new LoanPage1());
+    this.#addPage(new EquityPage());
     this.#addPage(new LoanPage2());
     this.#addPage(new LoanPage3());
   }
@@ -102,14 +105,15 @@ class Loan extends HTMLElement {
     }
   }
 
-  #validateCurrentPage() {
+  #validateCurrentPage(showValidationErrors) {
     const index = this.#currentStepIndex;
     if (index + 1 >= this.#steps.length) return false;
     const page = this.#steps[index].page;
     const result = page.validate(this.#state);
     console.log("Updated state:", this.#state);
     if (result.success) return true;
-    this.#api.showAlert(result.message, 3, 3);
+    if (!!showValidationErrors)
+      this.#api.showAlert(result.message, 3, 3);
     return false;
   }
 
@@ -129,6 +133,7 @@ class Loan extends HTMLElement {
   #moveBack() {
     const wiz = this.#wizard?.instance;
     if (wiz && wiz.activeIndex > 0) {
+      this.#validateCurrentPage(false);
       wiz.activeStepValue = wiz.steps[wiz.activeIndex - 1].value;
       this.#showPage(wiz.activeStepValue);
       wiz.ngOnChanges();
