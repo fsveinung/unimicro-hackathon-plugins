@@ -1,9 +1,11 @@
 import { Utils } from "../libs/utils.js";
 import { template } from "./loan.html";
 import { styles } from "./style.css";
-import { Table } from "../libs/editable/table.js";
-import { Rows } from "../libs/rows.js";
+// import { Table } from "../libs/editable/table.js";
+// import { Rows } from "../libs/rows.js";
 import { LoanPage1 } from "./pages/page1.js";
+import { LoanPage2 } from "./pages/page2.js";
+import { LoanPage3 } from "./pages/page3.js";
 
 /**
  * @typedef { import("./models").IPage } IPage
@@ -20,10 +22,9 @@ class Loan extends HTMLElement {
     { label: "Sikkerhet", value: "page2", ref: undefined },
     { label: "Fremtidige inntekter", value: "page3", ref: undefined}    
   ];
-  #incomes = new Rows(100);
   #pageIndex = 0;
 
-  /** Current wizard state
+  /** Current wizard state 
    * @type {IState}
    */
   #state = {
@@ -34,12 +35,8 @@ class Loan extends HTMLElement {
    * @type {IPage[]}
   */
   #pages = [];
-  
-  /** Table property reference
-   * @type {Table}
-  */
-  #incomeTable;
 
+  
   constructor() {
     super();
   }
@@ -77,18 +74,19 @@ class Loan extends HTMLElement {
   }
 
   #setupPages() {
-    this.#addPageAt(new LoanPage1(), 0);
+    this.#addPage(new LoanPage1());
+    this.#addPage(new LoanPage2());
+    this.#addPage(new LoanPage3());
   }
 
   /**
    * Adds a page to the wizard by calling .create on the page
    * @param {IPage} page 
-   * @param {number} index 
    */
-  #addPageAt(page, index) {
+  #addPage(page) {
     this.#pages.push(page);
     const pages = this.querySelectorAll(".page");    
-    pages[index].appendChild(page.create());    
+    pages[this.#pages.length - 1].appendChild(page.create());    
   }
 
   #setupWizard() {
@@ -152,31 +150,7 @@ class Loan extends HTMLElement {
   }
 
   onShowPage(step) {
-    if (step.value === "page3") {
-      if (!this.#incomeTable) {
-        const tbl = step.ref.querySelector("#future-incomes");
-        if (!tbl) { console.error("Could not find the table!"); return; }
-        this.#incomeTable = new Table();
-        const fields = [ 
-          { name: "year", label: "Årstall", type: "integer" },
-          { name: "source", label: "Kommentar", type: "string" },
-          { name: "amount", label: "Beløp", type: "money" },
-        ];
-        this.#incomeTable.setup( fields, true, tbl );
-        this.#incomeTable.eventMap.on("change", change => this.#userInput(change));
-        this.#incomeTable.addRows(5);
-      }
-      setTimeout(() => { this.#incomeTable?.focus(true); }, 100);    
-    }
-  }
 
-  /**
-   * Handle table-user-input
-   * @param {{ field: Field, rowIndex: number, value: any, commit: boolean }} change 
-   */
-  #userInput(change) {
-    this.#incomes.setValue(change.field.name, parseFloat(change.value), change.rowIndex);
-    this.querySelector("#sumIncome").innerText = this.#incomes.sum("amount").toString();
   }
 
   async #updateContent() {
@@ -184,7 +158,6 @@ class Loan extends HTMLElement {
         this.#company = await this.#api.http.get('/api/biz/companysettings/1?select=CompanyName');
     }
   }
-
 
 }
 
