@@ -1,10 +1,10 @@
 import { Utils } from "../libs/utils.js";
 import { template } from "./loan.html";
 import { styles } from "./style.css";
-import { LoanPage1 } from "./pages/page1.js";
+import { IntroPage } from "./pages/intro.js";
 import { EquityPage } from "./pages/equity.js";
-import { LoanPage2 } from "./pages/page2.js";
-import { LoanPage3 } from "./pages/page3.js";
+import { SecurityPage } from "./pages/security.js";
+import { FuturePage } from "./pages/future.js";
 
 /**
  * @typedef { import("./models").IPage } IPage
@@ -20,10 +20,10 @@ class Loan extends HTMLElement {
 
   /** @type {Step[]} */
   #steps = [
-    { label: "Om finansieringen", value: "page1", el: undefined, page: undefined },
-    { label: "Egenkapital", value: "page1_1", el: undefined, page: undefined },
-    { label: "Sikkerhet", value: "page2", el: undefined, page: undefined },
-    { label: "Fremtidige inntekter", value: "page3", el: undefined, page: undefined}    
+    { label: "Lånebeløp", value: "intro", el: undefined, page: undefined },
+    { label: "Egenkapital", value: "equity", el: undefined, page: undefined },
+    { label: "Sikkerhet", value: "security", el: undefined, page: undefined },
+    { label: "Fremtidige inntekter", value: "future", el: undefined, page: undefined}    
   ];
 
   get #currentStepIndex() {
@@ -71,14 +71,14 @@ class Loan extends HTMLElement {
       )
     );
     this.#setupPages();
-    this.#showPage("page1");
+    this.#showPage(this.#steps[0].value);
   }
 
   #setupPages() {
-    this.#addPage(new LoanPage1());
+    this.#addPage(new IntroPage());
     this.#addPage(new EquityPage());
-    this.#addPage(new LoanPage2());
-    this.#addPage(new LoanPage3());
+    this.#addPage(new SecurityPage());
+    this.#addPage(new FuturePage());
   }
 
   /**
@@ -99,7 +99,7 @@ class Loan extends HTMLElement {
     if (this.#wizard?.instance) {
       const wiz = this.#wizard.instance;
       wiz.steps = this.#steps;
-      wiz.activeStepValue = "page1";
+      wiz.activeStepValue = this.#steps[0].value;
       wiz.ngOnChanges();
       wiz.refresh();
     }
@@ -118,7 +118,7 @@ class Loan extends HTMLElement {
   }
 
   #moveNext() {    
-    if (!this.#validateCurrentPage()) return;
+    if (!this.#validateCurrentPage(true)) return;
     const wiz = this.#wizard?.instance;
     if (wiz && wiz.activeIndex < wiz.steps.length - 1) {
       wiz.activeStepValue = wiz.steps[wiz.activeIndex + 1].value;

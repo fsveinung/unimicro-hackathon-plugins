@@ -1,10 +1,10 @@
 import { Utils } from "../../libs/utils.js";
-import { page2_template } from "./page2.html";
+import { security_template } from "./security.html";
 
-export class LoanPage2 {
+export class SecurityPage {
   
   create() {
-    const fragment = Utils.createFromTemplate(page2_template);
+    const fragment = Utils.createFromTemplate(security_template);
     return fragment;
     
   }

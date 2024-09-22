@@ -1,15 +1,15 @@
 import { Utils } from "../../libs/utils.js";
-import { page1_template } from "./page1.html";
+import { intro_template } from "./intro.html";
 
 /**
- * @typedef { import("../models").IPage } IPage
- * @typedef { import("../models").IState } IState
+ * @typedef { import("../models.js").IPage } IPage
+ * @typedef { import("../models.js").IState } IState
  */
 
 /** 
  * @type {IPage}
  */
-export class LoanPage1 {
+export class IntroPage {
 
   /**
    * @type {HTMLInputElement}
@@ -17,7 +17,7 @@ export class LoanPage1 {
   #amountInputField;
   
   create() {
-    const fragment = Utils.createFromTemplate(page1_template,
+    const fragment = Utils.createFromTemplate(intro_template,
         "amount:blur", evt => this.#checkAmount(evt)
       );
     this.#amountInputField = fragment.querySelector("#amount");

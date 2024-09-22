@@ -1,16 +1,16 @@
 import { Utils } from "../../libs/utils.js";
-import { page3_template } from "./page3.html";
+import { future_template } from "./future.html";
 import { Table } from "../../libs/editable/table.js";
 import { Rows } from "../../libs/rows.js";
 
-export class LoanPage3 {
+export class FuturePage {
   
   /** @type {Table} */
   #incomeTable;
   #incomes = new Rows(100);  
 
   create() {
-    const fragment = Utils.createFromTemplate(page3_template);
+    const fragment = Utils.createFromTemplate(future_template);
     
     const tbl = fragment.querySelector("#future-incomes");
     if (!tbl) { console.error("Could not find the table!"); return; }
