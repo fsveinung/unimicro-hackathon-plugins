@@ -35,7 +35,8 @@ class Loan extends HTMLElement {
    * @type {IState}
    */
   #state = {
-    amount: 0
+    amount: 0,
+    equity: 0
   }
 
   constructor() {
@@ -86,6 +87,7 @@ class Loan extends HTMLElement {
    * @param {IPage} page 
    */
   #addPage(page) {
+    // find next empty slot
     const index = this.#steps.findIndex( s => s.page === undefined);
     const step = this.#steps[index];
     step.page = page;
@@ -110,7 +112,7 @@ class Loan extends HTMLElement {
     if (index + 1 >= this.#steps.length) return false;
     const page = this.#steps[index].page;
     const result = page.validate(this.#state);
-    console.log("Updated state:", this.#state);
+    this.#showState(this.#state);
     if (result.success) return true;
     if (!!showValidationErrors)
       this.#api.showAlert(result.message, 3, 3);
@@ -127,8 +129,6 @@ class Loan extends HTMLElement {
       wiz.refresh();
     }
   }
-
-
 
   #moveBack() {
     const wiz = this.#wizard?.instance;
@@ -170,6 +170,19 @@ class Loan extends HTMLElement {
     if (this.#api) {
         this.#company = await this.#api.http.get('/api/biz/companysettings/1?select=CompanyName');
     }
+  }
+
+  #showState(state) {
+    console.log("Updated state:", this.state);
+    const el = this.querySelector("#summary");
+    const sums = this.querySelectorAll(".amount");
+    el.classList.remove("hidden");
+
+    var fmt = new Intl.NumberFormat();
+    sums[0].innerText = fmt.format(state.amount);
+    sums[1].innerText = fmt.format(state.equity);
+    sums[2].innerText = fmt.format(state.amount + state.equity);
+
   }
 
 }

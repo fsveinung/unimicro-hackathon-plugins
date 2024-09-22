@@ -52,3 +52,26 @@ footer {
 .page input {
     display: inline-block;
 }
+
+
+.summary {
+    display: flex;
+    flex-direction: row;
+    margin-left: 6rem;
+    gap: 2rem;
+    text-align: center;
+    padding: 5px 2rem 0.7rem 2rem;
+    border-radius: 1rem;
+    background-color: var(--context-support-background);
+}
+
+.summary h4 {
+    font-size: 10pt;
+    margin: 0;
+    padding: 0 0 0.5rem 0;
+}
+
+.summary .amount {
+    font-size: 15pt;
+    color: var(--color-c2a);
+}
