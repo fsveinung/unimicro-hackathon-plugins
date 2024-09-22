@@ -5,6 +5,10 @@ import { Table } from "../libs/editable/table.js";
 import { Rows } from "../libs/rows.js";
 import { LoanPage1 } from "./pages/page1.js";
 
+/**
+ * @typedef { import("./models").IPage } IPage
+ */
+
 class Loan extends HTMLElement {
 
   #api = null;
@@ -16,10 +20,15 @@ class Loan extends HTMLElement {
     { label: "Fremtidige inntekter", value: "page3", ref: undefined}    
   ];
   #incomes = new Rows(100);
+  #pageIndex = 0;
+
+  /** List of page-instances
+   * @type {IPage[]}
+  */
+  #pages = [];
   
   /** Table property reference
    * @type {Table}
-   * @private
   */
   #incomeTable;
 
@@ -55,14 +64,23 @@ class Loan extends HTMLElement {
         "btnNext:click", () => this.#moveNext()
       )
     );
-    this.#loadPages();
+    this.#setupPages();
     this.#showPage("page1");
   }
 
-  #loadPages() {
-    const pages = this.querySelectorAll(".page");
-    const page1 = new LoanPage1();
-    page1.appendTo(pages[0]);    
+  #setupPages() {
+    this.#addPageAt(new LoanPage1(), 0);
+  }
+
+  /**
+   * Adds a page to the wizard by calling .create on the page
+   * @param {IPage} page 
+   * @param {number} index 
+   */
+  #addPageAt(page, index) {
+    this.#pages.push(page);
+    const pages = this.querySelectorAll(".page");    
+    pages[index].appendChild(page.create());    
   }
 
   #setupWizard() {
@@ -77,7 +95,16 @@ class Loan extends HTMLElement {
     }
   }
 
+  #canMoveNext() {
+    if (this.#pageIndex >= this.#pages.length) return false;
+    const page = this.#pages[this.#pageIndex];
+    const result = page.validate();
+    if (result.success) return true;
+    this.#api.showAlert(result.message);
+  }
+
   #moveNext() {
+    if (!this.#canMoveNext()) return;
     const wiz = this.#wizard?.instance;
     if (wiz && wiz.activeIndex < wiz.steps.length - 1) {
       wiz.activeStepValue = wiz.steps[wiz.activeIndex + 1].value;
