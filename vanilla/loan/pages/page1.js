@@ -18,12 +18,16 @@ export class LoanPage1 {
   
   create() {
     const fragment = Utils.createFromTemplate(page1_template,
-        "amount:blur", evt => this.checkAmount(evt)
+        "amount:blur", evt => this.#checkAmount(evt)
       );
     this.#amountInputField = fragment.querySelector("#amount");
     return fragment;
     
   }
+
+  activate(state) {
+    console.log("page1: activate", state);    
+  }  
 
   validate(state) {
     const value = this.#amountInputField?.value;
@@ -35,8 +39,10 @@ export class LoanPage1 {
     return { success: false, message: "Du må fylle ut et gyldig lånebeløp" };
   }
 
-  checkAmount(blurEvent) {    
+  #checkAmount(blurEvent) {    
     console.log("Onblur", blurEvent)
   }
+
+
 
 }

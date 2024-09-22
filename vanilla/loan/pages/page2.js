@@ -10,7 +10,12 @@ export class LoanPage2 {
   }
 
   validate(state) {
+    console.log("page2-validation..");
     return { success: false, message: "Page2 is not ready yet" };
   }
+
+  activate(state) {
+    console.log("page2: activate", state);    
+  }  
 
 }

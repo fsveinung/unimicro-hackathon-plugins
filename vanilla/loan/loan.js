@@ -1,8 +1,6 @@
 import { Utils } from "../libs/utils.js";
 import { template } from "./loan.html";
 import { styles } from "./style.css";
-// import { Table } from "../libs/editable/table.js";
-// import { Rows } from "../libs/rows.js";
 import { LoanPage1 } from "./pages/page1.js";
 import { LoanPage2 } from "./pages/page2.js";
 import { LoanPage3 } from "./pages/page3.js";
@@ -10,6 +8,7 @@ import { LoanPage3 } from "./pages/page3.js";
 /**
  * @typedef { import("./models").IPage } IPage
  * @typedef { import("./models").IState } IState
+ * @typedef { label: string, value: string, el?: HTMLElement, page?: IPage } Step
  */
 
 class Loan extends HTMLElement {
@@ -17,12 +16,18 @@ class Loan extends HTMLElement {
   #api = null;
   #company = null;
   #wizard = undefined;
+
+  /** @type {Step[]} */
   #steps = [
-    { label: "Om finansieringen", value: "page1", ref: undefined },
-    { label: "Sikkerhet", value: "page2", ref: undefined },
-    { label: "Fremtidige inntekter", value: "page3", ref: undefined}    
+    { label: "Om finansieringen", value: "page1", el: undefined, page: undefined },
+    { label: "Sikkerhet", value: "page2", el: undefined, page: undefined },
+    { label: "Fremtidige inntekter", value: "page3", el: undefined, page: undefined}    
   ];
-  #pageIndex = 0;
+
+  get #currentStepIndex() {
+    const wiz = this.#wizard?.instance;
+    return !!wiz ? wiz.activeIndex : -1;
+  }  
 
   /** Current wizard state 
    * @type {IState}
@@ -31,12 +36,6 @@ class Loan extends HTMLElement {
     amount: 0
   }
 
-  /** List of page-instances
-   * @type {IPage[]}
-  */
-  #pages = [];
-
-  
   constructor() {
     super();
   }
@@ -84,9 +83,11 @@ class Loan extends HTMLElement {
    * @param {IPage} page 
    */
   #addPage(page) {
-    this.#pages.push(page);
-    const pages = this.querySelectorAll(".page");    
-    pages[this.#pages.length - 1].appendChild(page.create());    
+    const index = this.#steps.findIndex( s => s.page === undefined);
+    const step = this.#steps[index];
+    step.page = page;
+    const pageElements = this.querySelectorAll(".page");    
+    pageElements[index].appendChild(page.create());    
   }
 
   #setupWizard() {
@@ -102,15 +103,17 @@ class Loan extends HTMLElement {
   }
 
   #validateCurrentPage() {
-    if (this.#pageIndex >= this.#pages.length) return false;
-    const page = this.#pages[this.#pageIndex];
+    const index = this.#currentStepIndex;
+    if (index + 1 >= this.#steps.length) return false;
+    const page = this.#steps[index].page;
     const result = page.validate(this.#state);
     console.log("Updated state:", this.#state);
     if (result.success) return true;
     this.#api.showAlert(result.message, 3, 3);
+    return false;
   }
 
-  #moveNext() {
+  #moveNext() {    
     if (!this.#validateCurrentPage()) return;
     const wiz = this.#wizard?.instance;
     if (wiz && wiz.activeIndex < wiz.steps.length - 1) {
@@ -120,6 +123,8 @@ class Loan extends HTMLElement {
       wiz.refresh();
     }
   }
+
+
 
   #moveBack() {
     const wiz = this.#wizard?.instance;
@@ -138,19 +143,22 @@ class Loan extends HTMLElement {
   #showPage(stepValue) {
     let index = 0;
     for (let step of this.#steps) {
-        if (!step.ref) step.ref = this.getElementsByClassName("page")[index++];
+        if (!step.el) step.el = this.getElementsByClassName("page")[index++];
         if (step.value == stepValue) {
-            step.ref.getElementsByClassName("pagetitle")[0].innerText = step.label;
-            this.onShowPage(step);
-            step.ref.classList.remove("hidden");
+            step.el.getElementsByClassName("pagetitle")[0].innerText = step.label;
+            this.onShowPage(step, index-1 );
+            step.el.classList.remove("hidden");
         } else {
-            step.ref.classList.add("hidden");
+            step.el.classList.add("hidden");
         }
     }
   }
 
-  onShowPage(step) {
-
+  onShowPage(step, index) {
+    if (step.page)
+      step.page.activate(this.#state);
+    else
+      console.error("No page!", step);
   }
 
   async #updateContent() {

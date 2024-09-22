@@ -12,25 +12,29 @@ export class LoanPage3 {
   create() {
     const fragment = Utils.createFromTemplate(page3_template);
     
-      const tbl = fragment.querySelector("#future-incomes");
-      if (!tbl) { console.error("Could not find the table!"); return; }
-      this.#incomeTable = new Table();
-      const fields = [ 
-        { name: "year", label: "Årstall", type: "integer" },
-        { name: "source", label: "Kommentar", type: "string" },
-        { name: "amount", label: "Beløp", type: "money" },
-      ];
-      this.#incomeTable.setup( fields, true, tbl );
-      this.#incomeTable.eventMap.on("change", change => this.#userInput(change));
-      this.#incomeTable.addRows(5);
+    const tbl = fragment.querySelector("#future-incomes");
+    if (!tbl) { console.error("Could not find the table!"); return; }
+    this.#incomeTable = new Table();
+    const fields = [ 
+      { name: "year", label: "Årstall", type: "integer" },
+      { name: "source", label: "Kommentar", type: "string" },
+      { name: "amount", label: "Beløp", type: "money" },
+    ];
+    this.#incomeTable.setup( fields, true, tbl );
+    this.#incomeTable.eventMap.on("change", change => this.#userInput(change));
+    this.#incomeTable.addRows(2);
     
-    //setTimeout(() => { this.#incomeTable?.focus(true); }, 100);      
     return fragment;
     
   }
 
   validate(state) {
     return { success: false, message: "Page3 is not ready yet" };
+  }
+
+  activate(state) {
+    console.log("step3", state);
+    setTimeout(() => { this.#incomeTable?.focus(true); }, 100);      
   }
 
   /**
