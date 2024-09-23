@@ -72,6 +72,7 @@ class Loan extends HTMLElement {
       )
     );
     this.#setupPages();
+    this.#state = this.#loadState(this.#state);
     this.#showPage(this.#steps[0].value);
   }
 
@@ -113,7 +114,10 @@ class Loan extends HTMLElement {
     const page = this.#steps[index].page;
     const result = page.validate(this.#state);
     this.#showState(this.#state);
-    if (result.success) return true;
+    if (result.success) {
+      this.#saveState(this.#state);
+      return true;
+    }
     if (!!showValidationErrors)
       this.#api.showAlert(result.message, 3, 3);
     return false;
@@ -189,6 +193,23 @@ class Loan extends HTMLElement {
     sums[1].innerText = fmt.format(state.equity);
     sums[2].innerText = fmt.format(state.amount + state.equity);
 
+  }
+
+  #loadState(defaultState) {
+    const jsonState = localStorage.getItem("loanState");
+    if (jsonState) {
+      try {
+      this.#state = JSON.parse(jsonState);
+      } catch {
+        return defaultState;
+      }
+      return JSON.parse(jsonState);
+    }
+    return defaultState;
+  }
+
+  #saveState(state) {
+    localStorage.setItem("loanState", JSON.stringify(state));
   }
 
 }

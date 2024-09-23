@@ -13,6 +13,7 @@ export class EquityPage {
   }
 
   activate(state) {
+    if (state.equity) this.#equityInput.value = state.equity;
     console.log("page1: activate", state);    
   }  
 

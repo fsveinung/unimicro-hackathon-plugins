@@ -26,7 +26,8 @@ export class IntroPage {
   }
 
   activate(state) {
-    console.log("page1: activate", state);    
+    if (state.amount) this.#amountInputField.value = state.amount;
+    console.log("page1: activate", state);
   }  
 
   validate(state) {
