@@ -174,9 +174,15 @@ class Loan extends HTMLElement {
 
   #showState(state) {
     console.log("Updated state:", this.state);
+
     const el = this.querySelector("#summary");
     const sums = this.querySelectorAll(".amount");
-    el.classList.remove("hidden");
+
+    if (state.amount + state.equity > 0) {
+      el.classList.remove("hidden");
+    } else {
+      el.classList.add("hidden");
+    }
 
     var fmt = new Intl.NumberFormat();
     sums[0].innerText = fmt.format(state.amount);
