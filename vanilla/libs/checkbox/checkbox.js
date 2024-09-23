@@ -66,22 +66,8 @@ export class CheckBoxComponent extends HTMLElement {
             if (this.#view === null) {
                 this.#view = Utils.createFromTemplate(chkTemplate);        
                 this.shadowRoot.appendChild( this.#view );
-                this.#observer = new MutationObserver(()=>this.#configureChildren());
-                this.#observer.observe(this, { childList: true });
-            } else {
-                this.#refreshView();
             }
         }
-    }
-
-    #configureChildren() {
-        // Do anything here?
-        // const buttons = this.querySelectorAll("button");
-        // console.log("We now have " + buttons.length + " buttons");
-    }
-
-    #refreshView() {
-        console.log("checkbox.#refreshView");
     }
 
     #onClick(event) {
