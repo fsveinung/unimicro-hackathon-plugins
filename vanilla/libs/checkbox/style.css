@@ -1,0 +1,29 @@
+:host {
+    display: flex;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+:host input[type='checkbox'] {
+    position: fixed;
+    visibility: hidden;
+}
+
+:host span {
+    padding: 0.1rem;
+    border-radius: 4px;
+    height: 1rem;
+    width: 1rem;
+}
+
+:host span.chk {
+    border: var(--checkbox-checked-border);
+    background: var(--checkbox-checked-background);
+    color: var(--checkbox-checked-color);
+}
+
+:host span.unchk {
+    border: var(--checkbox-border, 1px solid var(--input-border-color));
+    background: #fff;
+    color: var(--checkbox-checked-color);    
+}

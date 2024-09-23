@@ -33,8 +33,8 @@ export class IntroPage {
   validate(state) {
     const value = this.#amountInputField?.value;
     var total = parseInt(value || "0");
-    if (total > 0) {
-      state.amount = total;
+    state.amount = total;
+    if (total > 0) {      
       return { success: true, state: state };
     }
     return { success: false, message: "Du må fylle ut et gyldig lånebeløp" };

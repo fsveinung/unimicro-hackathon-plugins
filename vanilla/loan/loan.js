@@ -114,8 +114,8 @@ class Loan extends HTMLElement {
     const page = this.#steps[index].page;
     const result = page.validate(this.#state);
     this.#showState(this.#state);
+    this.#saveState(this.#state);
     if (result.success) {
-      this.#saveState(this.#state);
       return true;
     }
     if (!!showValidationErrors)

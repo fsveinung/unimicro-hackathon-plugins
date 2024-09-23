@@ -20,8 +20,8 @@ export class EquityPage {
   validate(state) {
     const value = this.#equityInput?.value;
     var sum = parseInt(value || "0");
+    state.equity = sum;
     if (sum > 0) {
-      state.equity = sum;
       return { success: true, state: state };
     }
     return { success: false, message: "Du må fylle ut egenkapital" };
