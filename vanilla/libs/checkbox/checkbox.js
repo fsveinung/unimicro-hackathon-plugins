@@ -49,13 +49,16 @@ export class CheckBoxComponent extends HTMLElement {
         if (!this.hasAttribute('role'))
             this.setAttribute('role', 'checkbox');
           if (!this.hasAttribute('tabindex'))
-            this.setAttribute('tabindex', 0);        
+            this.setAttribute('tabindex', 0);
+        //this.addEventListener('keyup', this._onKeyUp);
+        this.addEventListener('click', this.#onClick);
+    
         this.#checkView();
     }
 
     disconnectedCallback() {
-        this.removeEventListener('keyup', this._onKeyUp);
-        this.removeEventListener('click', this._onClick);
+        //this.removeEventListener('keyup', this._onKeyUp);
+        this.removeEventListener('click', this.#onClick);
     }
 
     #checkView() {
@@ -80,6 +83,23 @@ export class CheckBoxComponent extends HTMLElement {
     #refreshView() {
         console.log("checkbox.#refreshView");
     }
+
+    #onClick(event) {
+        this.#toggleChecked();
+    }
+
+    #toggleChecked() {
+        if (this.disabled)
+            return;
+        this.checked = !this.checked;
+        this.dispatchEvent(new CustomEvent('change', {
+          detail: {
+            checked: this.checked,
+          },
+          bubbles: true,
+        }));
+    }
+  
 }
 
 Utils.defineComponent(CheckBoxComponent.getTagName(), CheckBoxComponent);
