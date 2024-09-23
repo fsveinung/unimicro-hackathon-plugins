@@ -11,14 +11,51 @@ export class CheckBoxComponent extends HTMLElement {
         return "checkbox-component";
     }
 
+    static get observedAttributes() {
+        return ['checked', 'disabled'];
+    }
+
     constructor() {
         super();
         this.attachShadow({mode: "open"});
         this.shadowRoot.adoptedStyleSheets.push(cssCache(chkStyles));        
     }
 
+    set checked(value) {
+        const isChecked = Boolean(value);
+        if (isChecked)
+            this.setAttribute('checked', '');
+        else
+            this.removeAttribute('checked');
+    }
+      
+    get checked() {
+        return this.hasAttribute('checked');
+    }
+      
+    set disabled(value) {
+        const isDisabled = Boolean(value);
+        if (isDisabled)
+            this.setAttribute('disabled', '');
+        else
+            this.removeAttribute('disabled');
+    }
+    
+    get disabled() {
+        return this.hasAttribute('disabled');
+    }    
+
     connectedCallback() {
+        if (!this.hasAttribute('role'))
+            this.setAttribute('role', 'checkbox');
+          if (!this.hasAttribute('tabindex'))
+            this.setAttribute('tabindex', 0);        
         this.#checkView();
+    }
+
+    disconnectedCallback() {
+        this.removeEventListener('keyup', this._onKeyUp);
+        this.removeEventListener('click', this._onClick);
     }
 
     #checkView() {

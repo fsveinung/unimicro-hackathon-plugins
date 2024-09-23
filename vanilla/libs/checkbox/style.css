@@ -16,13 +16,13 @@
     width: 1rem;
 }
 
-:host span.chk {
+:host([checked]) span {
     border: var(--checkbox-checked-border);
     background: var(--checkbox-checked-background);
     color: var(--checkbox-checked-color);
 }
 
-:host span.unchk {
+:host(:not([checked])) span {
     border: var(--checkbox-border, 1px solid var(--input-border-color));
     background: #fff;
     color: var(--checkbox-checked-color);    
