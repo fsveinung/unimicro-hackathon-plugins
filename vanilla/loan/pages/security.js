@@ -11,7 +11,7 @@ export class SecurityPage {
 
   validate(state) {
     console.log("page2-validation..");
-    return { success: false, message: "Page2 is not ready yet" };
+    return { success: true };
   }
 
   activate(state) {

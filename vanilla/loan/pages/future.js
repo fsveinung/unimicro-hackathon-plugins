@@ -22,7 +22,7 @@ export class FuturePage {
     ];
     this.#incomeTable.setup( fields, true, tbl );
     this.#incomeTable.eventMap.on("change", change => this.#userInput(change));
-    this.#incomeTable.addRows(2);
+    this.#incomeTable.addRows(4);
     
     return fragment;
     
