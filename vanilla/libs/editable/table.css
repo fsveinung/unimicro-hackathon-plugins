@@ -46,6 +46,11 @@ table.editable .money {
     text-align: right;
 }
 
+table.editable .largesum {
+    width: 10em;
+    text-align: right;
+}
+
 table.editable td.warn {
     color: white;
     background-color: var(--color-warn) !important;

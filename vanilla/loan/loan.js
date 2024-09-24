@@ -178,7 +178,6 @@ class Loan extends HTMLElement {
   }
 
   #showState(state) {
-    console.log("Updated state:", this.state);
 
     const el = this.querySelector("#summary");
     const sums = this.querySelectorAll(".amount");

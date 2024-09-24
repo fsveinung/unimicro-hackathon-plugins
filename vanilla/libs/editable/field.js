@@ -4,14 +4,16 @@ export class Field {
 
     /** @type {string} */ name;
     /** @type {string} */ label;
-    /** @type {"string"|"date"|"money"|"integer"|"account"} */ type;
+    /** @type {"string"|"date"|"money"|"integer"|"account"|"largesum"} */ type;
     /** @type {string} */ relatesTo;
+    /** @type {boolean|undefined} */ readOnly;
 
-    constructor(name, label, type, relatesTo) {
+    constructor(name, label, type, relatesTo, readOnly) {
         this.name = name;
         this.label = label;
         this.type = type;
         if (!!relatesTo) this.relatesTo = relatesTo;
+        this.readOnly = !!readOnly;
     }
 
     /**
@@ -30,6 +32,11 @@ export class Field {
             case "money":
             case "decimal":
                 return this.#checkDecimal(res);
+
+            case "largesum":
+                if (res.textValue?.includes('k')) res.value = res.textValue.replaceAll('k', '000');
+                if (res.textValue?.includes('m')) res.value = res.textValue.replaceAll('m', '000000');
+                return this.#checkDecimal(res, 0);
         }
         return res;
     }
@@ -64,13 +71,14 @@ export class Field {
      * @param {Validation} res - the value being checked
      * @returns {Validation} updated validation
      */
-    #checkDecimal(res) {
+    #checkDecimal(res, digits) {
+        digits ??= 2;
         if(typeof res.value == 'number' && !isNaN(res.value)){
-            return res.setValue(res.value, res.value.toFixed(2));
+            return res.setValue(res.value, res.value.toFixed(digits));
         } else {
             const dec = parseFloat(("" + res.value).replaceAll(",", "."));
             if (!isNaN(dec)) {
-                return res.setValue(dec, dec.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                return res.setValue(dec, dec.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits }));
             }
         }    
         return res.setMessage("Invalid decimal");    

@@ -134,7 +134,7 @@ export class Table {
         const fld = this.#fields.find( f => f.name === name);
         if (!fld) return;
         const cellIndex = this.#fields.indexOf(fld);
-        if (this.#table.rows.length > rowIndex + 2) {
+        if (this.#table.rows.length > rowIndex + 1) {
             const row = this.#table.rows[rowIndex+1];
             return row.cells[cellIndex];
         }        

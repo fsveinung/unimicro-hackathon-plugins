@@ -112,6 +112,12 @@ export class Editable {
             this.#current.editor.eventMap.on("keydown", e => this.#handleEditEvents(e));
             this.#current.editor.eventMap.on("close", e => this.#handleEditClosing(e));
         }
+
+        const def = this.#getCellDef(this.#current.cell);
+        //console.log("openEditor", def);
+        if (def && def.readOnly) {
+            return;
+        }
         const cell = this.#current.cell;
         const text = cell.innerText ?? "";
         this.#current.isEditing = true;
@@ -210,7 +216,7 @@ export class Editable {
         if (!this.#fields) return undefined;
         let fld = this.#fields[cell.cellIndex];
         if (!fld.validate) { 
-            fld = new Field(fld.name, fld.label, fld.type)
+            fld = new Field(fld.name, fld.label, fld.type, fld.relatesTo, fld.readOnly)
         };
         return fld;
     }
