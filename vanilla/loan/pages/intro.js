@@ -15,12 +15,15 @@ export class IntroPage {
    * @type {HTMLInputElement}
    */
   #amountInputField;
-  
+  /** @type {FormHelper} */
+  #formHelper;
+    
   create() {
     const fragment = Utils.createFromTemplate(intro_template,
         "amount:blur", evt => this.#checkAmount(evt)
       );
     this.#amountInputField = fragment.querySelector("#amount");
+    this.#formHelper = new FormHelper(fragment);
     return fragment;
     
   }

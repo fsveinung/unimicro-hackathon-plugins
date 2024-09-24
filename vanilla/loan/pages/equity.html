@@ -1,6 +1,6 @@
 <form class="flex flex-column gap-3" onsubmit="return false" autocomplete="off">
 
-    Banken vil i de fleste tilfeller kreve egenkapital i forbindelse med finansiering.
+    Banken vil i de fleste tilfeller kreve noe egenkapital i forbindelse med finansiering.
 
     <div class="size2">
         <label for="amount">
@@ -14,12 +14,13 @@
     <b>Hvor kommer egenkapitalen fra?</b>
     <article class="two-column-layout">
         <section class="flex flex-column gap-2">
-            <checkbox-component>Salg av eiendeler</checkbox-component>
-            <checkbox-component>Lån fra eiere/andre</checkbox-component>
+            <checkbox-component name="kilde_salg">Salg av eiendeler</checkbox-component>
+            <checkbox-component name="kilde_lån">Lån fra eiere/andre</checkbox-component>
+            <checkbox-component name="kilde_ingen">Ingen egenkapital</checkbox-component>
         </section>
         <section class="flex flex-column gap-2">
-            <checkbox-component>Offentlig tilskudd</checkbox-component>
-            <checkbox-component>Annet</checkbox-component>
+            <checkbox-component name="kilde_tilskudd">Offentlig tilskudd</checkbox-component>
+            <checkbox-component name="kilde_annet">Annet</checkbox-component>
         </section>
 </article>
 

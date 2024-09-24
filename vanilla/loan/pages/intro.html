@@ -1,6 +1,13 @@
 <form class="flex flex-column gap-3" onsubmit="return false" autocomplete="off">
 
-    <b>Hva skal lånet brukes til ?</b>
+    <div class="size2">
+        <label for="amount">
+            Ønsket lånebeløp 
+            <input class="money" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Lånebeløp" id="amount" name="amount" />
+        </label>
+    </div>
+
+    <b class="mt-1">Hva skal lånet brukes til ?</b>
 
     <div class="size3">
         <label for="purpose">
@@ -17,11 +24,4 @@
         </label>
     </div>
 
-
-    <div class="size2">
-        <label for="amount">
-            Ønsket lånebeløp 
-            <input class="money" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Lånebeløp" id="amount" name="amount" />
-        </label>
-    </div>
 </form>
