@@ -1,7 +1,7 @@
 import { Utils } from "../../libs/utils.js";
 import { security_template } from "./security.html";
 import { CheckBoxComponent } from "../../libs/checkbox/checkbox.js";
-import { FormHelper } from "./formutils.js";
+import { FormHelper } from "../../libs/formutils.js";
 
 export class SecurityPage {
   

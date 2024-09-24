@@ -11,10 +11,6 @@ import { intro_template } from "./intro.html";
  */
 export class IntroPage {
 
-  /**
-   * @type {HTMLInputElement}
-   */
-  #amountInputField;
   /** @type {FormHelper} */
   #formHelper;
     
@@ -22,25 +18,24 @@ export class IntroPage {
     const fragment = Utils.createFromTemplate(intro_template,
         "amount:blur", evt => this.#checkAmount(evt)
       );
-    this.#amountInputField = fragment.querySelector("#amount");
     this.#formHelper = new FormHelper(fragment);
     return fragment;
     
   }
 
   activate(state) {
-    if (state.amount) this.#amountInputField.value = state.amount;
-    console.log("page1: activate", state);
+    this.#formHelper.setValues(state);
   }  
 
   validate(state) {
-    const value = this.#amountInputField?.value;
-    var total = parseInt(value || "0");
-    state.amount = total;
-    if (total > 0) {      
+    state = this.#formHelper.getValues(state);
+    var sum = parseInt(state.amount || "0");
+    state.amount = sum;
+    if (sum > 0) {
       return { success: true, state: state };
     }
-    return { success: false, message: "Du må fylle ut et gyldig lånebeløp" };
+    delete state.amount;
+    return { success: false, message: "Du må fylle ut egenkapital, eller krysse av 'Ingen egenkapital'" };
   }
 
   #checkAmount(blurEvent) {    

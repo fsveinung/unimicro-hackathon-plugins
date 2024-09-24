@@ -1,16 +1,11 @@
 export class FormHelper {
 
     #checkBoxes;
-    #inputs;
+    #textInputs;
 
     constructor(container) {
         this.#checkBoxes = container.querySelectorAll("checkbox-component");
-        this.#inputs = container.querySelectorAll("input[type='text']");
-
-        console.log("===============");
-        console.log("checkboxes", this.#checkBoxes);
-        console.log("inputs", this.#inputs);
-
+        this.#textInputs = container.querySelectorAll("input[type='text']");
     }
 
     getValues(state) {
@@ -23,7 +18,7 @@ export class FormHelper {
         }
 
         pos = 0;
-        for (const ip of this.#inputs) {
+        for (const ip of this.#textInputs) {
             pos++;
             const propName = ip.getAttribute("name") || "input_" + pos;
             result[propName] = ip.value ?? "";
@@ -42,7 +37,7 @@ export class FormHelper {
         }
 
         pos = 0;
-        for (const ip of this.#inputs) {
+        for (const ip of this.#textInputs) {
             pos++;
             const propName = ip.getAttribute("name") || "input_" + pos;
             ip.value = state[propName] ?? "";

@@ -1,5 +1,6 @@
 import { Utils } from "../../libs/utils.js";
 import { equity_template } from "./equity.html";
+import { FormHelper } from "../../libs/formutils.js";
 
 export class EquityPage {
   
