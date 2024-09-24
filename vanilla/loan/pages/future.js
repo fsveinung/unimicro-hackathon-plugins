@@ -13,7 +13,7 @@ export class FuturePage {
     const year = new Date().getFullYear();
     const fragment = Utils.createFromTemplate(future_template);
     const tbl = fragment.querySelector("#future-incomes");
-    if (!tbl) { console.error("Could not find the table!"); return; }
+    if (!tbl) { console.error("Could not find the table #future-incomes"); return; }
     this.#incomeTable = new Table();
     const fields = [ 
       { name: "name", label: "", type: "text", readOnly: true },
@@ -29,6 +29,7 @@ export class FuturePage {
     this.#incomes.setValue("name", "Andre kostnader", 3);
     this.#incomes.setValue("name", "Resultat", 4);
     this.#incomeTable.eventMap.on("change", change => this.#userInput(change));
+    this.#incomeTable.eventMap.on("startEdit", evt => this.#onStartEdit(evt));
     
     return fragment;
     
@@ -44,16 +45,27 @@ export class FuturePage {
     setTimeout(() => { this.#incomeTable?.focus(true); }, 100);      
   }
 
+  #onStartEdit(event) {
+    if (event.rowIndex >= 4) event.allow = false;
+  }
+
   /**
    * Handle table-user-input
    * @param {{ field: Field, rowIndex: number, value: any, commit: boolean }} change 
    */
   #userInput(change) {
-    console.log("change", change);
-    //this.#incomes.setValue(change.field.name, parseFloat(change.value), change.rowIndex);
+    if (change.rowIndex >= 4) { return; }
+    this.#incomes.setValue(change.field.name, change.value, change.rowIndex);
+    const income = this.#incomes.getValue(change.field.name, 0, 0);
+    const cost_of_goods = this.#incomes.getValue(change.field.name, 1, 0);
+    const cost_of_payroll = this.#incomes.getValue(change.field.name, 2, 0);
+    const cost_other = this.#incomes.getValue(change.field.name, 3, 0);
+    const outcome = income - (cost_of_goods + cost_of_payroll + cost_other);
+    const formattedOutcome = outcome.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    this.#incomes.setValue(change.field.name, formattedOutcome, 4);
+
     console.table(this.#incomes.Rows);
-    console.log("Sum updated to:" + this.#incomes.sum("year0"));
-    //this.querySelector("#sumIncome").innerText = this.#incomes.sum("amount").toString();
+    
   }  
 
 }

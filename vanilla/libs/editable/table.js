@@ -50,6 +50,7 @@ export class Table {
             this.#editable = new Editable();
             this.#editable.init(table, fields);
             this.#editable.eventMap.on("change", change => this.eventMap.raiseEvent("change", change) );
+            this.#editable.eventMap.on("startEdit", evt => this.eventMap.raiseEvent("startEdit", evt) );
         }
 
         let thead = table.querySelector("thead");

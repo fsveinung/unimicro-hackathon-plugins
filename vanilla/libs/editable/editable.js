@@ -114,14 +114,23 @@ export class Editable {
         }
 
         const def = this.#getCellDef(this.#current.cell);
-        //console.log("openEditor", def);
+        
         if (def && def.readOnly) {
             return;
         }
+        
+        // Launch StartEdit event
+        const pos = this.#getCellPosition(this.#current.cell);
+        const eventCargo = { field: def, rowIndex: pos.row - 1, allow: true };
+        this.eventMap.raiseEvent("startEdit", eventCargo);
+        if (!eventCargo.allow) 
+            return;
+
         const cell = this.#current.cell;
         const text = cell.innerText ?? "";
         this.#current.isEditing = true;
         this.#current.editor.startEdit(text, cell);
+        
     }
 
     #handleEditEvents(event) {
