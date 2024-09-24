@@ -5,7 +5,6 @@ import { chkStyles } from "./style.css";
 
 export class CheckBoxComponent extends HTMLElement {
     #view = null;
-    #observer = null;
 
     static getTagName() {
         return "checkbox-component";

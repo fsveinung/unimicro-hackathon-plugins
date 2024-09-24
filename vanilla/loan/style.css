@@ -46,7 +46,8 @@ footer {
 }
 
 .money {
-    text-align: right;
+    text-align: center;
+    letter-spacing: 0.5px;
 }
 
 .page input {
@@ -74,4 +75,10 @@ footer {
 .summary .amount {
     font-size: 15pt;
     color: var(--color-c2a);
+}
+
+.two-column-layout {
+    display: flex;
+    justify-content: space-between;
+    max-width: 50ch;
 }
