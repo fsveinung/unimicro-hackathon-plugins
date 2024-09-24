@@ -36,8 +36,8 @@ class Loan extends HTMLElement {
    * @type {IState}
    */
   #state = {
-    amount: 0,
-    equity: 0
+    amount: undefined,
+    equity: undefined
   }
 
   constructor() {
@@ -50,7 +50,7 @@ class Loan extends HTMLElement {
 
   set api(v) {
     this.#api = v;
-    this.#updateUserInterface();
+    this.#updateContent();
   }
 
   #updateUserInterface() {
@@ -58,8 +58,6 @@ class Loan extends HTMLElement {
       if (this.childNodes.length == 0) {
         this.#reateContent();
         setTimeout(() => { this.#setupWizard(); }, 0);
-      } else {
-        this.#updateContent();
       }
     }
   }
@@ -73,7 +71,6 @@ class Loan extends HTMLElement {
       )
     );
     this.#setupPages();
-    this.#state = this.#loadState(this.#state);
     this.#showPage(this.#steps[0].value);
   }
 
@@ -114,8 +111,8 @@ class Loan extends HTMLElement {
     if (index + 1 >= this.#steps.length) return false;
     const page = this.#steps[index].page;
     const result = page.validate(this.#state);
-    this.#showState(this.#state);
-    this.#saveState(this.#state);
+    this.#showSummary(this.#state);
+    this.#saveState(this.#state, this.#company);
     if (result.success) {
       return true;
     }
@@ -151,6 +148,13 @@ class Loan extends HTMLElement {
   }
 
   #showPage(stepValue) {
+    
+    if (stepValue === undefined) {
+      const index = this.#currentStepIndex;
+      const step = this.#steps[index];
+      stepValue = step.value;
+    }
+
     let index = 0;
     for (let step of this.#steps) {
         if (!step.el) step.el = this.getElementsByClassName("page")[index++];
@@ -166,18 +170,21 @@ class Loan extends HTMLElement {
 
   onShowPage(step, index) {
     if (step.page)
-      step.page.activate(this.#state);
+      step.page.activate(this.#state, this.#api);
     else
       console.error("No page!", step);
   }
 
   async #updateContent() {
-    if (this.#api) {
-        this.#company = await this.#api.http.get('/api/biz/companysettings/1?select=CompanyName');
+    if (this.#api && !this.#company) {
+        this.#company = await this.#api.http.get('/api/biz/companysettings/1?select=CompanyName,OrganizationNumber');
+        console.log("Company", this.#company);
+        this.#loadState(this.#state, this.#company);
+        this.#showPage();
     }
   }
 
-  #showState(state) {
+  #showSummary(state) {
 
     const el = this.querySelector("#summary");
     const sums = this.querySelectorAll(".amount");
@@ -195,8 +202,10 @@ class Loan extends HTMLElement {
 
   }
 
-  #loadState(defaultState) {
-    const jsonState = localStorage.getItem("loanState");
+  #loadState(defaultState, company) {
+    const key = this.#getStateKey(company);
+    const jsonState = localStorage.getItem(key);
+    console.log("State loaded from " + key);
     if (jsonState) {
       try {
       this.#state = JSON.parse(jsonState);
@@ -208,8 +217,14 @@ class Loan extends HTMLElement {
     return defaultState;
   }
 
-  #saveState(state) {
-    localStorage.setItem("loanState", JSON.stringify(state));
+  #saveState(state, company) {
+    const key = this.#getStateKey(company);
+    localStorage.setItem(key, JSON.stringify(state));
+  }
+
+  #getStateKey(company) {
+    let str = company?.CompanyName ?? "Any";
+    return "loanState_" + str.replace(/[^a-zA-Z0-9]/g, '')    
   }
 
 }
