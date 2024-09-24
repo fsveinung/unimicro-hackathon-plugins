@@ -1,5 +1,6 @@
 import { Utils } from "../../libs/utils.js";
 import { intro_template } from "./intro.html";
+import { FormHelper } from "../../libs/formHelper.js";
 
 /**
  * @typedef { import("../models.js").IPage } IPage

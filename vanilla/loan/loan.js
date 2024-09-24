@@ -5,6 +5,7 @@ import { IntroPage } from "./pages/intro.js";
 import { EquityPage } from "./pages/equity.js";
 import { SecurityPage } from "./pages/security.js";
 import { FuturePage } from "./pages/future.js";
+import { CheckBoxComponent } from "../libs/checkbox/checkbox.js";
 
 /**
  * @typedef { import("./models").IPage } IPage
