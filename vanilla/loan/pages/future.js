@@ -55,17 +55,16 @@ export class FuturePage {
    */
   #userInput(change) {
     if (change.rowIndex >= 4) { return; }
+
     this.#incomes.setValue(change.field.name, change.value, change.rowIndex);
+
     const income = this.#incomes.getValue(change.field.name, 0, 0);
     const cost_of_goods = this.#incomes.getValue(change.field.name, 1, 0);
     const cost_of_payroll = this.#incomes.getValue(change.field.name, 2, 0);
     const cost_other = this.#incomes.getValue(change.field.name, 3, 0);
     const outcome = income - (cost_of_goods + cost_of_payroll + cost_other);
-    const formattedOutcome = outcome.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-    this.#incomes.setValue(change.field.name, formattedOutcome, 4);
+    this.#incomes.setValue(change.field.name, outcome, 4);
 
-    console.table(this.#incomes.Rows);
-    
   }  
 
 }

@@ -1,6 +1,6 @@
 import { Utils } from "../../libs/utils.js";
 import { security_template } from "./security.html";
-import { FormHelper } from "../../libs/formutils.js";
+import { FormHelper } from "../../libs/formHelper.js";
 
 export class SecurityPage {
   

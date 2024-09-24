@@ -113,14 +113,14 @@ export class Table {
      */
     cellClass(name, rowIndex, className, add, timeout) {  
         const cell = this.#getCell(name, rowIndex);
-        if (cell) {
+        if (cell.td) {
             if (add) {
                 cell.classList.add(className);
                 if (timeout && timeout > 0) {
-                    setTimeout(() => { cell.classList.remove(className); }, timeout);
+                    setTimeout(() => { cell.td.classList.remove(className); }, timeout);
                 }
             } else {
-                cell.classList.remove(className);
+                cell.td.classList.remove(className);
             }
         }
     }
@@ -129,7 +129,7 @@ export class Table {
      * Tries to fetch a specific table cell
      * @param {string} name 
      * @param {number} rowIndex 
-     * @returns { HTMLTableCellElement | undefined}
+     * @returns { { td: HTMLTableCellElement | undefined, field: Field | undefined } | undefined }
      */
     #getCell(name, rowIndex) {
         const fld = this.#fields.find( f => f.name === name);
@@ -137,7 +137,7 @@ export class Table {
         const cellIndex = this.#fields.indexOf(fld);
         if (this.#table.rows.length > rowIndex + 1) {
             const row = this.#table.rows[rowIndex+1];
-            return row.cells[cellIndex];
+            return { td: row.cells[cellIndex], field: fld };
         }        
     }
 
@@ -146,10 +146,9 @@ export class Table {
      * @param {{name: string, value: any, rowIndex: number}} change 
      */
     #handleExternalUpdates(change) {
-        // console.log("table changes: " + change.name, change);
         const cell = this.#getCell(change.name, change.rowIndex);
-        if (cell) {
-            cell.innerText = change.value;
+        if (cell.td) {
+            cell.td.innerText = Field.format(change.value, cell.field?.type);
         }
     }
 

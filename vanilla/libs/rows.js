@@ -14,6 +14,10 @@ export class Rows {
         return this.#rows.length;
     }
 
+    get Rows() {
+        return this.#rows;
+    }
+
     clear() {
         this.#rows = [];
         this.eventMap.raiseEvent("clear");

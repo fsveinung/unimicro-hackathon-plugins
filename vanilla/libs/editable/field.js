@@ -42,6 +42,37 @@ export class Field {
     }
 
     /**
+     * Formats a value based on its type
+     * @param {any} value 
+     * @param {"string"|"date"|"money"|"integer"|"account"|"largesum"|undefined} type 
+     * @returns 
+     */
+    static format(value, type) {
+
+        switch (type) {
+            case "date":
+                if (!(value instanceof Date && !isNaN(value))) return value;
+                return value.toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" });
+
+            case "integer":
+            case "account":
+                return value.toString();
+
+            case "money":
+            case "decimal":
+                if (!(typeof value === 'number' && !isNaN(value))) return value;
+                return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            case "largesum":
+                if (!(typeof value === 'number' && !isNaN(value))) return value;
+                return value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+            default:
+                return value;
+        }        
+    }
+
+    /**
      * Validates input as a date
      * @param {Validation} res - the value being checked
      * @returns {Validation} updated validation
