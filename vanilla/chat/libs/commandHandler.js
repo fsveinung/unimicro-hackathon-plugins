@@ -241,7 +241,7 @@ export class CommandHandler {
     }
 
     async tryGetOrders(chatData) {
-        const nr = ChatUtils.getFuzzy(chatData.input, "ordernumber", "number", "id", "orderid", "nr");
+        const nr = ChatUtils.getFuzzy(chatData.input, "ordernumber", "number", "id", "orderid", "order_id", "nr");
         if (nr && Number(nr)) {
             this.tryGetSingleOrder(nr);
             return;
@@ -289,21 +289,24 @@ export class CommandHandler {
             const context = { type: "order", id: item.ID, nr: item.OrderNumber };
             var output = [];
             item.Status = statusList[item.StatusCode] ?? item.StatusCode;
-            output.push(`Ordre: ${item.OrderNumber} (${item.Status}): totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`);
-            output.push(`Kunde: ${item.CustomerName}`);
+            this.addMsg(`Ordre nr. ${item.OrderNumber} (status ${item.Status})`);
+            this.addMsg(`${item.CustomerName}`);
+            const lines = [];
             if (item.Items && item.Items.length) {
                 let n = 0;
                 item.Items.forEach( line => {
                     n++; if (n == 10) { output.push("..."); } if (n >= 10) return;
-                    output.push(`${line.Product?.PartName ?? "***"} ${line.ItemText}`
-                        + (line.NumberOfItems
-                            ? `(${line.NumberOfItems} * ${ChatUtils.formatMoney(line.PriceExVat)}) = ${ChatUtils.formatMoney(line.SumTotalExVat)}`
-                            : ""
-                        ));
+                    lines.push({
+                        Antall: line.NumberOfItems, 
+                        Produkt: line.ItemText, 
+                        Pris: ChatUtils.formatMoney(line.PriceExVat), 
+                        Sum:ChatUtils.formatMoney(line.SumTotalExVat)
+                    });
                 });
             }
-            for (let i = output.length - 1; i >= 0 ; i--)
-                this.addMsg(output[i], i == output.length - 1 ? context : undefined);
+            this.addMsg(lines);
+            this.addMsg(`Totalsum ${ChatUtils.formatMoney(item.TaxInclusiveAmount)}`, context);
+
         } else {
             this.addMsg("Fant ikke ordre nr." + nr);
         }

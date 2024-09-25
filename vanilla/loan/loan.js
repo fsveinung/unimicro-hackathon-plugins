@@ -5,6 +5,8 @@ import { IntroPage } from "./pages/intro.js";
 import { EquityPage } from "./pages/equity.js";
 import { SecurityPage } from "./pages/security.js";
 import { FuturePage } from "./pages/future.js";
+import { BalancePage } from "./pages/balance.js";
+import { SummaryPage } from "./pages/summary.js";
 import { CheckBoxComponent } from "../libs/checkbox/checkbox.js";
 
 /**
@@ -24,7 +26,9 @@ class Loan extends HTMLElement {
     { label: "Lånebeløp", value: "intro", el: undefined, page: undefined },
     { label: "Egenkapital", value: "equity", el: undefined, page: undefined },
     { label: "Sikkerhet", value: "security", el: undefined, page: undefined },
-    { label: "Fremtidige inntekter", value: "future", el: undefined, page: undefined}    
+    { label: "Fremtidige inntekter", value: "future", el: undefined, page: undefined},
+    { label: "Endring i balansen", value: "balance", el: undefined, page: undefined},
+    { label: "Oppsummering", value: "summary", el: undefined, page: undefined}
   ];
 
   get #currentStepIndex() {
@@ -79,6 +83,8 @@ class Loan extends HTMLElement {
     this.#addPage(new EquityPage());
     this.#addPage(new SecurityPage());
     this.#addPage(new FuturePage());
+    this.#addPage(new BalancePage());
+    this.#addPage(new SummaryPage());
   }
 
   /**
@@ -178,7 +184,6 @@ class Loan extends HTMLElement {
   async #updateContent() {
     if (this.#api && !this.#company) {
         this.#company = await this.#api.http.get('/api/biz/companysettings/1?select=CompanyName,OrganizationNumber');
-        console.log("Company", this.#company);
         this.#loadState(this.#state, this.#company);
         this.#showPage();
     }

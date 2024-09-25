@@ -39,7 +39,7 @@ export class FuturePage {
   }
 
   validate(state) {
-    return { success: false, message: "Page3 is not ready yet" };
+    return { success: true, message: "Lets go!" };
   }
 
   activate(state, appService) {
@@ -101,7 +101,7 @@ export class FuturePage {
 
     this.#recalcSum("year0");
 
-    this.#appService.showAlert("Forslaget er lagt inn basert på tilgjengelige data hittil i år, og ekstrapolert for de kommende månedene.",  );
+    this.#appService.showAlert("Forslaget er lagt inn basert på tilgjengelige data hittil i år, og ekstrapolert for de kommende månedene.", 2, 2 );
 
   }
 
@@ -109,7 +109,8 @@ export class FuturePage {
     sum ??= 0;
     const period = new Date().getMonth() + 1;
     const day = new Date().getDate();
-    const newSum = sum + (((12 - period)/12) * sum);
+    let newSum = sum + (((12 - period)/12) * sum);
+    newSum = Math.round(newSum / 1000) * 1000;
     return flipSign ? -newSum : newSum;
   }
 

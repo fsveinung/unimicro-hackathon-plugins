@@ -82,3 +82,13 @@ footer {
     justify-content: space-between;
     max-width: 50ch;
 }
+
+.radio-group {
+    padding: 0.8rem 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.radio-group input[type='radio'] {
+    margin-left: 1rem;
+}

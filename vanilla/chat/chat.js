@@ -21,6 +21,7 @@ class MicroPlugin extends HTMLElement {
     "Lag en ordre til 'Jon Terje Aksland'",
     "Legg til produktet 'USB-Lader' på ordren til 'Jon Terje Aksland'",
     "Vis ordrene",
+    "Vis ordre nr 1",
     "Jeg kom på jobb kl. 07:30 og gikk kl. 15:45 og hadde lunch i 20 minutter"
   ];
 
@@ -308,13 +309,13 @@ class MicroPlugin extends HTMLElement {
    * @returns HtmlElement
    */
   msgToNode(msg, pfx, textOnly, cls) {
-    if (textOnly) {
+    if (textOnly && !Array.isArray(msg)) {
       return this.ownerDocument.createTextNode(pfx + msg);
     }
 
     // create table?
     if (Array.isArray(msg)) {
-      const tbl = Utils.create("table", undefined, "class", "chat-message msg-left inline");
+      const tbl = Utils.create("table", undefined, "class", textOnly ? "" : "chat-message msg-left inline");
       let isFirst = true;
       for (const row of msg) {
         if (isFirst) {
