@@ -115,7 +115,7 @@ export class Table {
         const cell = this.#getCell(name, rowIndex);
         if (cell.td) {
             if (add) {
-                cell.classList.add(className);
+                cell.td.classList.add(className);
                 if (timeout && timeout > 0) {
                     setTimeout(() => { cell.td.classList.remove(className); }, timeout);
                 }
@@ -147,7 +147,7 @@ export class Table {
      */
     #handleExternalUpdates(change) {
         const cell = this.#getCell(change.name, change.rowIndex);
-        if (cell.td) {
+        if (cell?.td) {
             cell.td.innerText = Field.format(change.value, cell.field?.type);
         }
     }

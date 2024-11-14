@@ -25,7 +25,7 @@ export class JournalEntryLineDraft {
 
 export class JournalCoreFeature {
 
-    /** @type { DataService} */ #dataService
+    /** @type { DataService} */ #dataService;
     /** @type { EventMap } */ #sessionEventMap;
     #accountCache = new Map();
 
