@@ -18,6 +18,7 @@ class JournalEntryEditor extends HTMLElement {
     /** @type {Api} */ #httpApi;
     static #lang = {
         nothing_to_save: "Ingenting å lagre",
+        error_saving: "Problem med bokføring av bilag",
         saved_as: "Bilag bokført som nr."
     };
 
@@ -108,9 +109,14 @@ class JournalEntryEditor extends HTMLElement {
             this.#httpApi.post("/api/biz/journalentries?action=book-journal-entries", saveState.journals)
                 .catch( err => { console.log(err); this.#addMessage(err.error?.Message ?? err.message, "warn"); })
                 .then( res => {
-                    this.#clear();
-                    const nrs = res.map( j => j.JournalEntryNumber).join(", ");
-                    this.#addMessage(`${JournalEntryEditor.#lang.saved_as} ${nrs}`, "good", 4000);                    
+                    if (res?.length > 0) {
+                        this.#clear();
+                        const nrs = res.map( j => j.JournalEntryNumber).join(", ");
+                        this.#addMessage(`${JournalEntryEditor.#lang.saved_as} ${nrs}`, "good", 4000);                    
+                    } else {
+                        console.warn(saveState.journals);
+                        this.#addMessage(JournalEntryEditor.#lang.error_saving, "warn", 6000);
+                    }
                 });
         }
     }
